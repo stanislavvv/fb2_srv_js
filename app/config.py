@@ -19,10 +19,14 @@ VARS = {
   "pic_width": "PIC_WIDTH",
   "search_result_limit": "MAX_SEARCH_RES",
   "web_title": "TITLE",
+  "inpx_file": "INPX",
   "zips_path": "ZIPS"
 }
 
-CONFIG = {}
+CONFIG = {  # default values
+  "LISTEN_HOST": "0.0.0.0",
+  "LISTEN_PORT": "8000"
+}
 
 def read_config(conf: str):
   try:
@@ -31,7 +35,6 @@ def read_config(conf: str):
       app_env = 'development'
     cn = configparser.ConfigParser()
     cn.read(conf)
-    print(cn.sections())
     common = cn['common']
     for k in common.keys():
       if k in VARS:

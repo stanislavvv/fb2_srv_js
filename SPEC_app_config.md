@@ -18,6 +18,7 @@ pg_pass = ExamplePassword
 ; data dirs
 zips_path = ./data
 pages_path = ./data/pages
+inpx_file = flibusta_fb2_local.inpx
 ; for cover pics resize
 pic_width = 200
 ; show books with deleted=1
@@ -46,6 +47,7 @@ pg_pass = ExamplePassword
 ; data dirs
 zips_path = ./data
 pages_path = ./data/pages
+inpx_file = flibusta_fb2_local.inpx
 ; for cover pics resize
 pic_width = 200
 ; show books with deleted=1
