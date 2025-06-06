@@ -1,0 +1,23 @@
+# example docker-compose for fb2-srv-pseudostatic
+
+version: "3.2"
+services:
+    #fb2srv:
+    #    image: fb2srv-psql:latest
+    #    volumes:
+    #        - "./data:/fb2_srv/data"
+    #    ports:
+    #        - 8000:8000
+    #    depends_on:
+    #        - database
+    database:
+        image: postgres:15-bullseye
+        environment:
+            - POSTGRES_USER=books
+            - POSTGRES_PASSWORD=ExamplePassword
+            - POSTGRES_DB=books
+            - PGDATA=/pgdata
+        volumes:
+            - ./pgdata:/pgdata
+        ports:
+            - 127.0.0.1:5432:5432
