@@ -1,0 +1,231 @@
+1|accounting|Бухгалтерский учёт
+1|banking|Финансы
+1|economics_ref|Деловая литература
+1|economics|Экономика
+1|org_behavior|Маркетинг, PR
+1|popular_business|Карьера, кадры
+2|det_action|Боевик
+2|det_classic|Классический детектив
+2|det_crime|Криминальный детектив
+2|detective|Детективы
+2|det_espionage|Шпионский детектив
+2|det_hard|Крутой детектив
+2|det_history|Исторический детектив
+2|det_irony|Иронический детектив, дамский детективный роман
+2|det_maniac|Про маньяков
+2|det_police|Полицейский детектив
+2|det_political|Политический детектив
+2|det_su|Советский детектив
+2|thriller|Триллер
+3|military_special|Военное дело
+3|nonf_biography|Биографии и Мемуары
+3|nonfiction|Документальная литература
+3|nonf_military|Военная документалистика и аналитика
+3|nonf_publicism|Публицистика
+3|travel_notes|География, путевые заметки
+4|auto_regulations|Автомобили и ПДД
+4|family|Семейные отношения
+4|home_collecting|Коллекционирование
+4|home_cooking|Кулинария
+4|home_crafts|Хобби и ремесла
+4|home_diy|Сделай сам
+4|home_entertain|Развлечения
+4|home_garden|Сад и огород
+4|home_health|Здоровье
+4|home_pets|Домашние животные
+4|home_sex|Семейные отношения, секс
+4|home_sport|Боевые искусства, спорт 
+4|home|Домоводство
+4|sci_pedagogy|Педагогика, воспитание детей, литература для родителей 
+5|comedy|Комедия
+5|drama_antique|Античная драма
+5|dramaturgy|Драматургия
+5|drama|Драма
+5|screenplays|Сценарий
+5|tragedy|Трагедия
+5|vaudeville|Мистерия, буффонада, водевиль
+6|architecture_book|Скульптура и архитектура
+6|art_criticism|Искусствоведение
+6|art_world_culture|Мировая художественная культура
+6|cine|Кино
+6|design|Искусство и Дизайн
+6|music|Музыка
+6|nonf_criticism|Критика
+6|notes|Партитуры
+6|painting|Живопись, альбомы, иллюстрированные каталоги
+6|sci_culture|Культурология
+6|theatre|Театр
+7|comp_db|Программирование, программы, базы данных
+7|comp_hard|Компьютерное \железо\ аппаратное обеспечение цифровая обработка сигналов
+7|computers|Зарубежная компьютерная, околокомпьютерная литература 
+7|comp_www|ОС и Сети, интернет
+7|tbg_computers|Учебные пособия, самоучители
+8|child_classical|Классическая детская литература
+8|child_det|Детская остросюжетная литература
+8|child_education|Детская образовательная литература
+8|child_prose|Проза для детей
+8|children|Детская литература
+8|child_sf|Фантастика для детей
+8|child_tale_rus|Русские сказки
+8|child_tale|Сказки народов мира
+8|child_verse|Стихи для детей
+8|foreign_children|Зарубежная литература для детей
+8|prose_game|Игры, упражнения для детей
+9|love_contemporary|Современные любовные романы
+9|love_detective|Остросюжетные любовные романы
+9|love_erotica|Эротическая литература
+9|love_hard|Порно
+9|love_history|Исторические любовные романы
+9|love_sf|Любовное фэнтези, любовно-фантастические романы 
+9|love_short|Короткие любовные романы
+9|love|Любовные романы
+10|military_history|Военная история
+10|sci_biology|Биология, биофизика, биохимия 
+10|sci_botany|Ботаника
+10|sci_chem|Химия
+10|sci_cosmos|Астрономия и Космос
+10|sci_ecology|Экология
+10|sci_economy|Экономика
+10|science|Научная литература
+10|sci_geo|Геология и география
+10|sci_history|История
+10|sci_juris|Юриспруденция
+10|sci_linguistic|Языкознание, иностранные языки
+10|sci_math|Математика
+10|sci_medicine_alternative|Альтернативная медицина
+10|sci_medicine|Медицина
+10|sci_oriental|Востоковедение
+10|sci_philology|Литературоведение
+10|sci_philosophy|Философия
+10|sci_phys|Физика
+10|sci_politics|Политика
+10|sci_popular|Зарубежная образовательная литература, зарубежная прикладная,  научно-популярная  литература
+10|sci_psychology|Психология и психотерапия
+10|sci_social_studies|Обществознание, социология
+10|sci_state|Государство и право
+10|sci_theories|Альтернативные науки и научные теории
+10|sci_veterinary|Ветеринария
+10|sci_zoo|Зоология
+11|humor_verse|Юмористические стихи, басни 
+11|lyrics|Лирика
+11|palindromes|Визуальная и экспериментальная поэзия, верлибры, палиндромы
+11|poem|Поэма, эпическая поэзия
+11|poetry_classical|Классическая поэзия
+11|poetry_east|Поэзия Востока
+11|poetry_for_classical|Классическая зарубежная поэзия
+11|poetry_for_modern|Современная зарубежная поэзия
+11|poetry_modern|Современная поэзия
+11|poetry_rus_classical|Классическая русская поэзия
+11|poetry_rus_modern|Современная русская поэзия
+11|poetry|Поэзия
+11|song_poetry|Песенная поэзия
+12|adv_animal|Природа и животные
+12|adventure|Приключения
+12|adv_geo|Путешествия и география
+12|adv_history|Исторические приключения
+12|adv_indian|Вестерн, про индейцев 
+12|adv_maritime|Морские приключения
+12|adv_modern|Приключения в современном мире
+12|adv_story|Авантюрный роман
+12|child_adv|Приключения для детей и подростков
+12|tale_chivalry|Рыцарский роман
+13|aphorisms|Афоризмы, цитаты
+13|epistolary_fiction|Эпистолярная проза
+13|foreign_antique|Средневековая классическая проза
+13|foreign_prose|Зарубежная классическая проза
+13|gothic_novel|Готический роман
+13|great_story|Роман, повесть
+13|literature_18|Классическая проза XVII-XVIII веков
+13|literature_19|Классическая проза ХIX века
+13|literature_20|Классическая проза ХX века
+13|prose_abs|Фантасмагория, абсурдистская проза
+13|prose_classic|Классическая проза
+13|prose_contemporary|Современная русская и зарубежная проза
+13|prose_counter|Контркультура
+13|prose_history|Историческая проза
+13|prose_magic|Магический реализм
+13|prose_military|Проза о войне
+13|prose_neformatny|Экспериментальная, неформатная проза
+13|prose_rus_classic|Русская классическая проза
+13|prose_su_classics|Советская классическая проза
+13|prose|Проза
+13|story|Малые литературные формы прозы: рассказы, эссе, новеллы, феерия
+14|comics|Комиксы
+14|fanfiction|Фанфик
+14|network_literature|Самиздат, сетевая литература
+14|other|Неотсортированное
+14|periodic|Журналы, газеты 
+14|unfinished|Незавершенное
+15|astrology|Астрология и хиромантия
+15|religion_budda|Буддизм
+15|religion_catholicism|Католицизм
+15|religion_christianity|Христианство
+15|religion_esoterics|Эзотерика, эзотерическая литература 
+15|religion_hinduism|Индуизм
+15|religion_islam|Ислам
+15|religion_judaism|Иудаизм
+15|religion_orthodoxy|Православие
+15|religion_paganism|Язычество
+15|religion_protestantism|Протестантизм
+15|religion_self|Самосовершенствование
+15|religion|Религия, религиозная литература
+15|sci_religion|Религиоведение
+16|geo_guides|Путеводители, карты, атласы 
+16|ref_dict|Словари
+16|ref_encyc|Энциклопедии
+16|reference|Справочная литература
+16|ref_guide|Руководства
+16|ref_ref|Справочники
+17|antique|antique
+17|antique_ant|Античная литература
+17|antique_east|Древневосточная литература
+17|antique_european|Европейская старинная литература
+17|antique_russian|Древнерусская литература
+18|auto_business|Автодело
+18|equ_history|История техники
+18|military_weapon|Военное дело, военная техника и вооружение
+18|sci_build|Строительство и сопромат
+18|sci_metal|Металлургия
+18|sci_radio|Радиоэлектроника
+18|sci_tech|Технические науки
+18|sci_transport|Транспорт и авиация
+19|sci_textbook|Учебники и пособия
+19|tbg_higher|Учебники и пособия ВУЗов
+19|tbg_school|Школьные учебники и пособия, рефераты, шпаргалки
+19|tbg_secondary|Учебники и пособия для среднего и специального образования
+20|fairy_fantasy|Мифологическое фэнтези
+20|hronoopera|Хроноопера
+20|modern_tale|Современная сказка
+20|popadancy|Попаданцы
+20|russian_fantasy|Славянское фэнтези
+20|sf_action|Боевая фантастика
+20|sf_cyberpunk|Киберпанк
+20|sf_detective|Детективная фантастика
+20|sf_epic|Эпическая фантастика
+20|sf_etc|Фантастика
+20|sf_fantasy_city|Городское фэнтези
+20|sf_fantasy|Фэнтези
+20|sf_heroic|Героическая фантастика
+20|sf_history|Альтернативная история
+20|sf_horror|Ужасы
+20|sf_humor|Юмористическая фантастика
+20|sf_litrpg|ЛитРПГ
+20|sf_mystic|Мистика
+20|sf_postapocalyptic|Постапокалипсис
+20|sf_social|Социально-психологическая фантастика
+20|sf_space|Космическая фантастика
+20|sf_stimpank|Стимпанк
+20|sf_technofantasy|Технофэнтези
+20|sf|Научная Фантастика
+21|antique_myths|Мифы. Легенды. Эпос
+21|child_folklore|Детский фольклор
+21|epic|Былины, эпопея
+21|folklore|Фольклор, загадки folklore
+21|folk_songs|Народные песни
+21|folk_tale|Народные сказки
+21|limerick|Частушки, прибаутки, потешки
+21|proverbs|Пословицы, поговорки
+22|humor_anecdote|Анекдоты
+22|humor_prose|Юмористическая проза
+22|humor_satire|Сатира
+22|humor|Юмор
