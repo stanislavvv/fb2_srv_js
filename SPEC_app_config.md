@@ -25,6 +25,8 @@ hide_deleted = no
 ; web/opds interface root
 app_root = /books
 web_title = Home OPDS directory
+listen_host = 127.0.0.1
+listen_port = 8000
 ; used in indexing and in random pages
 page_size = 50
 search_result_limit = 500
@@ -51,6 +53,8 @@ hide_deleted = no
 ; web/opds interface root
 app_root = /books
 web_title = Home OPDS directory
+listen_host = 127.0.0.1
+listen_port = 8000
 ; used in indexing and in random pages
 page_size = 50
 search_result_limit = 500
