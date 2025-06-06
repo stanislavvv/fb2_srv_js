@@ -9,10 +9,9 @@ data
 pgdata
 LOG*
 logs
-app/config.py
 venv
 venv.sh
 docker-compose*.yml
 out.*
 pycallgraph.png
-
+config.ini
