@@ -2,8 +2,7 @@
 """Get data from fb2 in zips"""
 
 import os
-import zipfile
-import xmltodict
+# import zipfile
 import sys
 import io
 import logging
@@ -12,12 +11,16 @@ import base64
 import collections
 import traceback  # DEBUG
 
-from PIL import Image
 from datetime import datetime
 from bs4 import BeautifulSoup
+from PIL import Image
 
-from .strings import unicode_upper, strlist, strnull, strip_quotes, num2int
+import xmltodict
+
+from .strings import unicode_upper, strlist, strip_quotes, num2int
 from .config import CONFIG
+
+FB2_HEADER_LIMIT = 20000  # nearly 20kB for metadata text
 
 
 def get_struct_by_key(key: str, struct):
@@ -37,7 +40,7 @@ def get_struct_by_key(key: str, struct):
     return None
 
 
-def replace_book(filename: str, book, replace_data):  # FixMe types
+def replace_book(filename: str, book, replace_data):
     """get book struct, if exists replacement, replace some fields from it"""
     # filename = book["filename"]
     if filename in replace_data:
@@ -141,7 +144,7 @@ def get_sequence(seq, zip_file: str, filename: str):
     return ret
 
 
-def get_author_struct(author):  # FixMe types
+def get_author_struct(author):
     """return [{"name": "Name", "id": "id"}, ...] for author(s)"""
     # pylint: disable=R0912
     ret = [{"name": '--- unknown ---', "id": make_id('--- unknown ---')}]  # default
@@ -282,7 +285,7 @@ def get_image(name: str, binary, last=True, context=None):  # pylint: disable=R0
     return {"content-type": "image/jpeg", "data": "<image data in jpeg>"}
     content-type must be correspond for image data format
     """
-    # logging.getLogger("PIL.PngImagePlugin").setLevel(logging.CRITICAL + 1)
+    logging.getLogger("PIL.PngImagePlugin").setLevel(logging.CRITICAL)
     ret = None
     c_type = "image/jpeg"  # default
     if name is not None:
@@ -313,7 +316,7 @@ def get_image(name: str, binary, last=True, context=None):  # pylint: disable=R0
             basewidth = int(CONFIG['PIC_WIDTH'])
             buf = io.BytesIO(base64.b64decode(ret["data"] + '=='))  # additinally pad db64
             img = Image.open(buf).convert('RGB')
-            wpercent = (basewidth/float(img.size[0]))
+            wpercent = basewidth/float(img.size[0])
             if wpercent < 1:
                 hsize = int((float(img.size[1])*float(wpercent)))
                 img = img.resize((basewidth, hsize), Image.LANCZOS)
@@ -362,7 +365,7 @@ def fb2parse(z_file, filename, replace_data, inpx_data):  # pylint: disable=R091
         return None, None
 
     fb2 = z_file.open(filename)
-    b_soap = BeautifulSoup(bytes(fb2.read()), 'xml')
+    b_soap = BeautifulSoup(bytes(fb2.read(FB2_HEADER_LIMIT)), 'xml')
     # some data, taken from xml directly, so get_fb2data() can't be used
     bs_descr = b_soap.FictionBook.description
     tinfo = bs_descr.find("title-info")
@@ -482,4 +485,3 @@ def fb2parse(z_file, filename, replace_data, inpx_data):  # pylint: disable=R091
         "deleted": info["deleted"]
     }
     return book_id, out
-

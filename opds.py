@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""test app runner, not for production"""
 
 from app import create_app
 from app.config import CONFIG

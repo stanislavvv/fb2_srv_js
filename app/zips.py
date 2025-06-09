@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+""".zip file processing"""
 
 import logging
 import zipfile
@@ -11,7 +12,8 @@ from .config import CONFIG
 from .inpx import get_inpx_meta
 from .fb2int import fb2parse
 
-def get_replace_list(zip_file: str):  # FixMe types
+
+def get_replace_list(zip_file: str):
     """return None or struct from .zip.replace"""
     ret = None
     replace_list = zip_file + ".replace"

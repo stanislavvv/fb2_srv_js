@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""app module"""
 
 from flask import Flask
 from .config import read_config, CONFIG
@@ -7,6 +8,7 @@ CONFIG_FILE = "./config.ini"
 
 
 def create_app():
+    """create flask app"""
     read_config(CONFIG_FILE)
     app = Flask(__name__)
 

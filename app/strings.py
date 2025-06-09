@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+"""string manipulations"""
 
+import logging
 import unicodedata as ud
 
 
@@ -32,8 +34,7 @@ def strlist(string) -> str:
     if isinstance(string, list):
         if string:
             return strnull(string[0])
-        else:
-            return strnull("")  # empty list
+        return strnull("")  # empty list
     return strnull(str(string))
 
 
