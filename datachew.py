@@ -4,10 +4,11 @@
 
 import logging
 import argparse
-
+import sys
 
 from app.config import read_config
 from app.zips import renew_lists, new_lists
+from app.db import dbtables, dbclean
 
 CONFIG_FILE = "./config.ini"
 
@@ -27,6 +28,13 @@ def parse_arguments():
     new_lists_parser = subparsers.add_parser('new_lists',
                                              help='[re]create .zip.list for only new/refreshed .zip')
     new_lists_parser.description = '[re]create .zip.list for only new/refreshed .zip'
+
+    make_db_parser = subparsers.add_parser('tables', help='Create database tables and other if need')
+    make_db_parser.description = 'Create database tables and other if need'
+
+    clean_db_parser = subparsers.add_parser('cleandb', help='Clean database tables and other if need')
+    clean_db_parser.description = 'Clean database tables and other if need'
+
     pargs = parser.parse_args()
     return pargs
 
@@ -44,3 +52,10 @@ if __name__ == "__main__":
         renew_lists()
     elif args.command == 'new_lists':
         new_lists()
+    elif args.command == 'tables':
+        dbtables()
+    elif args.command == 'cleandb':
+        dbclean()
+    else:
+        print("-h or --help for help")
+        sys.exit(1)

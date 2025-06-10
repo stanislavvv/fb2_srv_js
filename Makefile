@@ -14,9 +14,9 @@ help:
 	@echo "  help      - this text"
 
 clean:
-	find . -name '*.pyc' -delete
-	find . -name '__pycache__' -delete
-	find . -name '.mypy_cache' -print0 | xargs -0 -n1 rm -rf
+	find app -name '*.pyc' -delete
+	find app -name '__pycache__' -delete
+	find app -name '.mypy_cache' -print0 | xargs -0 -n1 rm -rf
 	rm -rf venv
 
 flakeall:
