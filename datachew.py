@@ -9,6 +9,7 @@ import sys
 from app.config import read_config
 from app.zips import renew_lists, new_lists
 from app.db import dbtables, dbclean
+from app.db_fill import process_booklists_db
 
 CONFIG_FILE = "./config.ini"
 
@@ -35,6 +36,12 @@ def parse_arguments():
     clean_db_parser = subparsers.add_parser('cleandb', help='Clean database tables and other if need')
     clean_db_parser.description = 'Clean database tables and other if need'
 
+    fillall_db_parser = subparsers.add_parser('fillall', help='Fill all .zip.list to database, update if exists')
+    fillall_db_parser.description = 'Fill all .zip.list to database, update if exists'
+
+    fillonly_db_parser = subparsers.add_parser('fillonly', help='Fill all .zip.list to database, update if exists')
+    fillonly_db_parser.description = 'Fill all .zip.list to database, skip if exists'
+
     pargs = parser.parse_args()
     return pargs
 
@@ -56,6 +63,8 @@ if __name__ == "__main__":
         dbtables()
     elif args.command == 'cleandb':
         dbclean()
+    elif args.command in ('fillonly', 'fillall'):
+        process_booklists_db(stage=args.command)
     else:
         print("-h or --help for help")
         sys.exit(1)

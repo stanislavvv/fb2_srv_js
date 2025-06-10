@@ -50,5 +50,5 @@ def read_config(conf: str):
             if k in VARS:
                 CONFIG[VARS[k]] = current[k]
     except Exception as ex:
-        print("Exception by:", str(ex))
+        sys.stderr.write("Exception by: ", str(ex))
         sys.exit(1)
