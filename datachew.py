@@ -36,8 +36,8 @@ def parse_arguments():
     clean_db_parser = subparsers.add_parser('cleandb', help='Clean database tables and other if need')
     clean_db_parser.description = 'Clean database tables and other if need'
 
-    fillall_db_parser = subparsers.add_parser('fillall', help='Fill all .zip.list to database, update if exists')
-    fillall_db_parser.description = 'Fill all .zip.list to database, update if exists'
+    # fillall_db_parser = subparsers.add_parser('fillall', help='Fill all .zip.list to database, update if exists')
+    # fillall_db_parser.description = 'Fill all .zip.list to database, update if exists'
 
     fillonly_db_parser = subparsers.add_parser('fillonly', help='Fill all .zip.list to database, update if exists')
     fillonly_db_parser.description = 'Fill all .zip.list to database, skip if exists'
@@ -63,8 +63,8 @@ if __name__ == "__main__":
         dbtables()
     elif args.command == 'cleandb':
         dbclean()
-    elif args.command in ('fillonly', 'fillall'):
-        process_booklists_db(stage=args.command)
+    elif args.command in ('fillonly'):
+        process_booklists_db()
     else:
         print("-h or --help for help")
         sys.exit(1)

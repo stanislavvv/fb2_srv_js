@@ -54,6 +54,7 @@ def create_booklist(inpx_data, zip_file) -> None:  # pylint: disable=C0103
             for filename in files:
                 logging.debug("%s/%s            ", zip_file, filename)
                 _, book = fb2parse(z_file, filename, replace_data, inpx_meta)
+                # FixMe: replace wrong genres and langs
                 if book is None:
                     continue
                 blist.write(json.dumps(book, ensure_ascii=False))  # jsonl in blist
