@@ -6,7 +6,6 @@ import os
 import sys
 import io
 import logging
-import hashlib
 import base64
 import collections
 import traceback  # DEBUG
@@ -17,7 +16,7 @@ from PIL import Image
 
 import xmltodict
 
-from .strings import unicode_upper, strlist, strip_quotes, num2int
+from .strings import strlist, strip_quotes, num2int, make_id
 from .config import CONFIG
 
 FB2_HEADER_LIMIT = 20000  # nearly 20kB for metadata text
@@ -260,24 +259,6 @@ def get_pub_info(pubinfo):
                 if tmppub is not None:
                     publisher = tmppub
     return isbn, year, publisher
-
-
-def str_normalize(string: str) -> str:
-    """will be normalize string for make_id and compare"""
-    ret = unicode_upper(string.strip())
-    return ret
-
-
-def make_id(name) -> str:
-    """get name, strip quotes from begin/end, return md5"""
-    name_str = "--- unknown ---"
-    if name is not None and name != "":
-        if isinstance(name, str):
-            name_str = str(name).strip("'").strip('"')
-        else:
-            name_str = str(name, encoding='utf-8').strip("'").strip('"')
-    norm_name = str_normalize(name_str)
-    return hashlib.md5(norm_name.encode('utf-8').upper()).hexdigest()
 
 
 def get_image(name: str, binary, last=True, context=None):  # pylint: disable=R0912,R0914

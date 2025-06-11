@@ -2,9 +2,12 @@
 """in-vars data manipulations"""
 
 import sys
+import gzip
 
 from sqlalchemy.orm import sessionmaker
 
+from .config import CONFIG
+from .strings import make_id
 from .db_classes import (
     BookAuthor,
     BookSequence,
@@ -96,8 +99,9 @@ def fill_sequences_book(seqs, book):
     if book is None or "sequences" not in book or book["sequences"] is None or len(book["sequences"]) < 1:
         return seqs
     for seq in book["sequences"]:
-        seqs_tmp[seq["id"]] = seq["name"]
-        seq_ids_tmp.append(seq["id"])
+        if "id" in seq and seq["id"] is not None and "name" in seq and seq["name"] is not None:
+            seqs_tmp[seq["id"]] = seq["name"]
+            seq_ids_tmp.append(seq["id"])
     new_seq_ids = get_exist_seqs(seq_ids_tmp)
     for seq_id in seq_ids_tmp:
         if seq_id not in new_seq_ids:
@@ -153,14 +157,15 @@ def make_genres_db(genre_ids):
     ret = []
     for genre in genre_ids:
         if genre is not None and genre_ids[genre] is not None:
-            gdata = genres[genre]
-            ret.append(
-                BookGenre(
-                    id=genre,
-                    name=gdata["descr"],
-                    meta_id=gdata["meta_id"]
+            if genre in genres:  # ToDo: remove checking after wrong genre replacement
+                gdata = genres[genre]
+                ret.append(
+                    BookGenre(
+                        id=genre,
+                        name=gdata["descr"],
+                        meta_id=gdata["meta_id"]
+                    )
                 )
-            )
     return ret
 
 
@@ -201,7 +206,8 @@ def make_books_db(books):
             seq_ids = []
             if "sequences" in book and book["sequences"] is not None:
                 for seq in book["sequences"]:
-                    seq_ids.append(seq["id"])
+                    if "id" in seq and seq["id"] is not None:
+                        seq_ids.append(seq["id"])
             ret.append(
                 Book(
                     zipfile=book["zipfile"],
@@ -258,3 +264,63 @@ def make_book_covers_db(books):
                     )
                 )
     return ret
+
+
+def open_booklist(booklist):
+    """return file object of booklist (.zip.list or .zip.list.gz)"""
+    if booklist.find('gz') >= len(booklist) - 3:  # pylint: disable=R1705
+        return gzip.open(booklist)
+    else:
+        return open(booklist, encoding="utf-8")
+
+
+def seqs_in_data(data):
+    """return [{"name": "...", "id": "...", "cnt": 1}, ...]"""
+    ret = []
+    seq_idx = {}
+    for book in data:
+        if book["sequences"] is not None:
+            for seq in book["sequences"]:
+                seq_id = seq.get("id")
+                if seq_id is not None:
+                    seq_name = seq["name"]
+                    if seq_id in seq_idx:
+                        s = seq_idx[seq_id]
+                        count = s["cnt"]
+                        count = count + 1
+                        s["cnt"] = count
+                        seq_idx[seq_id] = s
+                    else:
+                        s = {"name": seq_name, "id": seq_id, "cnt": 1}
+                        seq_idx[seq_id] = s
+    for seq in seq_idx:
+        ret.append(seq_idx[seq])
+    return ret
+
+
+def nonseq_from_data(data):
+    """return books_id[] without sequences"""
+    ret = []
+    for book in data:
+        if book["sequences"] is None:
+            book_id = book["book_id"]
+            ret.append(book_id)
+    return ret
+
+
+def refine_book(book):
+    """strip images and refine some other data from books info"""
+    if "genres" not in book or book["genres"] in (None, "", []):
+        book["genres"] = ["other"]
+    # book["genres"] = db.genres_replace(book, book["genres"])
+    # book["lang"] = db.lang_replace(book, book["lang"])
+    if "cover" in book:
+        del book["cover"]
+    if "authors" not in book:
+        author = [
+            {
+                "name": CONFIG['AUTHOR_PLACEHOLDER'],
+                "id": make_id(CONFIG['AUTHOR_PLACEHOLDER'])
+            }
+        ]
+    return book

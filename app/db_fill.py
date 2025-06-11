@@ -20,7 +20,8 @@ from .data import (
     make_genres_db,
     make_books_db,
     make_book_descr_db,
-    make_book_covers_db
+    make_book_covers_db,
+    open_booklist
 )
 
 
@@ -80,14 +81,6 @@ def process_booklists_db(stage='fillonly'):
     #     logging.error(ex)
     #     return False
     logging.info("end stage %s", stage)
-
-
-def open_booklist(booklist):
-    """return file object of booklist (.zip.list or .zip.list.gz)"""
-    if booklist.find('gz') >= len(booklist) - 3:  # pylint: disable=R1705
-        return gzip.open(booklist)
-    else:
-        return open(booklist, encoding="utf-8")
 
 
 def process_booklist(booklist, hide_deleted=False):

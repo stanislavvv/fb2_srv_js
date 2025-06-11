@@ -10,6 +10,9 @@ from app.config import read_config
 from app.zips import renew_lists, new_lists
 from app.db import dbtables, dbclean
 from app.db_fill import process_booklists_db
+from app.files_fill import (
+    make_authorsindex
+)
 
 CONFIG_FILE = "./config.ini"
 
@@ -42,6 +45,9 @@ def parse_arguments():
     fillonly_db_parser = subparsers.add_parser('fillonly', help='Fill all .zip.list to database, update if exists')
     fillonly_db_parser.description = 'Fill all .zip.list to database, skip if exists'
 
+    authindex_parser = subparsers.add_parser('authors', help='Make static json struct for authors')
+    authindex_parser.description = 'Make static json struct for authors'
+
     pargs = parser.parse_args()
     return pargs
 
@@ -63,8 +69,10 @@ if __name__ == "__main__":
         dbtables()
     elif args.command == 'cleandb':
         dbclean()
-    elif args.command in ('fillonly'):
+    elif args.command == 'fillonly':
         process_booklists_db()
+    elif args.command == 'authors':
+        make_authorsindex()
     else:
         print("-h or --help for help")
         sys.exit(1)

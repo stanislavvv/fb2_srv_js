@@ -29,7 +29,8 @@ VARS = {
 
 CONFIG = {  # default values
     "LISTEN_HOST": "0.0.0.0",
-    "LISTEN_PORT": "8000"
+    "LISTEN_PORT": "8000",
+    "AUTHOR_PLACEHOLDER": "Автор Неизвестен",
 }
 
 

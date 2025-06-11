@@ -3,6 +3,7 @@
 
 import logging
 import unicodedata as ud
+import hashlib
 
 
 def strip_quotes(string: str) -> str:
@@ -55,3 +56,43 @@ def num2int(num: str, context: str) -> int:
         logging.error("Error: %s", str(ex))
         logging.error("Context: %s", context)
         return -1
+
+
+def id2path(id: str):  # pylint: disable=W0622
+    """1a2b3c.... to 1a/2b/1a2b3c..."""
+    first = id[:2]
+    second = id[2:4]
+    return first + "/" + second + "/" + id
+
+
+def id2pathonly(id: str):  # pylint: disable=W0622
+    """1a2b3c.... to 1a/2b"""
+    first = id[:2]
+    second = id[2:4]
+    return first + "/" + second
+
+
+def string2filename(data: str) -> str:
+    """remove fs-dangerous characters from data"""
+    data = data.replace('/', '').rstrip(' ')
+    if not data:
+        data = "-"
+    return data
+
+
+def make_id(name) -> str:
+    """get name, strip quotes from begin/end, return md5"""
+    name_str = "--- unknown ---"
+    if name is not None and name != "":
+        if isinstance(name, str):
+            name_str = str(name).strip("'").strip('"')
+        else:
+            name_str = str(name, encoding='utf-8').strip("'").strip('"')
+    norm_name = str_normalize(name_str)
+    return hashlib.md5(norm_name.encode('utf-8').upper()).hexdigest()
+
+
+def str_normalize(string: str) -> str:
+    """will be normalize string for make_id and compare"""
+    ret = unicode_upper(string.strip())
+    return ret
