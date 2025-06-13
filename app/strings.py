@@ -23,7 +23,7 @@ def strip_quotes(s: str) -> str:
             internal_quotes = True
     if internal_quotes:
         return s
-    return s[1:-1]
+    return s.strip('"')
 
 
 def unicode_upper(string: str) -> str:

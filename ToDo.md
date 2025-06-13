@@ -7,3 +7,8 @@
     * sequences
     * genres
   * opds interface for static files + DB
+
+## Small parts
+
+  * if can't decode image data -- set cover to null (f.fb2-185838-188548.zip for test .list creation)
+  * predecode .inpx and store predecoded data for history and use historic diff for `new_lists` (or not use, if does not exists)
