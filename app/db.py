@@ -3,6 +3,8 @@
 
 import logging
 
+from sqlalchemy import text
+
 from .db_classes import Base, dbconnect
 from .config import CONFIG
 from .db_fill import fill_genres_meta
@@ -14,7 +16,8 @@ def dbtables():
     engine = dbconnect()
     # SQLAlchemy ORM не умеет в расширения постгреса
     with engine.connect() as connection:
-        connection.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm")
+        connection.execute(text("CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA pg_catalog;"))
+        connection.commit()
     Base.metadata.create_all(engine)
     fill_genres_meta()
     logging.info('end')

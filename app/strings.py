@@ -6,16 +6,24 @@ import unicodedata as ud
 import hashlib
 
 
-def strip_quotes(string: str) -> str:
+def strip_quotes(s: str) -> str:
     """
     '"word word"' -> 'word word'
-    '"word" word' -> '`word` word'
+    '"word" word' -> '"word" word'
+    '"word" "word"' -> '"word" "word"'
     """
-    if string is None:
+    if s is None:
         return None
-    if string.startswith('"') and string.endswith('"'):
-        string = string[1:-1]
-    return string.replace('"', '`')
+    s = s.strip()
+
+    internal_quotes = False
+    if len(s) >= 2 and s[0] == '"' and s[-1] == '"':
+        inner_part = s[1:-1].strip()
+        if '"' in inner_part:
+            internal_quotes = True
+    if internal_quotes:
+        return s
+    return s[1:-1]
 
 
 def unicode_upper(string: str) -> str:
