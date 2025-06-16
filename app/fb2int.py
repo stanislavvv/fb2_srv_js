@@ -310,7 +310,8 @@ def get_image(name: str, binary, last=True, context=None):  # pylint: disable=R0
             if context is not None:
                 logging.error("Image error in: %s", context)
             logging.error(ex)
-            logging.debug(traceback.format_exc())
+            # logging.debug(traceback.format_exc())
+            ret = None
     return ret
 
 

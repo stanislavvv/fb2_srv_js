@@ -97,11 +97,11 @@ def get_line_fields(line: str):
             ret["deleted"] = int(line_arr[8])
         except ValueError as ex:
             logging.warning(
-                "can't get deleted status for '%s.%s', set it to 0",
+                "WARN: can't get deleted status for '%s.%s', set it to 0",
                 line_arr[5], line_arr[9]
             )
             logging.warning(
-                "raw deleted status for '%s.%s': >%s<",
+                "WARN: raw deleted status for '%s.%s': >%s<",
                 line_arr[5], line_arr[9], str(line_arr[8])
             )
             logging.debug("Exception: %s", ex)
