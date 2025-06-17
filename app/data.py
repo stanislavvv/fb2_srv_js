@@ -246,24 +246,24 @@ def make_book_descr_db(books):
     return ret
 
 
-def make_book_covers_db(books):
-    """return array of BookCover objects"""
-    ret = []
-    for book_id in books:
-        if book_id is not None and books[book_id] is not None:
-            book = books[book_id]
-            if "cover" in book and book["cover"] is not None:
-                cover = book["cover"]
-                cover_ctype = cover["content-type"]
-                cover_data = cover["data"]
-                ret.append(
-                    BookCover(
-                        book_id=book_id,
-                        cover_ctype=cover_ctype,
-                        cover=cover_data
-                    )
-                )
-    return ret
+# def make_book_covers_db(books):
+#     """return array of BookCover objects"""
+#     ret = []
+#     for book_id in books:
+#         if book_id is not None and books[book_id] is not None:
+#             book = books[book_id]
+#             if "cover" in book and book["cover"] is not None:
+#                 cover = book["cover"]
+#                 cover_ctype = cover["content-type"]
+#                 cover_data = cover["data"]
+#                 ret.append(
+#                     BookCover(
+#                         book_id=book_id,
+#                         cover_ctype=cover_ctype,
+#                         cover=cover_data
+#                     )
+#                 )
+#     return ret
 
 
 def open_booklist(booklist):

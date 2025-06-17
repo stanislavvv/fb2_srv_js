@@ -4,13 +4,14 @@
 import logging
 import glob
 import json
+import base64
 
 from pathlib import Path
 from sqlalchemy.orm import sessionmaker
 
 from .config import CONFIG
 from .data import open_booklist, seqs_in_data, nonseq_from_data, refine_book
-from .strings import id2path
+from .strings import id2path, id2pathonly
 from .db_classes import (
     dbconnect,
     BookAuthor
@@ -19,6 +20,7 @@ from .db_classes import (
 # MAX_PASS_LENGTH = 4000
 MAX_PASS_LENGTH = 20000
 MAX_PASS_LENGTH_GEN = 5
+PASS_SIZE_HINT = 10485760
 
 auth_processed = {}
 seq_processed = {}
@@ -108,3 +110,52 @@ def make_auth_data(session):
             json.dump(main, idx, indent=2, ensure_ascii=False)
         auth_processed[auth_id] = 1
     return len(auth_data.keys())
+
+
+def make_book_covers():
+    """walk over .list's and extract book covers to struct"""
+
+    logging.info("make book covers")
+
+    pagesdir = CONFIG['PAGES']
+    coversdir = pagesdir + '/covers'
+    Path(coversdir).mkdir(parents=True, exist_ok=True)
+
+    zipdir = CONFIG['ZIPS']
+    hide_deleted = CONFIG['HIDE_DELETED']
+
+    i = 0
+    for booklist in sorted(glob.glob(zipdir + '/*.zip.list') + glob.glob(zipdir + '/*.zip.list.gz')):
+        logging.info("[%s] %s", str(i), booklist)
+        with open_booklist(booklist) as lst:
+            count = 0
+            lines = lst.readlines(PASS_SIZE_HINT)
+            while len(lines) > 0:
+                count = count + len(lines)
+                # print("   %s" % count)
+                logging.info("   %s", count)
+                make_book_covers_data(lines, coversdir, hide_deleted)
+                lines = lst.readlines(PASS_SIZE_HINT)
+        i = i + 1
+    logging.info("end")
+
+
+def make_book_covers_data(lines, coversdir, hide_deleted=False):
+    for line in lines:
+        book = json.loads(line)
+        if book is not None and book['book_id'] is not None:
+            book_id = book['book_id']
+            zip_file = book['zipfile']
+            filename = book['filename']
+            if "cover" in book and book["cover"] is not None:
+                cover = book["cover"]
+                # cover_ctype = cover["content-type"]
+                cover_data = cover["data"] + '===='  # pad base64 data
+                workdir = coversdir + '/' + id2pathonly(book_id)
+                Path(workdir).mkdir(parents=True, exist_ok=True)
+                try:
+                    img_bytes = base64.b64decode(cover_data)
+                    with open(workdir + '/' + book_id + '.jpg', 'wb') as img:
+                        img.write(img_bytes)
+                except Exception as ex:
+                    logging.error('image error in %s/%s: %s', zip_file, filename, ex)

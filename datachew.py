@@ -11,6 +11,7 @@ from app.zips import renew_lists, new_lists
 from app.db import dbtables, dbclean
 from app.db_fill import process_booklists_db
 from app.files_fill import (
+    make_book_covers,
     make_authorsindex
 )
 
@@ -33,17 +34,20 @@ def parse_arguments():
                                              help='[re]create .zip.list for only new/refreshed .zip')
     new_lists_parser.description = '[re]create .zip.list for only new/refreshed .zip'
 
-    make_db_parser = subparsers.add_parser('tables', help='Create database tables and other if need')
-    make_db_parser.description = 'Create database tables and other if need'
-
     clean_db_parser = subparsers.add_parser('cleandb', help='Clean database tables and other if need')
     clean_db_parser.description = 'Clean database tables and other if need'
+
+    make_db_parser = subparsers.add_parser('tables', help='Create database tables and other if need')
+    make_db_parser.description = 'Create database tables and other if need'
 
     # fillall_db_parser = subparsers.add_parser('fillall', help='Fill all .zip.list to database, update if exists')
     # fillall_db_parser.description = 'Fill all .zip.list to database, update if exists'
 
     fillonly_db_parser = subparsers.add_parser('fillonly', help='Fill all .zip.list to database, update if exists')
     fillonly_db_parser.description = 'Fill all .zip.list to database, skip if exists'
+
+    cover_parser = subparsers.add_parser('covers', help='Make static data for book covers previews')
+    cover_parser.description = 'Make static data for book covers previews'
 
     authindex_parser = subparsers.add_parser('authors', help='Make static json struct for authors')
     authindex_parser.description = 'Make static json struct for authors'
@@ -73,6 +77,8 @@ if __name__ == "__main__":
         process_booklists_db()
     elif args.command == 'authors':
         make_authorsindex()
+    elif args.command == 'covers':
+        make_book_covers()
     else:
         print("-h or --help for help")
         sys.exit(1)

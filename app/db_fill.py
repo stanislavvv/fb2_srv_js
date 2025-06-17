@@ -20,7 +20,7 @@ from .data import (
     make_genres_db,
     make_books_db,
     make_book_descr_db,
-    make_book_covers_db,
+    # make_book_covers_db,
     open_booklist
 )
 
@@ -72,14 +72,6 @@ def process_booklists_db(stage='fillonly'):
         logging.info("[%s] %s", str(i), booklist)
         process_booklist(booklist, CONFIG['HIDE_DELETED'])
         i = i + 1
-
-    # try:
-    #     db.commit()
-    # except Exception as ex:  # pylint: disable=W0703
-    #     db.conn.rollback()
-    #     logging.error("db commit exception:")
-    #     logging.error(ex)
-    #     return False
     logging.info("end stage %s", stage)
 
 
@@ -112,7 +104,7 @@ def process_books_batch(lines, hide_deleted):
         books = fill_books(books, book)
     dbwrite(make_books_db(books))
     dbwrite(make_book_descr_db(books))
-    dbwrite(make_book_covers_db(books))
+    # dbwrite(make_book_covers_db(books))
     dbwrite(make_genres_db(genres))
     dbwrite(make_seqs_db(seqs))
     dbwrite(make_authors_db(authors))

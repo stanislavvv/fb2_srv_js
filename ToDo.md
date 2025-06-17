@@ -13,3 +13,4 @@
 
   * if can't decode image data -- set cover to null (see f.fb2-379005-382982.zip/381738.fb2) -- TESTING
   * predecode .inpx and store predecoded data for history and use historic diff for `new_lists` (or not use, if does not exists) -- NOT REALIZED (every file is unique)
+  * inspect image cover creations in *lists (see base64 decode errors in `cover` commands)
