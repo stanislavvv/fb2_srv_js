@@ -63,12 +63,12 @@ class BookDescription(Base):
     )
 
 
-class BookCover(Base):
-    """book cover image"""
-    __tablename__ = 'books_covers'
-    book_id = Column(String(32), ForeignKey("books.book_id"), primary_key=True)
-    cover_ctype = Column(String)
-    cover = Column(TEXT)
+# class BookCover(Base):
+#     """book cover image"""
+#     __tablename__ = 'books_covers'
+#     book_id = Column(String(32), ForeignKey("books.book_id"), primary_key=True)
+#     cover_ctype = Column(String)
+#     cover = Column(TEXT)
 
 
 class BookAuthor(Base):
@@ -112,6 +112,11 @@ class BookGenre(Base):
 
 def dbconnect():
     """connect to db and return engine"""
-    dbpath = f"postgresql+psycopg2://{CONFIG['PG_USER']}:{CONFIG['PG_PASS']}@{CONFIG['PG_HOST']}:5432/{CONFIG['PG_BASE']}"
+    dbpath = "postgresql+psycopg2://%s:%s@%s:5432/%s" % (
+        CONFIG['PG_USER'],
+        CONFIG['PG_PASS'],
+        CONFIG['PG_HOST'],
+        CONFIG['PG_BASE']
+    )
     engine = create_engine(dbpath)
     return engine

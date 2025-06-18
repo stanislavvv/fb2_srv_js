@@ -6,7 +6,7 @@ import logging
 from sqlalchemy import text
 
 from .db_classes import Base, dbconnect
-from .config import CONFIG
+# from .config import CONFIG
 from .db_fill import fill_genres_meta
 
 
@@ -31,7 +31,7 @@ def dbclean():
     logging.info("end")
 
 
-def get_genre_meta(meta_id):
-    """return genre meta object"""
-    engine = dbconnect()
-    # FixMe: дописать
+# def get_genre_meta(meta_id):
+#     """return genre meta object"""
+#     engine = dbconnect()
+#     # FixMe: дописать

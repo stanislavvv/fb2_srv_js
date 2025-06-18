@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """in-vars data manipulations"""
 
-import sys
 import gzip
 
 from sqlalchemy.orm import sessionmaker
@@ -14,7 +13,6 @@ from .db_classes import (
     BookGenre,
     Book,
     BookDescription,
-    BookCover,
     dbconnect
 )
 
@@ -186,7 +184,6 @@ def get_exists_book(book_ids):
 
 def fill_books(books, book):
     """append new-only book to books"""
-    books_tmp = {}
     new_book_ids = get_exists_book([book["book_id"]])
     if new_book_ids is None or len(new_book_ids) < 1:
         books[book["book_id"]] = book
@@ -246,26 +243,6 @@ def make_book_descr_db(books):
     return ret
 
 
-# def make_book_covers_db(books):
-#     """return array of BookCover objects"""
-#     ret = []
-#     for book_id in books:
-#         if book_id is not None and books[book_id] is not None:
-#             book = books[book_id]
-#             if "cover" in book and book["cover"] is not None:
-#                 cover = book["cover"]
-#                 cover_ctype = cover["content-type"]
-#                 cover_data = cover["data"]
-#                 ret.append(
-#                     BookCover(
-#                         book_id=book_id,
-#                         cover_ctype=cover_ctype,
-#                         cover=cover_data
-#                     )
-#                 )
-#     return ret
-
-
 def open_booklist(booklist):
     """return file object of booklist (.zip.list or .zip.list.gz)"""
     if booklist.find('gz') >= len(booklist) - 3:  # pylint: disable=R1705
@@ -323,4 +300,5 @@ def refine_book(book):
                 "id": make_id(CONFIG['AUTHOR_PLACEHOLDER'])
             }
         ]
+        book["authors"] = author
     return book

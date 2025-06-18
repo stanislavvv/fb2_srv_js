@@ -90,7 +90,8 @@ def string2filename(data: str) -> str:
     """remove fs-dangerous characters from data"""
     if not data:
         data = "-"
-    data = data.replace('/', '')
+    data = data.replace('/', '⧸')
+    data = data.replace('.', '_')
     return data
 
 

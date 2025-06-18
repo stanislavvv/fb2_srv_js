@@ -24,7 +24,8 @@ from .strings import (
 )
 from .db_classes import (
     dbconnect,
-    BookAuthor
+    BookAuthor,
+    BookSequence
 )
 
 auth_processed = {}
@@ -149,10 +150,10 @@ def make_auth_subindexes(session):
         t_real = {}
         for t in three_l:
             t_real[t[0]] = 1
-            t_pad = "%-3s" % t[0].upper()
+            t_pad = string2filename("%-3s" % t[0].upper())
             t_idx[t_pad] = 1
-        Path(workdir + letter).mkdir(parents=True, exist_ok=True)
-        with open(workdir + letter + "/index.json", "w") as f:
+        Path(workdir + string2filename(letter)).mkdir(parents=True, exist_ok=True)
+        with open(workdir + string2filename(letter) + "/index.json", "w") as f:
             json.dump(t_idx, f, indent=2, ensure_ascii=False)
         t_idx = {}
         for t in t_real.keys():
@@ -172,7 +173,7 @@ def make_auth_subindexes(session):
             for a in authors:
                 t_idx[t_pad][a.id] = a.name
         for idx in t_idx.keys():
-            with open(workdir + letter + f"/{idx}.json", "w") as f:
+            with open(workdir + string2filename(letter) + f"/{idx}.json", "w") as f:
                 json.dump(t_idx[idx], f, indent=2, ensure_ascii=False)
 
 
@@ -225,3 +226,126 @@ def make_book_covers_data(lines, coversdir, hide_deleted=False):
                         img.write(img_bytes)
                 except Exception as ex:
                     logging.error('image error in %s/%s: %s', zip_file, filename, ex)
+
+
+def make_sequencesindex():
+    """make pages/authorsindex content"""
+    make_pages_dir()
+    engine = dbconnect()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    seq_cnt = session.query(BookSequence).count()
+    logging.info("Creating per-sequences indexes (total: %d)...", seq_cnt)
+    processed = -1
+    while processed != 0:
+        processed = make_seq_data(session)
+        logging.debug(" - processed sequences: %d/%d, in pass: %d", len(seq_processed), seq_cnt, processed)
+
+    logging.debug("Creating sequences tree indexes")
+    make_seq_subindexes(session)
+    logging.debug("end")
+    session.close()
+
+
+def make_seq_data(session):
+    """make book sequences index"""
+
+    hide_deleted = CONFIG['HIDE_DELETED']
+    zipdir = CONFIG['ZIPS']
+    pagesdir = CONFIG['PAGES']
+
+    seq_data = {}
+    for booklist in sorted(glob.glob(zipdir + '/*.zip.list') + glob.glob(zipdir + '/*.zip.list.gz')):
+        with open_booklist(booklist) as lst:
+            for b in lst:
+                book = json.loads(b)
+                if book is None:
+                    continue
+                if hide_deleted and "deleted" in book and book["deleted"] != 0:
+                    continue
+                book = refine_book(book)
+                if book["sequences"] is not None:
+                    book = refine_book(book)
+                    for seq in book["sequences"]:
+                        seq_id = seq.get("id")
+                        seq_name = seq.get("name")
+                        if seq_id is not None and seq_id not in seq_processed:
+                            if seq_id in seq_data:
+                                s = seq_data[seq_id]["books"]
+                                s.append(book)
+                                seq_data[seq_id]["books"] = s
+                            elif len(seq_data) < int(CONFIG["MAX_PASS_LENGTH"]):
+                                s = {"name": seq_name, "id": seq_id}
+                                b = []
+                                b.append(book)
+                                s["books"] = b
+                                seq_data[seq_id] = s
+    for seq_id in seq_data:
+        data = seq_data[seq_id]
+
+        workdir = pagesdir + "/sequence/" + id2pathonly(seq_id)
+        Path(workdir).mkdir(parents=True, exist_ok=True)
+
+        workfile = workdir + f"/{seq_id}.json"
+        with open(workfile, 'w') as idx:
+            json.dump(data, idx, indent=2, ensure_ascii=False)
+        seq_processed[seq_id] = 1
+
+    return len(seq_data.keys())
+
+
+def make_seq_subindexes(session):
+    """make per-letter/three-letter indexes for sequences"""
+    pagesdir = CONFIG['PAGES']
+    workdir = pagesdir + '/sequencesindex/'
+
+    Path(workdir).mkdir(parents=True, exist_ok=True)
+
+    first_letters = session.query(
+        func.upper(func.left(BookSequence.name, 1)).distinct().label('first_letter')
+    ).all()
+    idx = {}
+    for letter in first_letters:
+        idx[letter[0]] = 1
+    with open(workdir + "index.json", "w") as f:
+        json.dump(idx, f, indent=2, ensure_ascii=False)
+
+    for letter in idx.keys():
+        if len(letter) < 1:
+            continue
+        three_l = session.query(
+            func.upper(func.left(BookSequence.name, 3))
+            .label('first_three')
+        ).filter(
+            func.upper(func.left(BookSequence.name, 1)) == letter
+        ).group_by('first_three').all()
+        logging.debug("- %s", letter)
+        t_idx = {}
+        t_real = {}
+        for t in three_l:
+            t_real[t[0]] = 1
+            t_pad = string2filename("%-3s" % t[0].upper())
+            t_idx[t_pad] = 1
+        Path(workdir + string2filename(letter)).mkdir(parents=True, exist_ok=True)
+        with open(workdir + string2filename(letter) + "/index.json", "w") as f:
+            json.dump(t_idx, f, indent=2, ensure_ascii=False)
+        t_idx = {}
+        for t in t_real.keys():
+            if len(t) < 3:
+                pattern = t
+                seqors = session.query(BookSequence).filter(
+                    func.upper(BookSequence.name) == func.upper(pattern)
+                ).all()
+            else:
+                pattern = t + '%'
+                seqors = session.query(BookSequence).filter(
+                    BookSequence.name.ilike(pattern)
+                ).all()
+            t_pad = string2filename("%-3s" % t)
+            if t_pad not in t_idx:
+                t_idx[t_pad] = {}
+            for a in seqors:
+                t_idx[t_pad][a.id] = a.name
+        for idx in t_idx.keys():
+            with open(workdir + string2filename(letter) + f"/{idx}.json", "w") as f:
+                json.dump(t_idx[idx], f, indent=2, ensure_ascii=False)

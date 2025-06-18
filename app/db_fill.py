@@ -8,7 +8,7 @@ import json
 from sqlalchemy.orm import sessionmaker
 
 from .config import CONFIG
-from .db_classes import dbconnect, GenresMeta, BookGenre
+from .db_classes import dbconnect, GenresMeta
 from .data import (
     genres_to_meta_init,
     fill_authors_book,
@@ -104,7 +104,6 @@ def process_books_batch(lines, hide_deleted):
         books = fill_books(books, book)
     dbwrite(make_books_db(books))
     dbwrite(make_book_descr_db(books))
-    # dbwrite(make_book_covers_db(books))
     dbwrite(make_genres_db(genres))
     dbwrite(make_seqs_db(seqs))
     dbwrite(make_authors_db(authors))

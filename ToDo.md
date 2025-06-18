@@ -4,9 +4,9 @@
   * fill database from .zip.list -- create db struct if needed and fill tables for books, authors, sequences and so on -- DONE
   * create static files for (see SPEC_static_files.md):
     * authors -- DONE
-    * sequences
+    * sequences -- DONE
     * genres
-    * covers (aa/bb/aabbcc...ee.jpg)
+    * covers (aa/bb/aabbcc...ee.jpg) -- DONE (but not for nginx)
   * opds interface for static files + DB
 
 ## Small parts
