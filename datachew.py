@@ -13,7 +13,8 @@ from app.db_fill import process_booklists_db
 from app.files_fill import (
     make_book_covers,
     make_authorsindex,
-    make_sequencesindex
+    make_sequencesindex,
+    make_genresindex
 )
 
 CONFIG_FILE = "./config.ini"
@@ -56,6 +57,9 @@ def parse_arguments():
     seqindex_parser = subparsers.add_parser('sequences', help='Make static json struct for sequences')
     seqindex_parser.description = 'Make static json struct for sequences'
 
+    genindex_parser = subparsers.add_parser('genres', help='Make static json struct for genres')
+    genindex_parser.description = 'Make static json struct for genres'
+
     pargs = parser.parse_args()
     return pargs
 
@@ -85,6 +89,8 @@ if __name__ == "__main__":
         make_book_covers()
     elif args.command == 'sequences':
         make_sequencesindex()
+    elif args.command == 'genres':
+        make_genresindex()
     else:
         print("-h or --help for help")
         sys.exit(1)

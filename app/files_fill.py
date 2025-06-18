@@ -6,6 +6,7 @@ import glob
 import json
 import base64
 
+from functools import cmp_to_key
 from pathlib import Path
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import func
@@ -15,7 +16,8 @@ from .data import (
     open_booklist,
     seqs_in_data,
     nonseq_from_data,
-    refine_book
+    refine_book,
+    custom_alphabet_book_title_cmp
 )
 from .strings import (
     id2path,
@@ -25,7 +27,12 @@ from .strings import (
 from .db_classes import (
     dbconnect,
     BookAuthor,
-    BookSequence
+    BookSequence,
+    BookGenre
+)
+from .db import (
+    get_genres,
+    get_genres_meta
 )
 
 auth_processed = {}
@@ -229,7 +236,7 @@ def make_book_covers_data(lines, coversdir, hide_deleted=False):
 
 
 def make_sequencesindex():
-    """make pages/authorsindex content"""
+    """make pages/sequencesindex content"""
     make_pages_dir()
     engine = dbconnect()
     Session = sessionmaker(bind=engine)
@@ -349,3 +356,99 @@ def make_seq_subindexes(session):
         for idx in t_idx.keys():
             with open(workdir + string2filename(letter) + f"/{idx}.json", "w") as f:
                 json.dump(t_idx[idx], f, indent=2, ensure_ascii=False)
+
+
+def make_genresindex():
+    """make pages/genresindex content"""
+    make_pages_dir()
+    engine = dbconnect()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    seq_cnt = session.query(BookGenre).count()
+    logging.info("Creating per-genre indexes (total: %d)...", seq_cnt)
+    # processed = -1
+    # while processed != 0:
+    #     processed = make_genres_data(session)
+    #     logging.debug(" - processed genres: %d/%d, in pass: %d", len(gen_processed), seq_cnt, processed)
+
+    logging.debug("Creating genres tree indexes")
+    make_genres_subindexes(session)
+    logging.debug("end")
+    session.close()
+
+
+def make_genres_data(session):
+    """make book genres index"""
+
+    hide_deleted = CONFIG['HIDE_DELETED']
+    zipdir = CONFIG['ZIPS']
+    pagesdir = CONFIG['PAGES']
+
+    genres = get_genres(session)
+
+    gen_data = {}
+    gen_names = {}
+    for booklist in sorted(glob.glob(zipdir + '/*.zip.list') + glob.glob(zipdir + '/*.zip.list.gz')):
+        with open_booklist(booklist) as lst:
+            for b in lst:
+                book = json.loads(b)
+                if book is None:
+                    continue
+                if hide_deleted and "deleted" in book and book["deleted"] != 0:
+                    continue
+                book = refine_book(book)
+                if book["genres"] is not None:
+                    book = refine_book(book)
+                    for gen in book["genres"]:
+                        gen_id = gen
+                        gen_name = gen
+                        if gen in genres:
+                            gen_name = genres[gen]["name"]
+                        gen_names[gen_id] = gen_name
+                        if gen_id not in gen_processed:
+                            if gen_id in gen_data:
+                                s = gen_data[gen_id]
+                                s.append(book)
+                                gen_data[gen_id] = s
+                            elif len(gen_data) < int(CONFIG["MAX_PASS_LENGTH_GEN"]):
+                                s = []
+                                s.append(book)
+                                gen_data[gen_id] = s
+
+    workdir = pagesdir + "/genre/"
+    Path(workdir).mkdir(parents=True, exist_ok=True)
+    for gen in gen_data:
+        workdir = pagesdir + "/genre/" + string2filename(gen)
+        Path(workdir).mkdir(parents=True, exist_ok=True)
+
+        data = []
+        for book in gen_data[gen]:
+            data.append(book["book_id"])
+
+        workfile = pagesdir + "/genre/" + string2filename(gen) + "/all.json"
+        with open(workfile, 'w') as idx:
+            json.dump(data, idx, indent=2, ensure_ascii=False)
+
+        i = 0
+        data = sorted(gen_data[gen], key=cmp_to_key(custom_alphabet_book_title_cmp))
+        while len(data) > 0:
+            wdata = data[:50]
+            data = data[50:]
+            workfile = pagesdir + "/genre/" + string2filename(gen) + "/" + str(i) + ".json"
+            with open(workfile, 'w') as idx:
+                json.dump(wdata, idx, indent=2, ensure_ascii=False)
+            i = i + 1
+        gen_processed[gen] = 1
+    return len(gen_data.keys())
+
+
+def make_genres_subindexes(session):
+    """make meta/genres indexes"""
+    pagesdir = CONFIG['PAGES']
+    workdir = pagesdir + '/genresindex/'
+
+    Path(workdir).mkdir(parents=True, exist_ok=True)
+
+    meta_data = get_genres_meta(session)
+    with open(workdir + "index.json", "w") as f:
+        json.dump(meta_data, f, indent=2, ensure_ascii=False)

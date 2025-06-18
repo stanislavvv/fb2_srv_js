@@ -5,7 +5,7 @@ import logging
 
 from sqlalchemy import text
 
-from .db_classes import Base, dbconnect
+from .db_classes import Base, dbconnect, BookGenre, GenresMeta
 # from .config import CONFIG
 from .db_fill import fill_genres_meta
 
@@ -31,7 +31,31 @@ def dbclean():
     logging.info("end")
 
 
-# def get_genre_meta(meta_id):
-#     """return genre meta object"""
-#     engine = dbconnect()
-#     # FixMe: дописать
+def get_genres_meta(session):
+    """return genres metas dict -- meta_id: meta_name"""
+
+    ret = {}
+    m_data = session.query(GenresMeta).all()
+    for m in m_data:
+        meta_id = m.meta_id
+        name = m.name
+        descr = m.description
+        ret[meta_id] = name
+    return ret
+
+
+def get_genres(session):
+    """return dict for gen_id: {"meta_id": meta_id, "name": genre_name}"""
+
+    ret = {}
+    g_data = session.query(BookGenre).all()
+    for gen in g_data:
+        gen_id = gen.id
+        meta_id = gen.meta_id
+        gen_name = gen.name
+        ret[gen_id] = {
+            "meta_id": meta_id,
+            "name": gen_name
+        }
+
+    return ret
