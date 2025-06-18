@@ -34,6 +34,12 @@ def unicode_upper(string: str) -> str:
     ret = ret.replace('Й', 'И')
     ret = ret.replace('Ъ', 'Ь')
     return ret
+    # upper_str = ud.normalize('NFKD', string).upper()
+    # ret = ''.join(
+    #     char for char in upper_str
+    #     if ud.category(char) == 'Ll' or ud.category(char) == 'Lu'
+    # )
+    # return ret
 
 
 def strlist(string) -> str:
@@ -82,9 +88,9 @@ def id2pathonly(id: str):  # pylint: disable=W0622
 
 def string2filename(data: str) -> str:
     """remove fs-dangerous characters from data"""
-    data = data.replace('/', '').rstrip(' ')
     if not data:
         data = "-"
+    data = data.replace('/', '')
     return data
 
 

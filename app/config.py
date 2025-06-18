@@ -9,28 +9,34 @@ import configparser
 
 # translate var names from config to internal
 VARS = {
-    "debug": "DEBUG",
-    "app_root": "APPLICATION_ROOT",
-    "hide_deleted": "HIDE_DELETED",
-    "page_size": "PAGE_SIZE",
-    "pages_path": "PAGES",
-    "pg_base": "PG_BASE",
-    "pg_host": "PG_HOST",
-    "pg_pass": "PG_PASS",
-    "pg_user": "PG_USER",
-    "listen_port": "LISTEN_PORT",
-    "listen_host": "LISTEN_HOST",
-    "pic_width": "PIC_WIDTH",
-    "search_result_limit": "MAX_SEARCH_RES",
-    "web_title": "TITLE",
-    "inpx_file": "INPX",
-    "zips_path": "ZIPS"
+    "debug": "DEBUG",  # yes|no -- enable some debug logs
+    "app_root": "APPLICATION_ROOT",  # url path like '/books'
+    "hide_deleted": "HIDE_DELETED",  # yes|no -- will skip deleted when indexing
+    "page_size": "PAGE_SIZE",  # web page size
+    "pages_path": "PAGES",  # filesystem full path to static data
+    "pg_base": "PG_BASE",  # postgres db name
+    "pg_host": "PG_HOST",  # postgres host
+    "pg_pass": "PG_PASS",  # postgres password
+    "pg_user": "PG_USER",  # postgres username
+    "listen_port": "LISTEN_PORT",  # ex: "8000"
+    "listen_host": "LISTEN_HOST",  # ex: "0.0.0.0"
+    "pic_width": "PIC_WIDTH",  # max width for cover previews (see 'datachew.sh cover' command)
+    "search_result_limit": "MAX_SEARCH_RES",  # max search page size
+    "web_title": "TITLE",  # web interface title
+    "inpx_file": "INPX",  # archive with .inp files, create empty .zip if not exists
+    "zips_path": "ZIPS",  # filesystem full path to .zip's with .fb2 content
+    "max_pass_lenth": "MAX_PASS_LENGTH",  # memory limit param, default see below
+    "mas_genre_pass_length": "MAX_PASS_LENGTH_GENRE",  # memory limit param, default see below
+    "books_pass_size_hint": "PASS_SIZE_HINT"  # memory limit param, default see below
 }
 
 CONFIG = {  # default values
     "LISTEN_HOST": "0.0.0.0",
     "LISTEN_PORT": "8000",
     "AUTHOR_PLACEHOLDER": "Автор Неизвестен",
+    "MAX_PASS_LENGTH": "4000",  # default for orange pi
+    "MAX_PASS_LENGTH_GENRE": "5",  # default for orange pi
+    "PASS_SIZE_HINT": "1048576"  # default for orange pi
 }
 
 

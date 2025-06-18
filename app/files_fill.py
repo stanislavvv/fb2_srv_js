@@ -8,19 +8,24 @@ import base64
 
 from pathlib import Path
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import func
 
 from .config import CONFIG
-from .data import open_booklist, seqs_in_data, nonseq_from_data, refine_book
-from .strings import id2path, id2pathonly
+from .data import (
+    open_booklist,
+    seqs_in_data,
+    nonseq_from_data,
+    refine_book
+)
+from .strings import (
+    id2path,
+    id2pathonly,
+    string2filename
+)
 from .db_classes import (
     dbconnect,
     BookAuthor
 )
-
-# MAX_PASS_LENGTH = 4000
-MAX_PASS_LENGTH = 20000
-MAX_PASS_LENGTH_GEN = 5
-PASS_SIZE_HINT = 10485760
 
 auth_processed = {}
 seq_processed = {}
@@ -40,12 +45,15 @@ def make_authorsindex():
     Session = sessionmaker(bind=engine)
     session = Session()
     auth_cnt = session.query(BookAuthor).count()
-    logging.info("Creating authors indexes (total: %d)...", auth_cnt)
+    logging.info("Creating per-authors indexes (total: %d)...", auth_cnt)
     processed = -1
     while processed != 0:
         processed = make_auth_data(session)
         logging.debug(" - processed authors: %d/%d, in pass: %d", len(auth_processed), auth_cnt, processed)
-    # make_auth_subindexes(db, pagesdir)
+
+    logging.debug("Creating author's tree indexes")
+    make_auth_subindexes(session)
+    logging.debug("end")
     session.close()
 
 
@@ -76,7 +84,7 @@ def make_auth_data(session):
                                 s = auth_data[auth_id]["books"]
                                 s.append(book)
                                 auth_data[auth_id]["books"] = s
-                            elif len(auth_data) < MAX_PASS_LENGTH:
+                            elif len(auth_data) < int(CONFIG["MAX_PASS_LENGTH"]):
                                 s = {"name": auth_name, "id": auth_id}
                                 b = []
                                 b.append(book)
@@ -112,6 +120,62 @@ def make_auth_data(session):
     return len(auth_data.keys())
 
 
+def make_auth_subindexes(session):
+    """make per-letter/three-letter indexes"""
+    pagesdir = CONFIG['PAGES']
+    workdir = pagesdir + '/authorsindex/'
+
+    Path(workdir).mkdir(parents=True, exist_ok=True)
+
+    first_letters = session.query(
+        func.upper(func.left(BookAuthor.name, 1)).distinct().label('first_letter')
+    ).all()
+    idx = {}
+    for letter in first_letters:
+        idx[letter[0]] = 1
+    with open(workdir + "index.json", "w") as f:
+        json.dump(idx, f, indent=2, ensure_ascii=False)
+
+    for letter in idx.keys():
+        three_l = session.query(
+            func.upper(func.left(BookAuthor.name, 3))
+            .label('first_three')
+        ).filter(
+            # BookAuthor.name.ilike(f'{letter}%')
+            func.upper(func.left(BookAuthor.name, 1)) == letter
+        ).group_by('first_three').all()
+        logging.debug("- %s", letter)
+        t_idx = {}
+        t_real = {}
+        for t in three_l:
+            t_real[t[0]] = 1
+            t_pad = "%-3s" % t[0].upper()
+            t_idx[t_pad] = 1
+        Path(workdir + letter).mkdir(parents=True, exist_ok=True)
+        with open(workdir + letter + "/index.json", "w") as f:
+            json.dump(t_idx, f, indent=2, ensure_ascii=False)
+        t_idx = {}
+        for t in t_real.keys():
+            if len(t) < 3:
+                pattern = t
+                authors = session.query(BookAuthor).filter(
+                    func.upper(BookAuthor.name) == func.upper(pattern)
+                ).all()
+            else:
+                pattern = t + '%'
+                authors = session.query(BookAuthor).filter(
+                    BookAuthor.name.ilike(pattern)
+                ).all()
+            t_pad = string2filename("%-3s" % t)
+            if t_pad not in t_idx:
+                t_idx[t_pad] = {}
+            for a in authors:
+                t_idx[t_pad][a.id] = a.name
+        for idx in t_idx.keys():
+            with open(workdir + letter + f"/{idx}.json", "w") as f:
+                json.dump(t_idx[idx], f, indent=2, ensure_ascii=False)
+
+
 def make_book_covers():
     """walk over .list's and extract book covers to struct"""
 
@@ -124,18 +188,20 @@ def make_book_covers():
     zipdir = CONFIG['ZIPS']
     hide_deleted = CONFIG['HIDE_DELETED']
 
+    passhint = int(CONFIG['PASS_SIZE_HINT'])
+
     i = 0
     for booklist in sorted(glob.glob(zipdir + '/*.zip.list') + glob.glob(zipdir + '/*.zip.list.gz')):
         logging.info("[%s] %s", str(i), booklist)
         with open_booklist(booklist) as lst:
             count = 0
-            lines = lst.readlines(PASS_SIZE_HINT)
+            lines = lst.readlines(passhint)
             while len(lines) > 0:
                 count = count + len(lines)
                 # print("   %s" % count)
                 logging.info("   %s", count)
                 make_book_covers_data(lines, coversdir, hide_deleted)
-                lines = lst.readlines(PASS_SIZE_HINT)
+                lines = lst.readlines(passhint)
         i = i + 1
     logging.info("end")
 
