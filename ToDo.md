@@ -14,7 +14,6 @@
   * indexing at all:
     * debug log config param using (now always 'debug = yes')
   * static files:
-    * covers: if can't decode image data -- set cover to null (see f.fb2-379005-382982.zip/381738.fb2) -- TESTING
     * covers: inspect image cover creations in *lists (see base64 decode errors in `cover` commands)
     * covers: copy default cover to root of covers tree (for nginx `@try_files` directive) + prepare nginx example
   * database:

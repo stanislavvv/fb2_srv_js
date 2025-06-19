@@ -60,6 +60,12 @@ def parse_arguments():
     genindex_parser = subparsers.add_parser('genres', help='Make static json struct for genres')
     genindex_parser.description = 'Make static json struct for genres'
 
+    allindex_parser = subparsers.add_parser(
+        'all',
+        help='Run new_lists fillonly covers authors sequences genres sequentially'
+    )
+    allindex_parser.description = 'Run new_lists fillonly covers authors sequences genres sequentially'
+
     pargs = parser.parse_args()
     return pargs
 
@@ -90,6 +96,13 @@ if __name__ == "__main__":
     elif args.command == 'sequences':
         make_sequencesindex()
     elif args.command == 'genres':
+        make_genresindex()
+    elif args.command == 'all':
+        new_lists()
+        process_booklists_db()
+        make_book_covers()
+        make_authorsindex()
+        make_sequencesindex()
         make_genresindex()
     else:
         print("-h or --help for help")

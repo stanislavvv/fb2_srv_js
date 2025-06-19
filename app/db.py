@@ -39,7 +39,7 @@ def get_genres_meta(session):
     for m in m_data:
         meta_id = m.meta_id
         name = m.name
-        descr = m.description
+        # descr = m.description
         ret[meta_id] = name
     return ret
 
