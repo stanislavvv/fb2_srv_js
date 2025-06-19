@@ -366,10 +366,10 @@ def make_genresindex():
     session = Session()
     seq_cnt = session.query(BookGenre).count()
     logging.info("Creating per-genre indexes (total: %d)...", seq_cnt)
-    # processed = -1
-    # while processed != 0:
-    #     processed = make_genres_data(session)
-    #     logging.debug(" - processed genres: %d/%d, in pass: %d", len(gen_processed), seq_cnt, processed)
+    processed = -1
+    while processed != 0:
+        processed = make_genres_data(session)
+        logging.debug(" - processed genres: %d/%d, in pass: %d", len(gen_processed), seq_cnt, processed)
 
     logging.debug("Creating genres tree indexes")
     make_genres_subindexes(session)
@@ -452,3 +452,17 @@ def make_genres_subindexes(session):
     meta_data = get_genres_meta(session)
     with open(workdir + "index.json", "w") as f:
         json.dump(meta_data, f, indent=2, ensure_ascii=False)
+
+    genres = get_genres(session)
+
+    data = {}
+    for gen_id in genres:
+        gen_name = genres[gen_id]["name"]
+        meta_id = genres[gen_id]["meta_id"]
+        if meta_id not in data:
+            data[meta_id] = {}
+        data[meta_id][gen_id] = gen_name
+    for meta_id in data:
+        meta = data[meta_id]
+        with open(workdir + string2filename(meta_id) + ".json", "w") as f:
+            json.dump(meta, f, indent=2, ensure_ascii=False)
