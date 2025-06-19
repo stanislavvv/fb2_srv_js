@@ -17,7 +17,8 @@ from .data import (
     seqs_in_data,
     nonseq_from_data,
     refine_book,
-    custom_alphabet_book_title_cmp
+    custom_alphabet_book_title_cmp,
+    decode_b64
 )
 from .strings import (
     id2path,
@@ -211,6 +212,7 @@ def make_book_covers():
                 make_book_covers_data(lines, coversdir, hide_deleted)
                 lines = lst.readlines(passhint)
         i = i + 1
+    # FixMe: ToDo: copy default cover to coversdir/default.jpg
     logging.info("end")
 
 
@@ -224,11 +226,11 @@ def make_book_covers_data(lines, coversdir, hide_deleted=False):
             if "cover" in book and book["cover"] is not None:
                 cover = book["cover"]
                 # cover_ctype = cover["content-type"]
-                cover_data = cover["data"] + '===='  # pad base64 data
+                cover_data = cover["data"] + '==='  # pad base64 data
                 workdir = coversdir + '/' + id2pathonly(book_id)
                 Path(workdir).mkdir(parents=True, exist_ok=True)
                 try:
-                    img_bytes = base64.b64decode(cover_data)
+                    img_bytes = decode_b64(cover_data)
                     with open(workdir + '/' + book_id + '.jpg', 'wb') as img:
                         img.write(img_bytes)
                 except Exception as ex:

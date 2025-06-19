@@ -16,8 +16,9 @@ from PIL import Image
 
 import xmltodict
 
-from .strings import strlist, strip_quotes, num2int, make_id
 from .config import CONFIG
+from .strings import strlist, strip_quotes, num2int, make_id
+from .data import decode_b64
 
 FB2_HEADER_LIMIT = 20000  # nearly 20kB for metadata text
 
@@ -295,7 +296,8 @@ def get_image(name: str, binary, last=True, context=None):  # pylint: disable=R0
         try:
             # basewidth = 300
             basewidth = int(CONFIG['PIC_WIDTH'])
-            buf = io.BytesIO(base64.b64decode(ret["data"] + '=='))  # additinally pad db64
+            # buf = io.BytesIO(base64.b64decode(ret["data"] + '=='))  # additinally pad db64
+            buf = io.BytesIO(decode_b64(ret["data"]))
             img = Image.open(buf).convert('RGB')
             wpercent = basewidth/float(img.size[0])
             if wpercent < 1:
@@ -303,7 +305,7 @@ def get_image(name: str, binary, last=True, context=None):  # pylint: disable=R0
                 img = img.resize((basewidth, hsize), Image.LANCZOS)
             buffout = io.BytesIO()
             img.save(buffout, format="JPEG", quality="web_medium")
-            data = base64.encodebytes(buffout.getvalue())
+            data = base64.b64encode(buffout.getvalue())
             ret["content-type"] = "image/jpeg"
             ret["data"] = data.decode("utf-8")
         except Exception as ex:  # pylint: disable=W0703

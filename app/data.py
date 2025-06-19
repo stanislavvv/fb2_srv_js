@@ -2,6 +2,7 @@
 """in-vars data manipulations"""
 
 import gzip
+import base64
 
 from sqlalchemy.orm import sessionmaker
 
@@ -391,3 +392,25 @@ def refine_book(book):
         ]
         book["authors"] = author
     return book
+
+
+def decode_b64(data):
+    try:
+        return base64.b64decode(data)
+    except Exception as e:
+        # can't decode as is - pad and try again
+        padding_len = len(data) % 4
+        if padding_len != 0:
+            data_padded = data + '=' * (4 - padding_len)
+        else:
+            data_padded = data
+        try:
+            return base64.b64decode(data_padded)
+        except Exception as e:
+            # can't decode even padded - try take partial decode
+            for i in range(1,5):
+                try:
+                    return base64.b64decode(data[:len(data) - i])
+                except:
+                    pass
+            return base64.b64decode(data[:len(data) - 6])
