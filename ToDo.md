@@ -1,20 +1,24 @@
 # ToDo
 
-  * generate .zip.list from .zip -- process every fb2 in .zip, create jsonl for it, write to .zip.list, if .zip.list older than .zip or does not exist -- DONE
-  * fill database from .zip.list -- create db struct if needed and fill tables for books, authors, sequences and so on -- DONE
-  * create static files for (see SPEC_static_files.md):
-    * authors -- DONE
-    * sequences -- DONE
-    * genres -- IN-PROGRESS
-    * covers (aa/bb/aabbcc...ee.jpg) -- DONE (but not for nginx)
   * opds interface for static files + DB
+    * /opds base:
+      * `/opds/authorsindex` -- single letter links to three-letter lists which links to authors
+        * `/opds/author/{id[0:2]}/{id[2:2]}/{id}` -- tree for author
+      * `/opds/sequencesindex` -- as for authors, but for sequences
+        * `/opds/sequence/{id[0:2]}/{id[2:2]}/{id}` -- books list in sequence
+      * `/opds/genresindex` -- genres groups links to genres in group which links to genres
+        * `/opds/genre/{id}` -- paginated books list in genre with `/{number}` in next pages
+  * /opds optional:
+    * `/opds/time` -- books by date, simple list with `/{number}` in next pages
+    * `/opds/random-books` -- one page of random books list 
+    * `/opds/random-sequences` -- one page of random sequences list
+    * `/opds/rnd-genresindex` -- as in genresindex but links to `rnd-genre` instead `genre`
+      * `/opds/rnd-genre/{id}` -- one page of random books list in this genre
 
 ## Small parts
 
-  * indexing at all:
-    * debug log config param using (now always 'debug = yes')
-  * static files:
-  * database:
   * opds:
   * docs:
     * nginx example for covers (`@try_files` and default cover)
+    * spec to url tree
+    * [maybe] spec to THIS library opds output
