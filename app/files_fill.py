@@ -5,6 +5,7 @@ import logging
 import glob
 import json
 import base64
+import shutil
 
 from functools import cmp_to_key
 from pathlib import Path
@@ -212,7 +213,7 @@ def make_book_covers():
                 make_book_covers_data(lines, coversdir, hide_deleted)
                 lines = lst.readlines(passhint)
         i = i + 1
-    # FixMe: ToDo: copy default cover to coversdir/default.jpg
+    shutil.copy(CONFIG['DEFAULT_COVER'], coversdir + '/default.jpg')
     logging.info("end")
 
 

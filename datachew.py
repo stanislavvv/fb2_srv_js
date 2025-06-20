@@ -6,7 +6,7 @@ import logging
 import argparse
 import sys
 
-from app.config import read_config
+from app.config import read_config, CONFIG
 from app.zips import renew_lists, new_lists
 from app.db import dbtables, dbclean
 from app.db_fill import process_booklists_db
@@ -75,7 +75,10 @@ if __name__ == "__main__":
 
     read_config(args.config)
 
-    DBLOGLEVEL = logging.DEBUG  # DEBUG, INFO, WARN, ERR
+    if CONFIG['DEBUG'] == 'yes' or CONFIG['DEBUG'] == True:
+        DBLOGLEVEL = logging.DEBUG  # DEBUG, INFO, WARN, ERR
+    else:
+        DBLOGLEVEL = logging.INFO  # INFO, WARN, ERR
     DBLOGFORMAT = '%(asctime)s -- %(message)s'
     logging.basicConfig(level=DBLOGLEVEL, format=DBLOGFORMAT)
 

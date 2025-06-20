@@ -14,7 +14,7 @@
   * indexing at all:
     * debug log config param using (now always 'debug = yes')
   * static files:
-    * covers: inspect image cover creations in *lists (see base64 decode errors in `cover` commands)
-    * covers: copy default cover to root of covers tree (for nginx `@try_files` directive) + prepare nginx example
   * database:
   * opds:
+  * docs:
+    * nginx example for covers (`@try_files` and default cover)

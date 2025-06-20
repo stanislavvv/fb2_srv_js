@@ -27,7 +27,8 @@ VARS = {
     "zips_path": "ZIPS",  # filesystem full path to .zip's with .fb2 content
     "max_pass_lenth": "MAX_PASS_LENGTH",  # memory limit param, default see below
     "mas_genre_pass_length": "MAX_PASS_LENGTH_GEN",  # memory limit param, default see below
-    "books_pass_size_hint": "PASS_SIZE_HINT"  # memory limit param, default see below
+    "books_pass_size_hint": "PASS_SIZE_HINT",  # memory limit param, default see below
+    "default_cover_image": "DEFAULT_COVER"  # path to default cover
 }
 
 CONFIG = {  # default values
@@ -36,7 +37,8 @@ CONFIG = {  # default values
     "AUTHOR_PLACEHOLDER": "Автор Неизвестен",
     "MAX_PASS_LENGTH": "4000",  # default for orange pi
     "MAX_PASS_LENGTH_GEN": "5",  # default for orange pi
-    "PASS_SIZE_HINT": "1048576"  # default for orange pi
+    "PASS_SIZE_HINT": "1048576",  # default for orange pi
+    "DEFAULT_COVER": "./app/static/default-cover.jpg"
 }
 
 
