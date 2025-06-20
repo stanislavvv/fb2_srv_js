@@ -102,6 +102,7 @@ if __name__ == "__main__":
         make_genresindex()
     elif args.command == 'all':
         new_lists()
+        dbtables()
         process_booklists_db()
         make_book_covers()
         make_authorsindex()

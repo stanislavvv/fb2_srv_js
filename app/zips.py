@@ -167,6 +167,7 @@ def update_booklist(inpx_data, zip_file) -> bool:  # pylint: disable=C0103
 
 def renew_lists():
     """recreate all .list's from .zip's"""
+    logging.info("Create all lists")
     zipdir = CONFIG['ZIPS']
     inpx_data = zipdir + "/" + CONFIG['INPX']
     i = 0
@@ -179,6 +180,7 @@ def renew_lists():
 
 def new_lists():
     """create .list's for new or updated .zip's"""
+    logging.info("Create only needed lists")
     zipdir = CONFIG['ZIPS']
     inpx_data = zipdir + "/" + CONFIG['INPX']
     i = 0
