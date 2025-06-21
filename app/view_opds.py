@@ -9,9 +9,11 @@ from flask import Blueprint, Response
 from .opds_struct import (
     opds_main,
     opds_simple_list,
-    opds_author_page
+    opds_author_page,
+    opds_book_list
 )
 from .config import CONFIG, URL
+from .strings import id2path
 from .validate import (
     validate_prefix,
     validate_id
@@ -141,3 +143,55 @@ def opds_author_seqs(sub1, sub2, id):
         "up": URL["authidx"] + sub1
     }
     return create_opds_response(opds_simple_list(params))
+
+
+@opds.route(URL["author"] + "<sub1>/<sub2>/<id>/<seq_id>", methods=['GET'])
+def opds_author_seq(sub1, sub2, id, seq_id):
+    sub1 = validate_id(sub1)
+    sub2 = validate_id(sub2)
+    id = validate_id(id)
+    seq_id = validate_id(seq_id)
+    params = {
+        "index": URL["author"].replace("/opds/", "", 1) + f"{sub1}/{sub2}/{id}/",
+        "id": id,
+        "sub1": sub1,
+        "sub2": sub2,
+        "tag": "tag:author:" + id,
+        "subtag": "tag:author:" + id,
+        "seq_id": seq_id,
+        "title": "Автор ",
+        "subtitle": " серия ",
+        "layout": "author_seq",
+        "baseref": URL["author"],
+        "authref": URL["author"],
+        "seqref": URL["seq"],
+        "self": URL["author"] + id2path(id) + "/" + seq_id,
+        "start": URL["start"],
+        "up": URL["author"] + id2path(id)
+    }
+    return create_opds_response(opds_book_list(params))
+
+
+@opds.route(URL["author"] + "<sub1>/<sub2>/<id>/sequenceless", methods=['GET'])
+def opds_author_nonseq(sub1, sub2, id):
+    sub1 = validate_id(sub1)
+    sub2 = validate_id(sub2)
+    id = validate_id(id)
+    params = {
+        "index": URL["author"].replace("/opds/", "", 1) + f"{sub1}/{sub2}/{id}/",
+        "id": id,
+        "sub1": sub1,
+        "sub2": sub2,
+        "tag": "tag:author:" + id,
+        "subtag": "tag:author:" + id,
+        "title": "Книги вне серий автора ",
+        "subtitle": "",
+        "layout": "author_nonseq",
+        "baseref": URL["author"],
+        "authref": URL["author"],
+        "seqref": URL["seq"],
+        "self": URL["author"] + id2path(id),
+        "start": URL["start"],
+        "up": URL["authidx"]
+    }
+    return create_opds_response(opds_book_list(params))

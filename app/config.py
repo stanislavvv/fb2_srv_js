@@ -73,7 +73,49 @@ URL = {
     "rndgenidx": "/opds/rnd/genresindex/",
     "time": "/opds/time",  # all books by time (from new to old)
     "read": "/read/",  # read book
-    "dl": "/fb2/"  # download book
+    "dl": "/fb2/",  # download book
+    "cover": "/covers/",  # books cover images
+}
+
+LANG = {
+    "book_dl": "Скачать",
+    "book_read": "Читать онлайн",
+    "books_num": "%d книг(и)",
+    "books_author_alphabet": "Книги автора '%s' по алфавиту",
+    "books_author_time": "Книги автора '%s' по времени поступления",
+    "books_author_nonseq": "Книги автора '%s' вне серий",
+    "books_author_seq": "Серия '%s', автор '%s'",
+
+    "authors": "Авторы",
+    "auth_root_subtitle": "Авторы на ",
+    "author": "Автор ",
+    "author_tpl": "Автор '%s'",
+    "authors_num": "%d авт.",
+
+    "sequences": "Серии",
+    "seq_root_subtitle": "Серии на ",
+    "sequence": "Серия ",
+    "seq_tpl": "Серия '%s'",
+    "seqs_num": "%d сер.",
+    "seqs_author": "Серии автора '%s'",
+
+    "genres_meta": "Группы жанров",
+    "genres": "Жанры",
+    "genre": "Жанр ",
+    "genres_root_subtitle": "Жанры в группе ",
+    "genre_tpl": "Жанр '%s'",
+
+    "search_main": "Поиск по '%s'",
+    "search_author": "Поиск среди авторов по '%s'",
+    "search_seq": "Поиск среди серий по '%s'",
+    "search_book": "Поиск по заголовкам книг по '%s'",
+    "search_anno": "Поиск по описаниям книг по '%s'",
+
+    "rnd_books": "Случайные книги",
+    "rnd_seqs": "Случайные серии",
+    "rnd_genre_books": "Случайные книги в жанре '%s'",
+
+    "all_books_by_time": "Все книги по дате поступления"
 }
 
 

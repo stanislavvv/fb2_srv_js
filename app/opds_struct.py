@@ -9,15 +9,163 @@ import urllib
 
 from functools import cmp_to_key
 
-from .data import custom_alphabet_cmp
+from .data import (
+    custom_alphabet_cmp,
+    custom_alphabet_book_title_cmp,
+    url_str,
+    html_refine,
+    get_genre_name,
+    sizeof_fmt
+)
 from .validate import safe_path
 from .strings import id2path
-from .config import CONFIG, URL
+from .config import CONFIG, URL, LANG
 
 
 def get_dtiso():
     """return current time in iso"""
     return datetime.datetime.now().astimezone().replace(microsecond=0).isoformat()
+
+
+def pubinfo_anno(pubinfo):
+    """create publication info for opds"""
+    # pylint: disable=C0209
+    ret = ""
+    if pubinfo["isbn"] is not None and pubinfo["isbn"] != 'None':
+        ret = ret + "<p><b>Данные публикации:</b></p><p>ISBN: %s</p>" % pubinfo["isbn"]
+    if pubinfo["year"] is not None and pubinfo["year"] != 'None':
+        ret = ret + "<p>Год публикации: %s</p>" % pubinfo["year"]
+    if pubinfo["publisher"] is not None and pubinfo["year"] != 'None':
+        ret = ret + "<p>Издательство: %s</p>" % pubinfo["publisher"]
+    return ret
+
+
+def get_seq_link(approot: str, seqref: str, seq_id: str, seq_name: str):
+    """create sequence link for opds"""
+    ret = {
+        "@href": approot + seqref + seq_id,
+        "@rel": "related",
+        "@title": "Серия '" + seq_name + "'",
+        "@type": "application/atom+xml"
+    }
+    return ret
+
+
+def get_book_link(approot: str, zipfile: str, filename: str, ctype: str):
+    """create download/read link for opds"""
+    title = LANG["book_read"]
+    book_ctype = "text/html"
+    rel = "alternate"
+    if zipfile.endswith('zip'):
+        zipfile = zipfile[:-4]
+    href = approot + URL["read"] + zipfile + "/" + url_str(filename)
+    if ctype == 'dl':
+        title = LANG["book_dl"]
+        book_ctype = "application/fb2+zip"
+        rel = "http://opds-spec.org/acquisition/open-access"
+        href = approot + URL["dl"] + zipfile + "/" + url_str(filename) + ".zip"
+    ret = {
+        "@href": href,
+        "@rel": rel,
+        "@title": title,
+        "@type": book_ctype
+    }
+    return ret
+
+
+def make_book_entry(book, ts, authref, seqref, seq_id=None):
+    approot = CONFIG['APPLICATION_ROOT']
+    book_title = book["book_title"]
+    book_id = book["book_id"]
+    lang = book["lang"]
+    annotation = html_refine(book["annotation"])
+    size = int(book["size"])
+    date_time = book["date_time"]
+    zipfile = book["zipfile"]
+    filename = book["filename"]
+    genres = book["genres"]
+    pubinfo = ""
+    if "pub_info" in book and book["pub_info"] is not None:
+        pubinfo = pubinfo_anno(book["pub_info"])
+    authors = []
+    links = []
+    category = []
+    seq_name = ""
+    seq_num = ""
+    for author in book["authors"]:
+        authors.append(
+            {
+                "uri": approot + authref + id2path(author["id"]),
+                "name": author["name"]
+            }
+        )
+        links.append(
+            {
+                "@href": approot + authref + id2path(author["id"]),
+                "@rel": "related",
+                "@title": author["name"],
+                "@type": "application/atom+xml"
+            }
+        )
+    for gen in genres:
+        category.append(
+            {
+                "@label": get_genre_name(gen),
+                "@term": gen
+            }
+        )
+    if book["sequences"] is not None and book["sequences"] != '-':
+        for seq in book["sequences"]:
+            s_id = seq.get("id")
+            if s_id is not None:
+                links.append(get_seq_link(approot, seqref, id2path(s_id), seq["name"]))
+                if seq_id is not None and seq_id == s_id:
+                    seq_name = seq["name"]
+                    seq_num = seq.get("num")
+                    if seq_num is None:
+                        seq_num = "0"
+    links.append(get_book_link(approot, zipfile, filename, 'dl'))
+    links.append(get_book_link(approot, zipfile, filename, 'read'))
+
+    # book cover
+    for rel in (
+        "http://opds-spec.org/image",
+        "x-stanza-cover-image",
+        "http://opds-spec.org/thumbnail",
+        "x-stanza-cover-image-thumbnail"
+    ):
+        links.append({
+            "@href": approot + URL["cover"] + id2path(book_id) + ".jpg",
+            "@rel": rel,
+            "@type": "image/jpeg"
+        })
+
+    if seq_id is not None and seq_id != '':
+        annotext = """
+        <p class=\"book\"> %s </p>\n<br/>формат: fb2<br/>
+        размер: %s<br/>Серия: %s, номер: %s<br/>
+        """ % (annotation, sizeof_fmt(size), seq_name, seq_num)
+    else:
+        annotext = """
+        <p class=\"book\"> %s </p>\n<br/>формат: fb2<br/>
+        размер: %s<br/>
+        """ % (annotation, sizeof_fmt(size))
+    annotext = annotext + pubinfo
+    ret = {
+        "updated": date_time,
+        "id": "tag:book:" + book_id,
+        "title": book_title,
+        "author": authors,
+        "link": links,
+        "category": category,
+        "dc:language": lang,
+        "dc:format": "fb2",
+        "content": {
+            "@type": "text/html",
+            "#text": annotext
+        }
+    }
+    return ret
 
 
 def opds_header(params):
@@ -289,9 +437,8 @@ def opds_author_page(params):
     auth_id = params["id"]
     index = params["index"]
     subtag = params["subtag"]
-    print(params)
+
     indexfile = pagesdir + "/" + f"{index}/index.json"
-    print(indexfile)
     if not os.path.isfile(indexfile):
         return None
     try:
@@ -301,9 +448,8 @@ def opds_author_page(params):
         logging.error(f"Error on author {sub1}/{sub2}/{id}, exception: {ex}")
         return None
     auth_name = auth_data["name"]
-    print(params)
-    print(auth_data)
     params["title"] = params["title"] + f"'{auth_name}'"
+
     ret = opds_header(params)
     ret["feed"]["entry"] = [
         {
@@ -366,4 +512,88 @@ def opds_author_page(params):
             }
         }
     ]
+    return ret
+
+
+def opds_book_list(params):
+    """return list of books"""
+    ts = get_dtiso()
+    params["ts"] = ts
+    # approot = CONFIG["APPLICATION_ROOT"]
+    pagesdir = CONFIG["PAGES"]
+
+    index = params["index"]
+    title = params["title"]
+    subtitle = params["subtitle"]
+    authref = params["authref"]
+    seqref = params["seqref"]
+
+    layout = params["layout"]
+
+    if layout in ("author_seq", "author_alpha", "author_time", "author_nonseq"):
+        auth_name = ""
+        try:
+            with open(pagesdir + "/" + index + "index.json") as nm:
+                auth_name = json.load(nm)["name"]
+        except Exception as ex:
+            logging.error(f"Can't read author data for {index}/index.json, exception: {ex}")
+        title = title + "'" + auth_name + "'"
+        params["title"] = title
+        booksidx = index + "/all.json"
+    if layout == "author_seq":
+        seq_name = ""
+        try:
+            seq_id = params["seq_id"]
+            with open(pagesdir + "/" + index + "sequences.json") as seqs:
+                seq_data = json.load(seqs)
+            for s in seq_data:
+                if s["id"] == seq_id:
+                    seq_name = s["name"]
+                    break
+        except Exception as ex:
+            logging.error(f"Can't read sequences data for {index}/sequences.json, exception: {ex}")
+            return None
+        params["title"] = title + subtitle + "'" + seq_name + "'"
+    elif layout == "author_nonseq":
+        booksidx = index + "/all.json"
+    else:
+        booksidx = index  # ToDo: fix this
+
+    try:
+        with open(pagesdir + "/" + booksidx) as b:
+            data = json.load(b)
+    except Exception as ex:
+        logging.error(f"Can't read books list from {booksidx}, exception: {ex}")
+        return None
+
+    ret = opds_header(params)
+    if layout == "author_seq":
+        data = sorted(data, key=cmp_to_key(custom_alphabet_book_title_cmp))  # presort unnumbered books
+        data_seq = []
+
+        for book in data:
+            if book["sequences"] is not None and seq_name is not None:
+                for s in book["sequences"]:
+                    seq_num = 0
+                    if s.get("id") == seq_id:
+                        snum = s.get("num")
+                        if snum is not None:
+                            seq_num = int(snum)
+                        book["seq_num"] = seq_num
+                        data_seq.append(book)
+        data = sorted(data_seq, key=lambda s: s["seq_num"] or -1)
+    elif layout == "author_nonseq":
+        data_nonseq = []
+        for book in data:
+            if book["sequences"] is None:
+                data_nonseq.append(book)
+        data = sorted(data_nonseq, key=cmp_to_key(custom_alphabet_book_title_cmp))
+    else:
+        data = sorted(data, key=cmp_to_key(custom_alphabet_book_title_cmp))
+
+    for book in data:
+        if layout == "sequence":
+            ret["feed"]["entry"].append(make_book_entry(book, ts, authref, seqref, seq_id=seq_id))
+        else:
+            ret["feed"]["entry"].append(make_book_entry(book, ts, authref, seqref))
     return ret

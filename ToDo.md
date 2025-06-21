@@ -19,6 +19,7 @@
 ## Small parts
 
   * opds:
+    * user URL and LANG arrays instead hardcoded strings
   * docs:
     * nginx example for covers (`@try_files` and default cover)
     * spec to url tree

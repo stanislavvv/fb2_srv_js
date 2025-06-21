@@ -23,7 +23,7 @@ from .validate import (
     validate_zip,
     validate_fb2
 )
-from .config import CONFIG
+from .config import CONFIG, URL
 
 static = Blueprint("static", __name__)
 
@@ -71,7 +71,7 @@ def html_out(zip_file: str, filename: str):
         return None
 
 
-@static.route("/covers/<sub1>/<sub2>/<book_id>.jpg")
+@static.route(URL["cover"] + "<sub1>/<sub2>/<book_id>.jpg")
 def fb2_cover(sub1=None, sub2=None, book_id=None):
     """return cover image for book"""
     sub1 = validate_id(sub1)
@@ -95,7 +95,7 @@ def fb2_cover(sub1=None, sub2=None, book_id=None):
     return send_file(fullpath, mimetype='image/jpeg', max_age=max_age)
 
 
-@static.route("/fb2/<zip_file>/<filename>")
+@static.route(URL["dl"] + "<zip_file>/<filename>")
 def fb2_download(zip_file=None, filename=None):
     """send fb2.zip on download request"""
     if filename.endswith('.zip'):  # will accept any of .fb2 or .fb2.zip with right filename in .zip
@@ -123,7 +123,7 @@ def fb2_download(zip_file=None, filename=None):
     return Response("Book not found", status=404)
 
 
-@static.route("/read/<zip_file>/<filename>")
+@static.route(URL["read"] + "<zip_file>/<filename>")
 def fb2_read(zip_file=None, filename=None):
     """translate fb2 to html for read request"""
     if filename.endswith('.zip'):  # will accept any of .fb2 or .fb2.zip with right filename in .zip

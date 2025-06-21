@@ -4,8 +4,10 @@
 import gzip
 import base64
 import logging
+import urllib
 
 from sqlalchemy.orm import sessionmaker
+from bs4 import BeautifulSoup
 
 from .config import CONFIG
 from .strings import make_id
@@ -119,6 +121,13 @@ def genres_to_meta_init():
             genre_line = line.strip('\n').split('|')
             if len(genre_line) > 1:
                 genres[genre_line[1]] = {"descr": genre_line[2], "meta_id": genre_line[0]}
+
+
+def get_genre_name(gen_id):
+    """return genre name by id"""
+    if gen_id in genres:
+        return genres[gen_id]["descr"]
+    return gen_id
 
 
 def get_exist_authors(author_ids):
@@ -418,3 +427,38 @@ def decode_b64(data):
                     logging.debug("truncated image pass %d error: %s", i, e)
                     pass
             return base64.b64decode(data[:len(data) - 6])
+
+
+def url_str(string: str):
+    """urlencode string (quote + replace some characters to %NN)"""
+    transl = {
+        '"': '%22',
+        "'": '%27',
+        # '.': '%2E',
+        # '/': '%2F'
+    }
+    ret = ''
+    if string is not None:
+        for char in string:
+            if char in transl:  # pylint: disable=R1715
+                # pylint take here wrong warning
+                char = transl[char]
+            ret = ret + char
+    return urllib.parse.quote(ret, encoding='utf-8')
+
+
+def html_refine(txt: str):
+    """refine html by beautiful soap"""
+    html = BeautifulSoup(txt, 'html.parser')
+    ret = html.prettify()
+    return ret
+
+
+# 123456 -> 123k, 1234567 -> 1.23M
+def sizeof_fmt(num: int, suffix="B"):
+    """format size to human-readable format"""
+    for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
+        if abs(num) < 1024.0:
+            return f"{num:3.1f}{unit}{suffix}"
+        num /= 1024.0
+    return f"{num:.1f}Yi{suffix}"
