@@ -2,7 +2,16 @@
 """opds data structures and functions"""
 
 import datetime
+import os
+import json
+import logging
+import urllib
 
+from functools import cmp_to_key
+
+from .data import custom_alphabet_cmp
+from .validate import safe_path
+from .strings import id2path
 from .config import CONFIG, URL
 
 
@@ -19,13 +28,14 @@ def opds_header(params):
     ts = params["ts"]
     startlink = params["start"]
     selflink = params["self"]
+    tag = params["tag"]
 
     feed = {
         "@xmlns": "http://www.w3.org/2005/Atom",
         "@xmlns:dc": "http://purl.org/dc/terms/",
         "@xmlns:os": "http://a9.com/-/spec/opensearch/1.1/",
         "@xmlns:opds": "http://opds-spec.org/2010/catalog",
-        "id": "tag:root",
+        "id": tag,
         "title": title,
         "updated": ts,
         "icon": approot + CONFIG["APP_ICO"],
@@ -85,6 +95,7 @@ def opds_main(params={}):
     ts = get_dtiso()
 
     params["ts"] = ts
+    params["tag"] = "tag:root"
     params["title"] = CONFIG["TITLE"]
     params["start"] = URL["start"]
     params["self"] = URL["start"]
@@ -183,4 +194,72 @@ def opds_main(params={}):
             }
           }
         ]
+    return ret
+
+
+def opds_simple_list(params):
+    """asimple urls list
+        params["index"] -- for example: 'authorsindex/', 'authorsindex/A', 'authorindex/ABC'
+    """
+    approot = CONFIG["APPLICATION_ROOT"]
+    ts = get_dtiso()
+    params["ts"] = ts
+
+    pagesdir = CONFIG["PAGES"]
+    index_info = params['index']
+    simple_baseref = params['simple_baseref']  # simple lists
+    strong_baseref = params['strong_baseref']  # authors lists or books lists
+    subtag = params["subtag"]  # common part of tags in links
+    subtitle = params["subtitle"]  # for text part of links
+
+    print(params)
+
+    simple_links = False  # links not to simple lists
+    if os.path.isfile(pagesdir + "/" + safe_path(index_info + "/index.json")):
+        indexfile = pagesdir + "/" + safe_path(index_info + "/index.json")
+        simple_links = True
+    elif os.path.isfile(pagesdir + "/" + safe_path(index_info + ".json")):
+        indexfile = pagesdir + "/" + safe_path(index_info + ".json")
+    else:
+        return None
+
+    index = {}
+    try:
+        with open(indexfile) as idx:
+            index = json.load(idx)
+    except Exception as ex:
+        logging.error(f"error in index: {index_info}, exception: {ex}")
+        return None
+
+    data = []
+    if simple_links:
+        data = sorted(index.keys(), key=cmp_to_key(custom_alphabet_cmp))
+    else:
+        for k, v in sorted(index.items(), key=lambda item: item[1]):  # pylint: disable=W0612
+            data.append(k)
+
+    ret = opds_header(params)
+
+    for k in data:
+        if simple_links:
+            title = k
+            baseref = simple_baseref
+        else:
+            title = index[k]
+            baseref = strong_baseref
+        ret["feed"]["entry"].append(
+            {
+                "updated": ts,
+                "id": subtag + urllib.parse.quote(k),
+                "title": title,
+                "content": {
+                    "@type": "text",
+                    "#text": subtitle + "'" + title + "'"
+                },
+                "link": {
+                    "@href": approot + baseref + urllib.parse.quote(id2path(k)),
+                    "@type": "application/atom+xml;profile=opds-catalog"
+                }
+            }
+        )
     return ret

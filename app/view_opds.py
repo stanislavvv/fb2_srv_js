@@ -6,14 +6,22 @@ import logging
 
 from flask import Blueprint, Response
 
-from .opds_struct import opds_main
+from .opds_struct import (
+    opds_main,
+    opds_simple_list
+)
 from .config import CONFIG, URL
+from .validate import (
+    validate_prefix
+)
 
 opds = Blueprint("opds", __name__)
 
 
 def create_opds_response(data, cache_time=CONFIG["CACHE_TIME"]):
     """data to xml to flask response"""
+    if data is None:
+        return Response("Page not found", status=404)
     try:
         xml = xmltodict.unparse(data, pretty=True)
         resp = Response(xml, mimetype='text/xml')
@@ -30,3 +38,57 @@ def create_opds_response(data, cache_time=CONFIG["CACHE_TIME"]):
 def opds_root():
     """root"""
     return create_opds_response(opds_main())
+
+
+@opds.route(URL["authidx"], methods=['GET'])
+def opds_auth_root():
+    params = {
+        "index": URL["authidx"].replace("/opds/", "", 1),
+        "tag": "tag:root:authors",
+        "subtag": "tag:authors:",
+        "title": "По авторам",
+        "subtitle": "Авторы на ",
+        "simple_baseref": URL["authidx"],
+        "strong_baseref": URL["author"],
+        "self": URL["authidx"],
+        "start": URL["start"],
+        "up": URL["start"]
+    }
+    return create_opds_response(opds_simple_list(params))
+
+
+@opds.route(URL["authidx"] + "<sub>", methods=['GET'])
+def opds_auth_sub(sub):
+    sub = validate_prefix(sub)
+    params = {
+        "index": URL["authidx"].replace("/opds/", "", 1) + sub,
+        "tag": "tag:authors:" + sub,
+        "subtag": "tag:authors:",
+        "title": f"По авторам на {sub}",
+        "subtitle": "Авторы на ",
+        "simple_baseref": URL["authidx"] + sub + "/",
+        "strong_baseref": URL["author"],
+        "self": URL["authidx"] + sub,
+        "start": URL["start"],
+        "up": URL["authidx"]
+    }
+    return create_opds_response(opds_simple_list(params))
+
+
+@opds.route(URL["authidx"] + "<sub1>/<sub2>", methods=['GET'])
+def opds_auth_sub2(sub1, sub2):
+    sub1 = validate_prefix(sub1)
+    sub2 = validate_prefix(sub2)
+    params = {
+        "index": URL["authidx"].replace("/opds/", "", 1) + f"{sub1}/{sub2}",
+        "tag": "tag:authors:" + sub2,
+        "subtag": "tag:author:",
+        "title": f"Авторы на {sub2}",
+        "subtitle": "",
+        "simple_baseref": URL["authidx"] + sub1 + "/" + sub2,
+        "strong_baseref": URL["author"],
+        "self": URL["authidx"] + sub1 + "/" + sub2,
+        "start": URL["start"],
+        "up": URL["authidx"] + sub1
+    }
+    return create_opds_response(opds_simple_list(params))

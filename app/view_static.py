@@ -18,6 +18,7 @@ from flask import (
 )
 
 from .validate import (
+    safe_path,
     validate_id,
     validate_zip,
     validate_fb2
@@ -25,13 +26,6 @@ from .validate import (
 from .config import CONFIG
 
 static = Blueprint("static", __name__)
-
-
-def safe_path(fspath):
-    """create safe relative path from input"""
-    if fspath is None:
-        return None
-    return os.path.relpath(os.path.normpath(os.path.join("/", fspath)), "/")
 
 
 def redir_invalid(redir_name):
