@@ -147,5 +147,4 @@ def fb2_read(zip_file=None, filename=None):
         resp = Response(data, mimetype='text/html')
         resp.headers['Cache-Control'] = cachectl
         return resp
-    else:
-        return Response("Book not found", status=404)
+    return Response("Book not found", status=404)
