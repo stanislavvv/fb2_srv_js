@@ -39,7 +39,7 @@ CONFIG = {  # default values
     "MAX_PASS_LENGTH": "4000",  # default for orange pi
     "MAX_PASS_LENGTH_GEN": "5",  # default for orange pi
     "PASS_SIZE_HINT": "1048576",  # default for orange pi
-    "DEFAULT_COVER": "/covers/default-cover.jpg",
+    "DEFAULT_COVER": "/covers/default.jpg",
     "CACHE_TIME_ST": "2592000",  # 60 * 60 * 24 * 30 == 30 days
 }
 
