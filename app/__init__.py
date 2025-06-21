@@ -21,7 +21,7 @@ def create_app():
     app.register_blueprint(static, url_prefix=app.config['APPLICATION_ROOT'])
 
     @app.route('/')
-    def hello_world():
+    def root():
         return 'Hello, World!'
 
     return app

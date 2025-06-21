@@ -41,6 +41,8 @@ CONFIG = {  # default values
     "PASS_SIZE_HINT": "1048576",  # default for orange pi
     "DEFAULT_COVER": "/covers/default.jpg",
     "CACHE_TIME_ST": "2592000",  # 60 * 60 * 24 * 30 == 30 days
+    # internal configs
+    "REDIR_FROM_ERR": '/',
 }
 
 
