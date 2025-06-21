@@ -17,6 +17,11 @@ from flask import (
     redirect
 )
 
+from .validate import (
+    validate_id,
+    validate_zip,
+    validate_fb2
+)
 from .config import CONFIG
 
 static = Blueprint("static", __name__)
@@ -75,10 +80,9 @@ def html_out(zip_file: str, filename: str):
 @static.route("/covers/<sub1>/<sub2>/<book_id>.jpg")
 def fb2_cover(sub1=None, sub2=None, book_id=None):
     """return cover image for book"""
-    # ToDo: validate input
-    # sub1 = validate_prefix(sub1)
-    # sub2 = validate_prefix(sub2)
-    # book_id = validate_id(book_id)
+    sub1 = validate_id(sub1)
+    sub2 = validate_id(sub2)
+    book_id = validate_id(book_id)
 
     max_age = int(CONFIG['CACHE_TIME_ST'])  # cache control
 
@@ -104,11 +108,10 @@ def fb2_download(zip_file=None, filename=None):
         filename = filename[:-4]
     if not zip_file.endswith('.zip'):
         zip_file = zip_file + '.zip'
-    # ToDo: validate input
-    # zip_file = validate_zip(zip_file)
-    # filename = validate_fb2(filename)
-    # if zip_file is None or filename is None:
-    #     return redir_invalid(REDIR_ALL)
+    zip_file = validate_zip(zip_file)
+    filename = validate_fb2(filename)
+    if zip_file is None or filename is None:
+        return redir_invalid(CONFIG['REDIR_FROM_ERR'])
     fb2data = fb2_out(zip_file, filename)
     if fb2data is not None:  # pylint: disable=R1705
         memory_file = io.BytesIO()
@@ -133,17 +136,14 @@ def fb2_read(zip_file=None, filename=None):
         filename = filename[:-4]
     if not zip_file.endswith('.zip'):
         zip_file = zip_file + '.zip'
-    # ToDo: validation
-    # zip_file = validate_zip(zip_file)
-    # filename = validate_fb2(filename)
-    # if zip_file is None or filename is None:
-    #     return redir_invalid(REDIR_ALL)
+    zip_file = validate_zip(zip_file)
+    filename = validate_fb2(filename)
+    if zip_file is None or filename is None:
+        return redir_invalid(CONFIG['REDIR_FROM_ERR'])
     data = html_out(zip_file, filename)
     cachectl = "maxage=%d, must-revalidate" % int(CONFIG['CACHE_TIME_ST'])
 
     if data is not None:  # pylint: disable=R1705
-        # head = Headers()
-        # head.add('Cache-Control', cachectl)
         resp = Response(data, mimetype='text/html')
         resp.headers['Cache-Control'] = cachectl
         return resp

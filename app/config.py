@@ -45,7 +45,7 @@ CONFIG = {  # default values
     "CACHE_TIME_ST": "2592000",  # 60 * 60 * 24 * 30 == 30 days
     "FB2_XSLT": "fb2_to_html.xsl",
     # internal configs
-    "REDIR_FROM_ERR": '/',
+    "REDIR_FROM_ERR": 'root',
 }
 
 
