@@ -30,22 +30,50 @@ VARS = {
     "mas_genre_pass_length": "MAX_PASS_LENGTH_GEN",  # memory limit param, default see below
     "books_pass_size_hint": "PASS_SIZE_HINT",  # memory limit param, default see below
     "default_cover_image": "DEFAULT_COVER",  # path to default cover
+    "default_cache_seconds": "CACHE_TIME",  # default cache time
     "static_file_cache_seconds": "CACHE_TIME_ST",  # static file cache time, seconds
     "xslt_file": "FB2_XSLT",  # xslt file for fb2 to html conversion
+    "app_ico": "APP_ICO",  # application .ico
 }
 
 CONFIG = {  # default values
     "LISTEN_HOST": "0.0.0.0",
     "LISTEN_PORT": "8000",
+    "APPLICATION_ROOT": "",
     "AUTHOR_PLACEHOLDER": "Автор Неизвестен",
     "MAX_PASS_LENGTH": "4000",  # default for orange pi
     "MAX_PASS_LENGTH_GEN": "5",  # default for orange pi
     "PASS_SIZE_HINT": "1048576",  # default for orange pi
     "DEFAULT_COVER": "/covers/default.jpg",
+    "CACHE_TIME": "604800",  # 60 * 60 * 24 * 7 == 7 days
     "CACHE_TIME_ST": "2592000",  # 60 * 60 * 24 * 30 == 30 days
     "FB2_XSLT": "fb2_to_html.xsl",
     # internal configs
     "REDIR_FROM_ERR": 'root',
+    "APP_ICO": "/favicon.ico",
+}
+
+# internal configuration
+URL = {
+    "start": "/opds/",
+    "author": "/opds/author/",
+    "authidx": "/opds/authorsindex/",
+    "seq": "/opds/sequence/",
+    "seqidx": "/opds/sequencesindex/",
+    "genre": "/opds/genre/",
+    "genidx": "/opds/genresindex/",
+    "search": "/opds/search",  # main search page, no last '/' in search
+    "srchauth": "/opds/search/authors",
+    "srchseq": "/opds/search/sequences",
+    "srchbook": "/opds/search/books",
+    "srchbookanno": "/opds/search//booksanno",
+    "rndbook": "/opds/random-books/",
+    "rndseq": "/opds/random-sequences/",
+    "rndgen": "/opds/rnd/genre/",
+    "rndgenidx": "/opds/rnd/genresindex/",
+    "time": "/opds/time",  # all books by time (from new to old)
+    "read": "/read/",  # read book
+    "dl": "/fb2/"  # download book
 }
 
 

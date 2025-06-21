@@ -5,6 +5,7 @@ from flask import Flask
 from .config import read_config, init_xslt, CONFIG
 
 from .view_static import static
+from .view_opds import opds
 
 CONFIG_FILE = "./config.ini"
 
@@ -21,6 +22,7 @@ def create_app():
     init_xslt(CONFIG['FB2_XSLT'])
 
     app.register_blueprint(static, url_prefix=app.config['APPLICATION_ROOT'])
+    app.register_blueprint(opds, url_prefix=app.config['APPLICATION_ROOT'])
 
     @app.route('/')
     def root():
