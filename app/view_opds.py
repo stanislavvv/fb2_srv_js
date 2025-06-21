@@ -8,11 +8,13 @@ from flask import Blueprint, Response
 
 from .opds_struct import (
     opds_main,
-    opds_simple_list
+    opds_simple_list,
+    opds_author_page
 )
 from .config import CONFIG, URL
 from .validate import (
-    validate_prefix
+    validate_prefix,
+    validate_id
 )
 
 opds = Blueprint("opds", __name__)
@@ -87,6 +89,53 @@ def opds_auth_sub2(sub1, sub2):
         "subtitle": "",
         "simple_baseref": URL["authidx"] + sub1 + "/" + sub2,
         "strong_baseref": URL["author"],
+        "self": URL["authidx"] + sub1 + "/" + sub2,
+        "start": URL["start"],
+        "up": URL["authidx"] + sub1
+    }
+    return create_opds_response(opds_simple_list(params))
+
+
+@opds.route(URL["author"] + "<sub1>/<sub2>/<id>", methods=['GET'])
+def opds_author_main(sub1, sub2, id):
+    sub1 = validate_id(sub1)
+    sub2 = validate_id(sub2)
+    id = validate_id(id)
+    params = {
+        "index": URL["author"].replace("/opds/", "", 1) + f"{sub1}/{sub2}/{id}",
+        "id": id,
+        "sub1": sub1,
+        "sub2": sub2,
+        "tag": "tag:author:" + id,
+        "subtag": "tag:author:" + id,
+        "title": "Автор ",
+        "subtitle": "",
+        "simple_baseref": URL["authidx"] + sub1 + "/" + sub2,
+        "strong_baseref": URL["author"],
+        "self": URL["authidx"] + sub1 + "/" + sub2,
+        "start": URL["start"],
+        "up": URL["authidx"] + sub1
+    }
+    return create_opds_response(opds_author_page(params))
+
+
+@opds.route(URL["author"] + "<sub1>/<sub2>/<id>/sequences", methods=['GET'])
+def opds_author_seqs(sub1, sub2, id):
+    sub1 = validate_id(sub1)
+    sub2 = validate_id(sub2)
+    id = validate_id(id)
+    params = {
+        "index": URL["author"].replace("/opds/", "", 1) + f"{sub1}/{sub2}/{id}/sequences",
+        "id": id,
+        "sub1": sub1,
+        "sub2": sub2,
+        "tag": "tag:author:" + id,
+        "subtag": "tag:author:" + id,
+        "title": "Автор ",
+        "subtitle": "",
+        "layout": "name_id_list",
+        "simple_baseref": URL["authidx"] + sub1 + "/" + sub2,
+        "strong_baseref": URL["author"] + f"{sub1}/{sub2}/{id}",
         "self": URL["authidx"] + sub1 + "/" + sub2,
         "start": URL["start"],
         "up": URL["authidx"] + sub1

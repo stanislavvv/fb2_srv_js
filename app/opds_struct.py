@@ -202,17 +202,15 @@ def opds_simple_list(params):
         params["index"] -- for example: 'authorsindex/', 'authorsindex/A', 'authorindex/ABC'
     """
     approot = CONFIG["APPLICATION_ROOT"]
+    pagesdir = CONFIG["PAGES"]
     ts = get_dtiso()
     params["ts"] = ts
 
-    pagesdir = CONFIG["PAGES"]
     index_info = params['index']
     simple_baseref = params['simple_baseref']  # simple lists
     strong_baseref = params['strong_baseref']  # authors lists or books lists
     subtag = params["subtag"]  # common part of tags in links
     subtitle = params["subtitle"]  # for text part of links
-
-    print(params)
 
     simple_links = False  # links not to simple lists
     if os.path.isfile(pagesdir + "/" + safe_path(index_info + "/index.json")):
@@ -234,7 +232,15 @@ def opds_simple_list(params):
     data = []
     if simple_links:
         data = sorted(index.keys(), key=cmp_to_key(custom_alphabet_cmp))
-    else:
+    elif "layout" in params and params["layout"] == "name_id_list":  # array of {name: ..., id, ...}
+        idx_data = {}
+        for i in index:
+            name = i["name"]
+            i_id = i["id"]
+            idx_data[i_id] = name
+        for k, v in sorted(idx_data.items(), key=lambda item: item[1]):  # pylint: disable=W0612
+            data.append(k)
+    else:  # id: name dict
         for k, v in sorted(index.items(), key=lambda item: item[1]):  # pylint: disable=W0612
             data.append(k)
 
@@ -244,9 +250,15 @@ def opds_simple_list(params):
         if simple_links:
             title = k
             baseref = simple_baseref
+            href = approot + baseref + urllib.parse.quote(id2path(k))
+        elif "layout" in params and params["layout"] == "name_id_list":
+            title = idx_data[k]
+            baseref = strong_baseref
+            href = approot + baseref + "/" + urllib.parse.quote(k)
         else:
             title = index[k]
             baseref = strong_baseref
+            href = approot + baseref + urllib.parse.quote(id2path(k))
         ret["feed"]["entry"].append(
             {
                 "updated": ts,
@@ -257,9 +269,101 @@ def opds_simple_list(params):
                     "#text": subtitle + "'" + title + "'"
                 },
                 "link": {
-                    "@href": approot + baseref + urllib.parse.quote(id2path(k)),
+                    "@href": href,
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
             }
         )
+    return ret
+
+
+def opds_author_page(params):
+    """main page of author"""
+    ts = get_dtiso()
+    params["ts"] = ts
+    approot = CONFIG["APPLICATION_ROOT"]
+    pagesdir = CONFIG["PAGES"]
+
+    sub1 = params["sub1"]
+    sub2 = params["sub2"]
+    auth_id = params["id"]
+    index = params["index"]
+    subtag = params["subtag"]
+    print(params)
+    indexfile = pagesdir + "/" + f"{index}/index.json"
+    print(indexfile)
+    if not os.path.isfile(indexfile):
+        return None
+    try:
+        with open(indexfile) as idx:
+            auth_data = json.load(idx)
+    except Exception as ex:
+        logging.error(f"Error on author {sub1}/{sub2}/{id}, exception: {ex}")
+        return None
+    auth_name = auth_data["name"]
+    print(params)
+    print(auth_data)
+    params["title"] = params["title"] + f"'{auth_name}'"
+    ret = opds_header(params)
+    ret["feed"]["entry"] = [
+        {
+            "updated": ts,
+            "id": "tag:author:bio:" + auth_id,
+            "title": "Об авторе",
+            "link": [
+                {
+                    "@href": approot + URL["author"] + id2path(auth_id) + "/sequences",
+                    "@rel": "http://www.feedbooks.com/opds/facet",
+                    "@title": "Books of author by sequences",
+                    "@type": "application/atom+xml;profile=opds-catalog"
+                },
+                {
+                    "@href": approot + URL["author"] + id2path(auth_id) + "/sequenceless",
+                    "@rel": "http://www.feedbooks.com/opds/facet",
+                    "@title": "Sequenceless books of author",
+                    "@type": "application/atom+xml;profile=opds-catalog"
+                }
+            ],
+            "content": {
+                "@type": "text/html",
+                "#text": "<p><span style=\"font-weight:bold\">" + auth_name + "</span></p>"
+            }
+        },
+        {
+            "updated": ts,
+            "id": subtag + ":sequences",
+            "title": "По сериям",
+            "link": {
+                "@href": approot + URL["author"] + id2path(auth_id) + "/sequences",
+                "@type": "application/atom+xml;profile=opds-catalog"
+            }
+        },
+        {
+            "updated": ts,
+            "id": subtag + ":sequenceless",
+            "title": "Вне серий",
+            "link": {
+                "@href": approot + URL["author"] + id2path(auth_id) + "/sequenceless",
+                "@type": "application/atom+xml;profile=opds-catalog"
+            }
+        },
+        {
+            "updated": ts,
+            "id": subtag + ":alphabet",
+            "title": "По алфавиту",
+            "link": {
+                "@href": approot + URL["author"] + id2path(auth_id) + "/alphabet",
+                "@type": "application/atom+xml;profile=opds-catalog"
+            }
+        },
+        {
+            "updated": ts,
+            "id": subtag + ":time",
+            "title": "По дате добавления",
+            "link": {
+                "@href": approot + URL["author"] + id2path(auth_id) + "/time",
+                "@type": "application/atom+xml;profile=opds-catalog"
+            }
+        }
+    ]
     return ret
