@@ -4,7 +4,7 @@
 import logging
 import glob
 import json
-import base64
+# import base64
 import shutil
 
 from functools import cmp_to_key

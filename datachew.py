@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     read_config(args.config)
 
-    if CONFIG['DEBUG'] == 'yes' or CONFIG['DEBUG'] == True:
+    if CONFIG['DEBUG'] == 'yes' or CONFIG['DEBUG'] is True:
         DBLOGLEVEL = logging.DEBUG  # DEBUG, INFO, WARN, ERR
     else:
         DBLOGLEVEL = logging.INFO  # INFO, WARN, ERR

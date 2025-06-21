@@ -4,6 +4,8 @@
 from flask import Flask
 from .config import read_config, CONFIG
 
+from .view_static import static
+
 CONFIG_FILE = "./config.ini"
 
 
@@ -15,6 +17,8 @@ def create_app():
     # Configure flask with values from CONFIG
     for key, value in CONFIG.items():
         app.config[key] = value
+
+    app.register_blueprint(static, url_prefix=app.config['APPLICATION_ROOT'])
 
     @app.route('/')
     def hello_world():

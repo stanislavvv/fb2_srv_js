@@ -3,6 +3,7 @@
 
 import gzip
 import base64
+import logging
 
 from sqlalchemy.orm import sessionmaker
 
@@ -398,6 +399,7 @@ def decode_b64(data):
     try:
         return base64.b64decode(data)
     except Exception as e:
+        logging.debug("bare image error: %s", e)
         # can't decode as is - pad and try again
         padding_len = len(data) % 4
         if padding_len != 0:
@@ -407,10 +409,12 @@ def decode_b64(data):
         try:
             return base64.b64decode(data_padded)
         except Exception as e:
+            logging.debug("padded image error: %s", e)
             # can't decode even padded - try take partial decode
-            for i in range(1,5):
+            for i in range(1, 5):
                 try:
                     return base64.b64decode(data[:len(data) - i])
-                except:
+                except Exception as e:
+                    logging.debug("truncated image pass %d error: %s", i, e)
                     pass
             return base64.b64decode(data[:len(data) - 6])
