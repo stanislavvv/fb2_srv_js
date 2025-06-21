@@ -5,7 +5,9 @@ import os
 import io
 import time
 import zipfile
+import lxml.etree as et
 
+from bs4 import BeautifulSoup
 from flask import (
     Blueprint,
     Response,
@@ -51,6 +53,25 @@ def fb2_out(zip_file: str, filename: str):
         return None
 
 
+def html_out(zip_file: str, filename: str):
+    """create html from fb2 for reading"""
+    transform = CONFIG['TRANSFORM']
+    zipdir = CONFIG['ZIPS']
+    zippath = zipdir + "/" + zip_file
+    try:
+        with zipfile.ZipFile(zippath) as z_file:
+            with z_file.open(filename) as fb2:
+                data = io.BytesIO(fb2.read())
+                b_soap = BeautifulSoup(data, 'xml')
+                doc = b_soap.prettify()
+                dom = et.fromstring(bytes(doc, encoding='utf8'))
+                html = transform(dom)
+                return str(html)
+    except Exception as ex:  # pylint: disable=W0703
+        print(ex)
+        return None
+
+
 @static.route("/covers/<sub1>/<sub2>/<book_id>.jpg")
 def fb2_cover(sub1=None, sub2=None, book_id=None):
     """return cover image for book"""
@@ -86,6 +107,8 @@ def fb2_download(zip_file=None, filename=None):
     # ToDo: validate input
     # zip_file = validate_zip(zip_file)
     # filename = validate_fb2(filename)
+    # if zip_file is None or filename is None:
+    #     return redir_invalid(REDIR_ALL)
     fb2data = fb2_out(zip_file, filename)
     if fb2data is not None:  # pylint: disable=R1705
         memory_file = io.BytesIO()
@@ -101,3 +124,28 @@ def fb2_download(zip_file=None, filename=None):
         max_age = int(CONFIG['CACHE_TIME_ST'])  # cache control
         return send_file(memory_file, download_name=zip_name, as_attachment=True, max_age=max_age)
     return Response("Book not found", status=404)
+
+
+@static.route("/read/<zip_file>/<filename>")
+def fb2_read(zip_file=None, filename=None):
+    """translate fb2 to html for read request"""
+    if filename.endswith('.zip'):  # will accept any of .fb2 or .fb2.zip with right filename in .zip
+        filename = filename[:-4]
+    if not zip_file.endswith('.zip'):
+        zip_file = zip_file + '.zip'
+    # ToDo: validation
+    # zip_file = validate_zip(zip_file)
+    # filename = validate_fb2(filename)
+    # if zip_file is None or filename is None:
+    #     return redir_invalid(REDIR_ALL)
+    data = html_out(zip_file, filename)
+    cachectl = "maxage=%d, must-revalidate" % int(CONFIG['CACHE_TIME_ST'])
+
+    if data is not None:  # pylint: disable=R1705
+        # head = Headers()
+        # head.add('Cache-Control', cachectl)
+        resp = Response(data, mimetype='text/html')
+        resp.headers['Cache-Control'] = cachectl
+        return resp
+    else:
+        return Response("Book not found", status=404)

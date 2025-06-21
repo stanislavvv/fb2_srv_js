@@ -6,6 +6,7 @@
 import os
 import sys
 import configparser
+import lxml.etree as et
 
 # translate var names from config to internal/flask
 VARS = {
@@ -29,7 +30,8 @@ VARS = {
     "mas_genre_pass_length": "MAX_PASS_LENGTH_GEN",  # memory limit param, default see below
     "books_pass_size_hint": "PASS_SIZE_HINT",  # memory limit param, default see below
     "default_cover_image": "DEFAULT_COVER",  # path to default cover
-    "static_file_cache_seconds": "CACHE_TIME_ST"  # static file cache time, seconds
+    "static_file_cache_seconds": "CACHE_TIME_ST",  # static file cache time, seconds
+    "xslt_file": "FB2_XSLT",  # xslt file for fb2 to html conversion
 }
 
 CONFIG = {  # default values
@@ -41,6 +43,7 @@ CONFIG = {  # default values
     "PASS_SIZE_HINT": "1048576",  # default for orange pi
     "DEFAULT_COVER": "/covers/default.jpg",
     "CACHE_TIME_ST": "2592000",  # 60 * 60 * 24 * 30 == 30 days
+    "FB2_XSLT": "fb2_to_html.xsl",
     # internal configs
     "REDIR_FROM_ERR": '/',
 }
@@ -65,3 +68,10 @@ def read_config(conf: str):
     except Exception as ex:
         sys.stderr.write("Exception by: ", str(ex))
         sys.exit(1)
+
+
+def init_xslt(xsltfile):
+    """init xslt data from file"""
+    xslt = et.parse(xsltfile)
+    transform = et.XSLT(xslt)
+    CONFIG['TRANSFORM'] = transform
