@@ -7,6 +7,7 @@ import re
 id_check = re.compile('([0-9a-f]+)')
 zip_check = re.compile('([0-9a-zA-Z_.-]+.zip)')
 fb2_check = re.compile('([ 0-9a-zA-ZА-Яа-я_,.:!-]+.fb2)')  # may be incomplete
+genre_check = re.compile('([0-9a-z_]+)')
 
 
 def safe_path(fspath):
@@ -46,5 +47,13 @@ def validate_fb2(string: str):
     """fb2 filename validation"""
     ret = string
     if fb2_check.match(string):
+        return ret
+    return None
+
+
+def validate_genre(string: str):
+    """genre id validation"""
+    ret = string
+    if genre_check.match(string):
         return ret
     return None

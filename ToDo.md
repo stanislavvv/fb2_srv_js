@@ -18,6 +18,8 @@
 
 ## Small parts
 
+  * indexing:
+    * use URL in data path (with removing `^/opds`)
   * opds:
     * user URL and LANG arrays instead hardcoded strings -- DONE (may be)
     * authors non-sequences books page must use prepared data

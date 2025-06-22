@@ -372,37 +372,38 @@ def opds_simple_list(params):
         return None
 
     data = []
-    if simple_links:
+    if "layout" in params:
+        if params["layout"] == "name_id_list":  # array of {name: ..., id, ...}
+            idx_data = {}
+            for i in index:
+                name = i["name"]
+                i_id = i["id"]
+                idx_data[i_id] = name
+            for k, v in sorted(idx_data.items(), key=lambda item: item[1]):  # pylint: disable=W0612
+                data.append(k)
+        if params["layout"] == "key_value":
+            idx_data = {}
+            for k, v in sorted(index.items(), key=lambda item: item[1]):  # pylint: disable=W0612
+                idx_data[k] = v
+                data.append(k)
+    elif simple_links:  # id: name dict
         data = sorted(index.keys(), key=cmp_to_key(custom_alphabet_cmp))
-    elif "layout" in params and params["layout"] == "name_id_list":  # array of {name: ..., id, ...}
-        idx_data = {}
-        for i in index:
-            name = i["name"]
-            i_id = i["id"]
-            idx_data[i_id] = name
-        for k, v in sorted(idx_data.items(), key=lambda item: item[1]):  # pylint: disable=W0612
-            data.append(k)
-    else:  # id: name dict
+    else:  # key_value by default in not simple_links
         for k, v in sorted(index.items(), key=lambda item: item[1]):  # pylint: disable=W0612
             data.append(k)
 
     ret = opds_header(params)
 
     for k in data:
-        if simple_links:
-            title = k
-            baseref = simple_baseref
-            # href = approot + baseref + urllib.parse.quote(id2path(k))
-            href = approot + baseref + urllib.parse.quote(k)
-        elif "layout" in params:
-            if params["layout"] == "name_id_list":
+        if "layout" in params:
+            if params["layout"] in ("name_id_list", "key_value"):
                 title = idx_data[k]
                 baseref = strong_baseref
-                href = approot + baseref + "/" + urllib.parse.quote(k)
-            # else:
-            #     title = k
-            #     baseref = simple_baseref
-            #     href = approot + baseref + "/" + urllib.parse.quote(k)
+                href = approot + baseref + urllib.parse.quote(k)
+        elif simple_links:
+            title = k
+            baseref = simple_baseref
+            href = approot + baseref + urllib.parse.quote(k)
         else:
             title = index[k]
             baseref = strong_baseref

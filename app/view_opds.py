@@ -14,9 +14,11 @@ from .opds_struct import (
 )
 from .config import CONFIG, URL, LANG
 from .strings import id2path
+from .data import get_meta_name, get_genre_name
 from .validate import (
     validate_prefix,
-    validate_id
+    validate_id,
+    validate_genre
 )
 
 opds = Blueprint("opds", __name__)
@@ -324,5 +326,67 @@ def opds_sequence(sub1, sub2, id):
         "self": URL["seq"] + id2path(id),
         "start": URL["start"],
         "up": URL["seqidx"]
+    }
+    return create_opds_response(opds_book_list(params))
+
+
+@opds.route(URL["genidx"], methods=['GET'])
+def opds_genres_root():
+    params = {
+        "index": URL["genidx"].replace("/opds/", "", 1),
+        "tag": "tag:root:genres",
+        "subtag": "tag:genres:",
+        "title": LANG["genres_meta"],
+        "subtitle": "",
+        "layout": "key_value",
+        "simple_baseref": URL["genidx"],
+        "strong_baseref": URL["genre"],
+        "self": URL["genidx"],
+        "start": URL["start"],
+        "up": URL["start"]
+    }
+    return create_opds_response(opds_simple_list(params))
+
+
+@opds.route(URL["genidx"] + "<meta_id>", methods=['GET'])
+def opds_genres_list(meta_id):
+    meta_id = validate_id(meta_id)
+    meta_name = get_meta_name(meta_id)
+    params = {
+        "index": URL["genidx"].replace("/opds/", "", 1) + meta_id,
+        "tag": "tag:root:genres",
+        "subtag": "tag:genres:",
+        "title": LANG["genres_root_subtitle"] + meta_name,
+        "subtitle": "",
+        "layout": "key_value",
+        "simple_baseref": URL["genidx"],
+        "strong_baseref": URL["genre"],
+        "self": URL["genidx"],
+        "start": URL["start"],
+        "up": URL["start"]
+    }
+    return create_opds_response(opds_simple_list(params))
+
+
+@opds.route(URL["genre"] + "<gen_id>", methods=['GET'])
+@opds.route(URL["genre"] + "<gen_id>/<int:page>", methods=['GET'])
+def opds_genre_books(gen_id, page=0):
+    id = validate_genre(gen_id)
+    gen_name = get_genre_name(id)
+    params = {
+        "index": URL["genre"].replace("/opds/", "", 1) + id,
+        "id": gen_id,
+        "tag": "tag:seq:" + id,
+        "subtag": "tag:sequence:" + id,
+        "title": LANG["seq_tpl"],
+        "layout": "paginaged",
+        "page": page,
+        "simple_baseref": URL["genidx"],
+        "strong_baseref": URL["genre"],
+        "authref": URL["author"],
+        "seqref": URL["seq"],
+        "self": URL["genre"] + id,
+        "start": URL["start"],
+        "up": URL["genidx"]
     }
     return create_opds_response(opds_book_list(params))

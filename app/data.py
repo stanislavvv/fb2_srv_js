@@ -33,6 +33,7 @@ alphabet_2 = [  # second letters in main authors/sequences page
 ]
 
 genres = {}
+genres_meta = {}
 
 
 def cmp_in_arr(arr, char1, char2):
@@ -128,6 +129,25 @@ def get_genre_name(gen_id):
     if gen_id in genres:
         return genres[gen_id]["descr"]
     return gen_id
+
+
+def meta_init():
+    """load genres meta info from file"""
+    with open('genres_meta.list') as lst:
+        while True:
+            line = lst.readline()
+            if not line:
+                break
+            genre_line = line.strip('\n').split('|')
+            if len(genre_line) > 1:
+                genres_meta[genre_line[0]] = genre_line[1]
+
+
+def get_meta_name(meta_id):
+    """return genres meta name by id"""
+    if meta_id in genres_meta:
+        return genres_meta[meta_id]
+    return meta_id
 
 
 def get_exist_authors(author_ids):
