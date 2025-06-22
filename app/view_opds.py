@@ -70,6 +70,7 @@ def opds_auth_sub(sub):
         "subtag": "tag:authors:",
         "title": LANG["auth_root_subtitle"] + sub,
         "subtitle": LANG["auth_root_subtitle"],
+        "layout": "subs",
         "simple_baseref": URL["authidx"] + sub + "/",
         "strong_baseref": URL["author"],
         "self": URL["authidx"] + sub,
@@ -111,12 +112,12 @@ def opds_author_main(sub1, sub2, id):
         "tag": "tag:author:" + id,
         "subtag": "tag:author:" + id,
         "title": LANG["author_tpl"],
-        "subtitle": "",
+        # "subtitle": "",
         "simple_baseref": URL["authidx"] + sub1 + "/" + sub2,
         "strong_baseref": URL["author"],
-        "self": URL["authidx"] + sub1 + "/" + sub2,
+        "self": URL["author"] + id2path(id),
         "start": URL["start"],
-        "up": URL["authidx"] + sub1
+        "up": URL["authidx"]
     }
     return create_opds_response(opds_author_page(params))
 
@@ -138,9 +139,9 @@ def opds_author_seqs(sub1, sub2, id):
         "layout": "name_id_list",
         "simple_baseref": URL["authidx"] + sub1 + "/" + sub2,
         "strong_baseref": URL["author"] + f"{sub1}/{sub2}/{id}",
-        "self": URL["authidx"] + sub1 + "/" + sub2,
+        "self": URL["author"] + id2path(id) + "/sequences",
         "start": URL["start"],
-        "up": URL["authidx"] + sub1
+        "up": URL["author"] + id2path(id)
     }
     return create_opds_response(opds_simple_list(params))
 
@@ -160,14 +161,14 @@ def opds_author_seq(sub1, sub2, id, seq_id):
         "subtag": "tag:author:" + id,
         "seq_id": seq_id,
         "title": LANG["books_author_seq"],
-        "subtitle": "",
+        # "subtitle": "",
         "layout": "author_seq",
         "baseref": URL["author"],
         "authref": URL["author"],
         "seqref": URL["seq"],
         "self": URL["author"] + id2path(id) + "/" + seq_id,
         "start": URL["start"],
-        "up": URL["author"] + id2path(id)
+        "up": URL["author"] + id2path(id) + "/sequences"
     }
     return create_opds_response(opds_book_list(params))
 
@@ -185,13 +186,63 @@ def opds_author_nonseq(sub1, sub2, id):
         "tag": "tag:author:" + id,
         "subtag": "tag:author:" + id,
         "title": LANG["books_author_nonseq"],
-        "subtitle": "",
+        # "subtitle": "",
         "layout": "author_nonseq",
         "baseref": URL["author"],
         "authref": URL["author"],
         "seqref": URL["seq"],
-        "self": URL["author"] + id2path(id),
+        "self": URL["author"] + id2path(id) + "/sequenceless",
         "start": URL["start"],
-        "up": URL["authidx"]
+        "up": URL["author"] + id2path(id)
+    }
+    return create_opds_response(opds_book_list(params))
+
+
+@opds.route(URL["author"] + "<sub1>/<sub2>/<id>/alphabet", methods=['GET'])
+def opds_author_alphabet(sub1, sub2, id):
+    sub1 = validate_id(sub1)
+    sub2 = validate_id(sub2)
+    id = validate_id(id)
+    params = {
+        "index": URL["author"].replace("/opds/", "", 1) + f"{sub1}/{sub2}/{id}/",
+        "id": id,
+        "sub1": sub1,
+        "sub2": sub2,
+        "tag": "tag:author:" + id,
+        "subtag": "tag:author:" + id,
+        "title": LANG["books_author_alphabet"],
+        # "subtitle": "",
+        "layout": "author_alpha",
+        "baseref": URL["author"],
+        "authref": URL["author"],
+        "seqref": URL["seq"],
+        "self": URL["author"] + id2path(id) + "/alphabet",
+        "start": URL["start"],
+        "up": URL["author"] + id2path(id)
+    }
+    return create_opds_response(opds_book_list(params))
+
+
+@opds.route(URL["author"] + "<sub1>/<sub2>/<id>/time", methods=['GET'])
+def opds_author_time(sub1, sub2, id):
+    sub1 = validate_id(sub1)
+    sub2 = validate_id(sub2)
+    id = validate_id(id)
+    params = {
+        "index": URL["author"].replace("/opds/", "", 1) + f"{sub1}/{sub2}/{id}/",
+        "id": id,
+        "sub1": sub1,
+        "sub2": sub2,
+        "tag": "tag:author:" + id,
+        "subtag": "tag:author:" + id,
+        "title": LANG["books_author_alphabet"],
+        # "subtitle": "",
+        "layout": "author_time",
+        "baseref": URL["author"],
+        "authref": URL["author"],
+        "seqref": URL["seq"],
+        "self": URL["author"] + id2path(id) + "/time",
+        "start": URL["start"],
+        "up": URL["author"] + id2path(id)
     }
     return create_opds_response(opds_book_list(params))

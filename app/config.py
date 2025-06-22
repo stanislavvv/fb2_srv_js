@@ -79,6 +79,14 @@ URL = {
 
 # interface strings
 LANG = {
+    "title_time": "По дате поступления",
+    "title_authors": "По авторам",
+    "title_sequences": "По сериям",
+    "title_genres": "По жанрам",
+    "title_rnd_books": "Случайные книги",
+    "title_rnd_seqs": "Случайные серии",
+    "title_rnd_genre": "Случайные книги в жанре",
+
     "book_dl": "Скачать",
     "book_read": "Читать онлайн",
     "books_num": "%d книг(и)",
@@ -90,6 +98,14 @@ LANG = {
     "books_time": "По дате добавления",
     "books_nonseq": "Вне серий",
     "books_seq": "По сериям",
+    "bookinfo": """
+        <p class=\"book\"> %s </p>\n<br/>формат: fb2<br/>
+        размер: %s<br/>
+    """,
+    "bookinfo_seq": """
+        <p class=\"book\"> %s </p>\n<br/>формат: fb2<br/>
+        размер: %s<br/>Серия: %s, номер: %s<br/>
+    """,
 
     "authors": "Авторы",
     "auth_root_subtitle": "Авторы на ",
@@ -103,6 +119,10 @@ LANG = {
     "seq_tpl": "Серия '%s'",
     "seqs_num": "%d сер.",
     "seqs_author": "Серии автора '%s'",
+
+    "pubinfo_isbn": "<p>ISBN: %s</p>",
+    "pubinfo_year": "<p>Год публикации: %s</p>",
+    "pubinfo_publisher": "<p>Издательство: %s</p>",
 
     "genres_meta": "Группы жанров",
     "genres": "Жанры",

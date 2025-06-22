@@ -18,7 +18,7 @@ from .data import (
     sizeof_fmt
 )
 from .validate import safe_path
-from .strings import id2path
+from .strings import id2path, unicode_upper
 from .config import CONFIG, URL, LANG
 
 
@@ -32,11 +32,11 @@ def pubinfo_anno(pubinfo):
     # pylint: disable=C0209
     ret = ""
     if pubinfo["isbn"] is not None and pubinfo["isbn"] != 'None':
-        ret = ret + "<p><b>Данные публикации:</b></p><p>ISBN: %s</p>" % pubinfo["isbn"]
+        ret = ret + LANG["pubinfo_isbn"] % pubinfo["isbn"]
     if pubinfo["year"] is not None and pubinfo["year"] != 'None':
-        ret = ret + "<p>Год публикации: %s</p>" % pubinfo["year"]
+        ret = ret + LANG["pubinfo_isbn"] % pubinfo["year"]
     if pubinfo["publisher"] is not None and pubinfo["year"] != 'None':
-        ret = ret + "<p>Издательство: %s</p>" % pubinfo["publisher"]
+        ret = ret + LANG["pubinfo_publisher"] % pubinfo["publisher"]
     return ret
 
 
@@ -45,7 +45,7 @@ def get_seq_link(approot: str, seqref: str, seq_id: str, seq_name: str):
     ret = {
         "@href": approot + seqref + seq_id,
         "@rel": "related",
-        "@title": "Серия '" + seq_name + "'",
+        "@title": LANG["seq_tpl"] % seq_name,
         "@type": "application/atom+xml"
     }
     return ret
@@ -141,15 +141,9 @@ def make_book_entry(book, ts, authref, seqref, seq_id=None):
         })
 
     if seq_id is not None and seq_id != '':
-        annotext = """
-        <p class=\"book\"> %s </p>\n<br/>формат: fb2<br/>
-        размер: %s<br/>Серия: %s, номер: %s<br/>
-        """ % (annotation, sizeof_fmt(size), seq_name, seq_num)
+        annotext = LANG["bookinfo_seq"] % (annotation, sizeof_fmt(size), seq_name, seq_num)
     else:
-        annotext = """
-        <p class=\"book\"> %s </p>\n<br/>формат: fb2<br/>
-        размер: %s<br/>
-        """ % (annotation, sizeof_fmt(size))
+        annotext = LANG["bookinfo"] % (annotation, sizeof_fmt(size))
     annotext = annotext + pubinfo
     ret = {
         "updated": date_time,
@@ -253,10 +247,10 @@ def opds_main(params={}):
           {
             "updated": ts,
             "id": "tag:root:time",
-            "title": "По дате поступления",
+            "title": LANG["title_time"],
             "content": {
               "@type": "text",
-              "#text": "По дате поступления"
+              "#text": LANG["title_time"]
             },
             "link": {
               "@href": approot + URL["time"],
@@ -266,10 +260,10 @@ def opds_main(params={}):
           {
             "updated": ts,
             "id": "tag:root:authors",
-            "title": "По авторам",
+            "title": LANG["title_authors"],
             "content": {
               "@type": "text",
-              "#text": "По авторам"
+              "#text": LANG["title_authors"]
             },
             "link": {
               "@href": approot + URL["authidx"],
@@ -279,10 +273,10 @@ def opds_main(params={}):
           {
             "updated": ts,
             "id": "tag:root:sequences",
-            "title": "По сериям",
+            "title": LANG["title_sequences"],
             "content": {
               "@type": "text",
-              "#text": "По сериям"
+              "#text": LANG["title_sequences"]
             },
             "link": {
               "@href": approot + URL["seqidx"],
@@ -292,10 +286,10 @@ def opds_main(params={}):
           {
             "updated": ts,
             "id": "tag:root:genre",
-            "title": "По жанрам",
+            "title": LANG["title_genres"],
             "content": {
               "@type": "text",
-              "#text": "По жанрам"
+              "#text": LANG["title_genres"]
             },
             "link": {
               "@href": approot + URL["genidx"],
@@ -305,10 +299,10 @@ def opds_main(params={}):
           {
             "updated": ts,
             "id": "tag:root:random:books",
-            "title": "Случайные книги",
+            "title": LANG["title_rnd_books"],
             "content": {
               "@type": "text",
-              "#text": "Случайные книги"
+              "#text": LANG["title_rnd_books"]
             },
             "link": {
               "@href": approot + URL["rndbook"],
@@ -318,10 +312,10 @@ def opds_main(params={}):
           {
             "updated": ts,
             "id": "tag:root:random:sequences",
-            "title": "Случайные серии",
+            "title": LANG["title_rnd_seqs"],
             "content": {
               "@type": "text",
-              "#text": "Случайные серии"
+              "#text": LANG["title_rnd_seqs"]
             },
             "link": {
               "@href": approot + URL["rndseq"],
@@ -331,10 +325,10 @@ def opds_main(params={}):
           {
             "updated": ts,
             "id": "tag:root:random:genres",
-            "title": "Случайные книги в жанре",
+            "title": LANG["title_rnd_genre"],
             "content": {
               "@type": "text",
-              "#text": "Случайные книги в жанре"
+              "#text": LANG["title_rnd_genre"]
             },
             "link": {
               "@href": approot + URL["rndgenidx"],
@@ -346,7 +340,7 @@ def opds_main(params={}):
 
 
 def opds_simple_list(params):
-    """asimple urls list
+    """simple urls list
         params["index"] -- for example: 'authorsindex/', 'authorsindex/A', 'authorindex/ABC'
     """
     approot = CONFIG["APPLICATION_ROOT"]
@@ -398,11 +392,17 @@ def opds_simple_list(params):
         if simple_links:
             title = k
             baseref = simple_baseref
-            href = approot + baseref + urllib.parse.quote(id2path(k))
-        elif "layout" in params and params["layout"] == "name_id_list":
-            title = idx_data[k]
-            baseref = strong_baseref
-            href = approot + baseref + "/" + urllib.parse.quote(k)
+            # href = approot + baseref + urllib.parse.quote(id2path(k))
+            href = approot + baseref + urllib.parse.quote(k)
+        elif "layout" in params:
+            if params["layout"] == "name_id_list":
+                title = idx_data[k]
+                baseref = strong_baseref
+                href = approot + baseref + "/" + urllib.parse.quote(k)
+            # else:
+            #     title = k
+            #     baseref = simple_baseref
+            #     href = approot + baseref + "/" + urllib.parse.quote(k)
         else:
             title = index[k]
             baseref = strong_baseref
@@ -460,13 +460,13 @@ def opds_author_page(params):
                 {
                     "@href": approot + URL["author"] + id2path(auth_id) + "/sequences",
                     "@rel": "http://www.feedbooks.com/opds/facet",
-                    "@title": LANG["books_author_seq"] % auth_name,
+                    "@title": LANG["books_seq"],
                     "@type": "application/atom+xml;profile=opds-catalog"
                 },
                 {
                     "@href": approot + URL["author"] + id2path(auth_id) + "/sequenceless",
                     "@rel": "http://www.feedbooks.com/opds/facet",
-                    "@title": LANG["books_author_nonseq"] % auth_name,
+                    "@title": LANG["books_nonseq"],
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
             ],
@@ -554,7 +554,7 @@ def opds_book_list(params):
             logging.error(f"Can't read sequences data for {index}/sequences.json, exception: {ex}")
             return None
         params["title"] = title % (seq_name, auth_name)
-    elif layout == "author_nonseq":
+    elif layout in ("author_alpha", "author_nonseq", "author_time"):
         booksidx = index + "/all.json"
         params["title"] = title % auth_name
     else:
@@ -589,11 +589,13 @@ def opds_book_list(params):
             if book["sequences"] is None:
                 data_nonseq.append(book)
         data = sorted(data_nonseq, key=cmp_to_key(custom_alphabet_book_title_cmp))
+    elif layout == "author_time":
+        data = sorted(data, key=lambda s: unicode_upper(s["date_time"]))
     else:
         data = sorted(data, key=cmp_to_key(custom_alphabet_book_title_cmp))
 
     for book in data:
-        if layout == "sequence":
+        if layout in ("sequence", "author_seq"):
             ret["feed"]["entry"].append(make_book_entry(book, ts, authref, seqref, seq_id=seq_id))
         else:
             ret["feed"]["entry"].append(make_book_entry(book, ts, authref, seqref))
