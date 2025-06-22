@@ -246,3 +246,83 @@ def opds_author_time(sub1, sub2, id):
         "up": URL["author"] + id2path(id)
     }
     return create_opds_response(opds_book_list(params))
+
+
+@opds.route(URL["seqidx"], methods=['GET'])
+def opds_seq_root():
+    params = {
+        "index": URL["seqidx"].replace("/opds/", "", 1),
+        "tag": "tag:root:sequences",
+        "subtag": "tag:sequences:",
+        "title": LANG["sequences"],
+        "subtitle": LANG["seq_root_subtitle"],
+        "simple_baseref": URL["seqidx"],
+        "strong_baseref": URL["seq"],
+        "self": URL["seqidx"],
+        "start": URL["start"],
+        "up": URL["start"]
+    }
+    return create_opds_response(opds_simple_list(params))
+
+
+@opds.route(URL["seqidx"] + "<sub>", methods=['GET'])
+def opds_seq_sub(sub):
+    sub = validate_prefix(sub)
+    params = {
+        "index": URL["seqidx"].replace("/opds/", "", 1) + sub,
+        "tag": "tag:sequences:" + sub,
+        "subtag": "tag:sequences:",
+        "title": LANG["seq_root_subtitle"] + sub,
+        "subtitle": LANG["seq_root_subtitle"],
+        "layout": "subs",
+        "simple_baseref": URL["seqidx"] + sub + "/",
+        "strong_baseref": URL["seq"],
+        "self": URL["seqidx"] + sub,
+        "start": URL["start"],
+        "up": URL["seqidx"]
+    }
+    return create_opds_response(opds_simple_list(params))
+
+
+@opds.route(URL["seqidx"] + "<sub1>/<sub2>", methods=['GET'])
+def opds_seq_sub2(sub1, sub2):
+    sub1 = validate_prefix(sub1)
+    sub2 = validate_prefix(sub2)
+    params = {
+        "index": URL["seqidx"].replace("/opds/", "", 1) + f"{sub1}/{sub2}",
+        "tag": "tag:sequences:" + sub2,
+        "subtag": "tag:sequence:",
+        "title": LANG["seq_root_subtitle"] + sub2,
+        "subtitle": "",
+        "simple_baseref": URL["seqidx"] + sub1 + "/" + sub2,
+        "strong_baseref": URL["seq"],
+        "self": URL["seqidx"] + sub1 + "/" + sub2,
+        "start": URL["start"],
+        "up": URL["seqidx"] + sub1
+    }
+    return create_opds_response(opds_simple_list(params))
+
+
+@opds.route(URL["seq"] + "<sub1>/<sub2>/<id>", methods=['GET'])
+def opds_sequence(sub1, sub2, id):
+    sub1 = validate_id(sub1)
+    sub2 = validate_id(sub2)
+    id = validate_id(id)
+    params = {
+        "index": URL["seq"].replace("/opds/", "", 1) + f"{sub1}/{sub2}/{id}",
+        "id": id,
+        "sub1": sub1,
+        "sub2": sub2,
+        "tag": "tag:seq:" + id,
+        "subtag": "tag:sequence:" + id,
+        "title": LANG["seq_tpl"],
+        "layout": "sequence",
+        "simple_baseref": URL["seqidx"] + sub1 + "/" + sub2,
+        "strong_baseref": URL["seq"],
+        "authref": URL["author"],
+        "seqref": URL["seq"],
+        "self": URL["seq"] + id2path(id),
+        "start": URL["start"],
+        "up": URL["seqidx"]
+    }
+    return create_opds_response(opds_book_list(params))

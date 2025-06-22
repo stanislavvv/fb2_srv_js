@@ -537,8 +537,6 @@ def opds_book_list(params):
                 auth_name = json.load(nm)["name"]
         except Exception as ex:
             logging.error(f"Can't read author data for {index}/index.json, exception: {ex}")
-        # title = title + "'" + auth_name + "'"
-        # params["title"] = title
         booksidx = index + "/all.json"
     if layout == "author_seq":
         seq_name = ""
@@ -557,8 +555,8 @@ def opds_book_list(params):
     elif layout in ("author_alpha", "author_nonseq", "author_time"):
         booksidx = index + "/all.json"
         params["title"] = title % auth_name
-    else:
-        booksidx = index  # ToDo: fix this
+    elif layout == "sequence":
+        booksidx = index + ".json"
 
     try:
         with open(pagesdir + "/" + booksidx) as b:
@@ -566,6 +564,9 @@ def opds_book_list(params):
     except Exception as ex:
         logging.error(f"Can't read books list from {booksidx}, exception: {ex}")
         return None
+
+    if layout == "sequence":
+        params["title"] = title % data["name"]
 
     ret = opds_header(params)
     if layout == "author_seq":
@@ -591,8 +592,9 @@ def opds_book_list(params):
         data = sorted(data_nonseq, key=cmp_to_key(custom_alphabet_book_title_cmp))
     elif layout == "author_time":
         data = sorted(data, key=lambda s: unicode_upper(s["date_time"]))
-    else:
-        data = sorted(data, key=cmp_to_key(custom_alphabet_book_title_cmp))
+    elif layout == "sequence":
+        seq_id = data["id"]
+        data = sorted(data["books"], key=cmp_to_key(custom_alphabet_book_title_cmp))
 
     for book in data:
         if layout in ("sequence", "author_seq"):

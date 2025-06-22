@@ -19,8 +19,9 @@
 ## Small parts
 
   * opds:
-    * user URL and LANG arrays instead hardcoded strings
+    * user URL and LANG arrays instead hardcoded strings -- DONE (may be)
+    * authors non-sequences books page must use prepared data
   * docs:
     * nginx example for covers (`@try_files` and default cover)
-    * spec to url tree
+    * spec to url tree -- DONE (may be it even complete)
     * [maybe] spec to THIS library opds output
