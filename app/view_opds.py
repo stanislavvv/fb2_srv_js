@@ -411,3 +411,20 @@ def opds_time_books(page=0):
         "up": URL["start"]
     }
     return create_opds_response(opds_books_db(params))
+
+
+@opds.route(URL["rndbook"], methods=['GET'])
+def opds_rnd_books():
+    params = {
+        "tag": "tag:search:books:random",
+        "title": LANG["rnd_books"],
+        "layout": "rnd_books",
+        # "simple_baseref": URL["rndbook"],
+        # "strong_baseref": URL["rndbook"],
+        "authref": URL["author"],
+        "seqref": URL["seq"],
+        "self": URL["rndbook"],
+        "start": URL["start"],
+        "up": URL["start"]
+    }
+    return create_opds_response(opds_books_db(params))
