@@ -530,7 +530,11 @@ def opds_book_list(params):
     seqref = params["seqref"]
 
     layout = params["layout"]
+    if layout == "paginated":
+        page = params["page"]
 
+    print(layout)
+    print(index)
     if layout in ("author_seq", "author_alpha", "author_time", "author_nonseq"):
         auth_name = ""
         try:
@@ -558,6 +562,14 @@ def opds_book_list(params):
         params["title"] = title % auth_name
     elif layout == "sequence":
         booksidx = index + ".json"
+    elif layout == "paginated":
+        booksidx = index + f"/{page}.json"
+        params["next"] = params["self"] + "/" + str(page + 1)
+        if page == 1:
+            params["prev"] = params["self"]
+        elif page > 1:
+            params["prev"] = params["self"] + "/" + str(page - 1)
+        print(booksidx)
 
     try:
         with open(pagesdir + "/" + booksidx) as b:
