@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Config file loading"""
+"""Config file loading and some internal constants"""
 
 # pylint: disable=C0103,W0718
 
@@ -53,7 +53,7 @@ CONFIG = {  # default values
     "APP_ICO": "/favicon.ico",
 }
 
-# internal configuration
+# internal configuration for opds interface
 URL = {
     "start": "/opds/",
     "author": "/opds/author/",
@@ -77,6 +77,7 @@ URL = {
     "cover": "/covers/",  # books cover images
 }
 
+# interface strings
 LANG = {
     "book_dl": "Скачать",
     "book_read": "Читать онлайн",
@@ -85,6 +86,10 @@ LANG = {
     "books_author_time": "Книги автора '%s' по времени поступления",
     "books_author_nonseq": "Книги автора '%s' вне серий",
     "books_author_seq": "Серия '%s', автор '%s'",
+    "books_alphabet": "По алфавиту",
+    "books_time": "По дате добавления",
+    "books_nonseq": "Вне серий",
+    "books_seq": "По сериям",
 
     "authors": "Авторы",
     "auth_root_subtitle": "Авторы на ",

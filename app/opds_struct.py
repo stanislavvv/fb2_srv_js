@@ -448,7 +448,7 @@ def opds_author_page(params):
         logging.error(f"Error on author {sub1}/{sub2}/{id}, exception: {ex}")
         return None
     auth_name = auth_data["name"]
-    params["title"] = params["title"] + f"'{auth_name}'"
+    params["title"] = params["title"] % auth_name
 
     ret = opds_header(params)
     ret["feed"]["entry"] = [
@@ -460,13 +460,13 @@ def opds_author_page(params):
                 {
                     "@href": approot + URL["author"] + id2path(auth_id) + "/sequences",
                     "@rel": "http://www.feedbooks.com/opds/facet",
-                    "@title": "Books of author by sequences",
+                    "@title": LANG["books_author_seq"] % auth_name,
                     "@type": "application/atom+xml;profile=opds-catalog"
                 },
                 {
                     "@href": approot + URL["author"] + id2path(auth_id) + "/sequenceless",
                     "@rel": "http://www.feedbooks.com/opds/facet",
-                    "@title": "Sequenceless books of author",
+                    "@title": LANG["books_author_nonseq"] % auth_name,
                     "@type": "application/atom+xml;profile=opds-catalog"
                 }
             ],
@@ -478,7 +478,7 @@ def opds_author_page(params):
         {
             "updated": ts,
             "id": subtag + ":sequences",
-            "title": "По сериям",
+            "title": LANG["books_seq"],
             "link": {
                 "@href": approot + URL["author"] + id2path(auth_id) + "/sequences",
                 "@type": "application/atom+xml;profile=opds-catalog"
@@ -487,7 +487,7 @@ def opds_author_page(params):
         {
             "updated": ts,
             "id": subtag + ":sequenceless",
-            "title": "Вне серий",
+            "title": LANG["books_nonseq"],
             "link": {
                 "@href": approot + URL["author"] + id2path(auth_id) + "/sequenceless",
                 "@type": "application/atom+xml;profile=opds-catalog"
@@ -496,7 +496,7 @@ def opds_author_page(params):
         {
             "updated": ts,
             "id": subtag + ":alphabet",
-            "title": "По алфавиту",
+            "title": LANG["books_alphabet"],
             "link": {
                 "@href": approot + URL["author"] + id2path(auth_id) + "/alphabet",
                 "@type": "application/atom+xml;profile=opds-catalog"
@@ -505,7 +505,7 @@ def opds_author_page(params):
         {
             "updated": ts,
             "id": subtag + ":time",
-            "title": "По дате добавления",
+            "title": LANG["books_time"],
             "link": {
                 "@href": approot + URL["author"] + id2path(auth_id) + "/time",
                 "@type": "application/atom+xml;profile=opds-catalog"
@@ -524,7 +524,7 @@ def opds_book_list(params):
 
     index = params["index"]
     title = params["title"]
-    subtitle = params["subtitle"]
+    # subtitle = params["subtitle"]
     authref = params["authref"]
     seqref = params["seqref"]
 
@@ -537,8 +537,8 @@ def opds_book_list(params):
                 auth_name = json.load(nm)["name"]
         except Exception as ex:
             logging.error(f"Can't read author data for {index}/index.json, exception: {ex}")
-        title = title + "'" + auth_name + "'"
-        params["title"] = title
+        # title = title + "'" + auth_name + "'"
+        # params["title"] = title
         booksidx = index + "/all.json"
     if layout == "author_seq":
         seq_name = ""
@@ -553,9 +553,10 @@ def opds_book_list(params):
         except Exception as ex:
             logging.error(f"Can't read sequences data for {index}/sequences.json, exception: {ex}")
             return None
-        params["title"] = title + subtitle + "'" + seq_name + "'"
+        params["title"] = title % (seq_name, auth_name)
     elif layout == "author_nonseq":
         booksidx = index + "/all.json"
+        params["title"] = title % auth_name
     else:
         booksidx = index  # ToDo: fix this
 

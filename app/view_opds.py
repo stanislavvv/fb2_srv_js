@@ -12,7 +12,7 @@ from .opds_struct import (
     opds_author_page,
     opds_book_list
 )
-from .config import CONFIG, URL
+from .config import CONFIG, URL, LANG
 from .strings import id2path
 from .validate import (
     validate_prefix,
@@ -50,8 +50,8 @@ def opds_auth_root():
         "index": URL["authidx"].replace("/opds/", "", 1),
         "tag": "tag:root:authors",
         "subtag": "tag:authors:",
-        "title": "По авторам",
-        "subtitle": "Авторы на ",
+        "title": LANG["authors"],
+        "subtitle": LANG["auth_root_subtitle"],
         "simple_baseref": URL["authidx"],
         "strong_baseref": URL["author"],
         "self": URL["authidx"],
@@ -68,8 +68,8 @@ def opds_auth_sub(sub):
         "index": URL["authidx"].replace("/opds/", "", 1) + sub,
         "tag": "tag:authors:" + sub,
         "subtag": "tag:authors:",
-        "title": f"По авторам на {sub}",
-        "subtitle": "Авторы на ",
+        "title": LANG["auth_root_subtitle"] + sub,
+        "subtitle": LANG["auth_root_subtitle"],
         "simple_baseref": URL["authidx"] + sub + "/",
         "strong_baseref": URL["author"],
         "self": URL["authidx"] + sub,
@@ -87,7 +87,7 @@ def opds_auth_sub2(sub1, sub2):
         "index": URL["authidx"].replace("/opds/", "", 1) + f"{sub1}/{sub2}",
         "tag": "tag:authors:" + sub2,
         "subtag": "tag:author:",
-        "title": f"Авторы на {sub2}",
+        "title": LANG["auth_root_subtitle"] + sub2,
         "subtitle": "",
         "simple_baseref": URL["authidx"] + sub1 + "/" + sub2,
         "strong_baseref": URL["author"],
@@ -110,7 +110,7 @@ def opds_author_main(sub1, sub2, id):
         "sub2": sub2,
         "tag": "tag:author:" + id,
         "subtag": "tag:author:" + id,
-        "title": "Автор ",
+        "title": LANG["author_tpl"],
         "subtitle": "",
         "simple_baseref": URL["authidx"] + sub1 + "/" + sub2,
         "strong_baseref": URL["author"],
@@ -159,8 +159,8 @@ def opds_author_seq(sub1, sub2, id, seq_id):
         "tag": "tag:author:" + id,
         "subtag": "tag:author:" + id,
         "seq_id": seq_id,
-        "title": "Автор ",
-        "subtitle": " серия ",
+        "title": LANG["books_author_seq"],
+        "subtitle": "",
         "layout": "author_seq",
         "baseref": URL["author"],
         "authref": URL["author"],
@@ -184,7 +184,7 @@ def opds_author_nonseq(sub1, sub2, id):
         "sub2": sub2,
         "tag": "tag:author:" + id,
         "subtag": "tag:author:" + id,
-        "title": "Книги вне серий автора ",
+        "title": LANG["books_author_nonseq"],
         "subtitle": "",
         "layout": "author_nonseq",
         "baseref": URL["author"],
