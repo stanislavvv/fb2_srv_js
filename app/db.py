@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-"""database initialization"""
+"""database initialization and some utilities"""
 
 import logging
 
 from sqlalchemy import text
 
-from .db_classes import Base, dbconnect, BookGenre, GenresMeta
+from .db_classes import Base, dbconnect, BookAuthor, BookDescription, BookSequence, BookGenre, GenresMeta
 # from .config import CONFIG
 from .db_fill import fill_genres_meta
 
@@ -58,4 +58,48 @@ def get_genres(session):
             "name": gen_name
         }
 
+    return ret
+
+
+def get_books_descr(session, bookids):
+    """return dict for: book_id: {BookDescription named fields dict}"""
+    ret = {}
+    data = session.query(BookDescription).filter(BookDescription.book_id.in_(bookids)).all()
+    for b in data:
+        book_id = b.book_id
+        ret[book_id] = {
+            "book_id": b.book_id,
+            "book_title": b.book_title,
+            "pub_isbn": b.pub_isbn,
+            "pub_year": b.pub_year,
+            "publisher": b.publisher,
+            "publisher_id": b.publisher_id,
+            "annotation": b.annotation
+        }
+    return ret
+
+
+def get_authors(session, authids):
+    """return dict for: author_id: {BookAuthor named fields dict}"""
+    ret = {}
+    data = session.query(BookAuthor).filter(BookAuthor.id.in_(authids)).all()
+    for a in data:
+        auth_id = a.id
+        ret[auth_id] = {
+            "id": a.id,
+            "name": a.name
+        }
+    return ret
+
+
+def get_seqs(session, seqids):
+    """return dict for: author_id: {BookSequence named fields dict}"""
+    ret = {}
+    data = session.query(BookSequence).filter(BookSequence.id.in_(seqids)).all()
+    for a in data:
+        seq_id = a.id
+        ret[seq_id] = {
+            "id": a.id,
+            "name": a.name
+        }
     return ret

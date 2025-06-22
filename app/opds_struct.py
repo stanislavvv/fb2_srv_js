@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""opds data structures and functions"""
+"""opds data structures and functions for static files data"""
 
 import datetime
 import os
@@ -517,7 +517,7 @@ def opds_author_page(params):
 
 
 def opds_book_list(params):
-    """return list of books"""
+    """return list of books, only for data in json"""
     ts = get_dtiso()
     params["ts"] = ts
     # approot = CONFIG["APPLICATION_ROOT"]
@@ -533,8 +533,6 @@ def opds_book_list(params):
     if layout == "paginated":
         page = params["page"]
 
-    print(layout)
-    print(index)
     if layout in ("author_seq", "author_alpha", "author_time", "author_nonseq"):
         auth_name = ""
         try:

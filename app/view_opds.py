@@ -12,6 +12,7 @@ from .opds_struct import (
     opds_author_page,
     opds_book_list
 )
+from .opds_db import opds_books_db
 from .config import CONFIG, URL, LANG
 from .strings import id2path
 from .data import get_meta_name, get_genre_name
@@ -390,3 +391,23 @@ def opds_genre_books(gen_id, page=0):
         "up": URL["genidx"]
     }
     return create_opds_response(opds_book_list(params))
+
+
+@opds.route(URL["time"], methods=['GET'])
+@opds.route(URL["time"] + "/<int:page>", methods=['GET'])
+def opds_time_books(page=0):
+    params = {
+        "tag": "tag:time:" + str(page),
+        "subtag": "tag:time:" + str(page),
+        "title": LANG["title_time"],
+        "layout": "paginated",
+        "page": page,
+        "simple_baseref": URL["time"],
+        "strong_baseref": URL["time"],
+        "authref": URL["author"],
+        "seqref": URL["seq"],
+        "self": URL["time"],
+        "start": URL["start"],
+        "up": URL["start"]
+    }
+    return create_opds_response(opds_books_db(params))

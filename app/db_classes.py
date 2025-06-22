@@ -14,6 +14,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import ARRAY, TEXT
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
 from .config import CONFIG
 
@@ -120,3 +121,11 @@ def dbconnect():
     )
     engine = create_engine(dbpath)
     return engine
+
+
+def dbsession():
+    """connect to db and return session"""
+    engine = dbconnect()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    return session
