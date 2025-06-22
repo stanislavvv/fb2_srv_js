@@ -3,7 +3,7 @@
 
 import logging
 
-from  sqlalchemy.sql.expression import func
+from sqlalchemy.sql.expression import func
 
 from .db_classes import Book, dbsession
 from .db import (
@@ -21,7 +21,7 @@ from .config import CONFIG
 
 
 def opds_books_db(params):
-    """"""
+    """get books from db"""
     ts = get_dtiso()
     params["ts"] = ts
     # approot = CONFIG["APPLICATION_ROOT"]
@@ -41,6 +41,13 @@ def opds_books_db(params):
         session = dbsession()
         if layout == "rnd_books":
             books_data = session.query(Book).order_by(func.random()).limit(pagelimit).all()
+        elif layout == "rnd_books_genre":
+            gen_id = params["gen_id"]
+            books_data = session.query(
+                Book
+            ).filter(
+                Book.genres.any(gen_id)
+            ).order_by(func.random()).limit(pagelimit).all()
         else:
             books_data = session.query(Book).order_by(Book.date.desc()).limit(pagelimit).offset(pagelimit * page).all()
         book_ids = []

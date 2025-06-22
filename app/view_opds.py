@@ -428,3 +428,22 @@ def opds_rnd_books():
         "up": URL["start"]
     }
     return create_opds_response(opds_books_db(params))
+
+
+@opds.route(URL["rndgen"] + "<gen_id>", methods=['GET'])
+def opds_rnd_books_genre(gen_id):
+    gen_id = validate_genre(gen_id)
+    params = {
+        "tag": "tag:search:books:random",
+        "title": LANG["rnd_books"],
+        "layout": "rnd_books_genre",
+        "gen_id": gen_id,
+        # "simple_baseref": URL["rndbook"],
+        # "strong_baseref": URL["rndbook"],
+        "authref": URL["author"],
+        "seqref": URL["seq"],
+        "self": URL["rndbook"],
+        "start": URL["start"],
+        "up": URL["start"]
+    }
+    return create_opds_response(opds_books_db(params))
