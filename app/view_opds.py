@@ -12,7 +12,7 @@ from .opds_struct import (
     opds_author_page,
     opds_book_list
 )
-from .opds_db import opds_books_db
+from .opds_db import opds_books_db, opds_simple_list_db
 from .config import CONFIG, URL, LANG
 from .strings import id2path
 from .data import get_meta_name, get_genre_name
@@ -447,3 +447,19 @@ def opds_rnd_books_genre(gen_id):
         "up": URL["start"]
     }
     return create_opds_response(opds_books_db(params))
+
+
+@opds.route(URL["rndseq"], methods=['GET'])
+def opds_rnd_seqs():
+    params = {
+        "tag": "tag:search:sequences:random:",
+        "subtag": "tag:search:sequence:random:",
+        "title": LANG["rnd_seqs"],
+        "subtitle": "",
+        "layout": "rnd_seqs",
+        "baseref": URL["seq"],
+        "self": URL["rndseq"],
+        "start": URL["start"],
+        "up": URL["start"]
+    }
+    return create_opds_response(opds_simple_list_db(params))
