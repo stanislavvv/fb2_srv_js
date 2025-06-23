@@ -22,3 +22,17 @@
 
   * `./datachew.sh covers` -- make dir/file struct for book covers previews
   * `./datachew.sh authors` -- make static indexes for authors
+
+### Run development server
+
+useful for debug configuration
+
+```shell
+./opds.sh
+```
+
+### Run production server
+
+```shell
+./gunicorn.sh
+```
