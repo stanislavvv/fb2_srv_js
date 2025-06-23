@@ -430,11 +430,49 @@ def opds_rnd_books():
     return create_opds_response(opds_books_db(params))
 
 
+@opds.route(URL["rndgenidx"], methods=['GET'])
+def opds_rnd_genres_root():
+    params = {
+        "index": URL["genidx"].replace("/opds/", "", 1),
+        "tag": "tag:rnd:genres",
+        "subtag": "tag:rnd:genres:",
+        "title": LANG["genres_meta"],
+        "subtitle": "",
+        "layout": "key_value",
+        "simple_baseref": URL["rndgenidx"],
+        "strong_baseref": URL["rndgen"],
+        "self": URL["rndgenidx"],
+        "start": URL["start"],
+        "up": URL["start"]
+    }
+    return create_opds_response(opds_simple_list(params))
+
+
+@opds.route(URL["rndgenidx"] + "<meta_id>", methods=['GET'])
+def opds_rnd_genres_list(meta_id):
+    meta_id = validate_id(meta_id)
+    meta_name = get_meta_name(meta_id)
+    params = {
+        "index": URL["genidx"].replace("/opds/", "", 1) + meta_id,
+        "tag": "tag:rnd:genres:" + meta_id,
+        "subtag": "tag:rnd:genre:",
+        "title": LANG["genres_root_subtitle"] + meta_name,
+        "subtitle": "",
+        "layout": "key_value",
+        "simple_baseref": URL["rndgenidx"],
+        "strong_baseref": URL["rndgen"],
+        "self": URL["rndgenidx"] + meta_id,
+        "start": URL["start"],
+        "up": URL["rndgenidx"]
+    }
+    return create_opds_response(opds_simple_list(params))
+
+
 @opds.route(URL["rndgen"] + "<gen_id>", methods=['GET'])
 def opds_rnd_books_genre(gen_id):
     gen_id = validate_genre(gen_id)
     params = {
-        "tag": "tag:search:books:random",
+        "tag": "tag:rnd:genre:" + gen_id,
         "title": LANG["rnd_books"],
         "layout": "rnd_books_genre",
         "gen_id": gen_id,
@@ -442,9 +480,9 @@ def opds_rnd_books_genre(gen_id):
         # "strong_baseref": URL["rndbook"],
         "authref": URL["author"],
         "seqref": URL["seq"],
-        "self": URL["rndbook"],
+        "self": URL["rndgen"] + gen_id,
         "start": URL["start"],
-        "up": URL["start"]
+        "up": URL["rndgenidx"]
     }
     return create_opds_response(opds_books_db(params))
 
