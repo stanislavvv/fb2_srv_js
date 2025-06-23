@@ -559,3 +559,45 @@ def opds_search_seq():
         "subtitle": ""
     }
     return create_opds_response(opds_simple_list_db(params))
+
+
+@opds.route(URL["srchbook"], methods=['GET'])
+def opds_search_books(page=0):
+    s_term = request.args.get('searchTerm')
+    s_term = validate_search(s_term)
+    s_term_q = urllib.parse.quote(s_term)
+    params = {
+        "search_term": s_term,
+        "tag": "tag:search:books:",
+        "subtag": "tag:book:",
+        "title": LANG["search_book"] % s_term,
+        "layout": "search_book",
+        "page": page,
+        "authref": URL["author"],
+        "seqref": URL["seq"],
+        "self": URL["srchbook"] + f"?searchTerm={s_term_q}",
+        "start": URL["start"],
+        "up": URL["search"] + f"?searchTerm={s_term_q}"
+    }
+    return create_opds_response(opds_books_db(params))
+
+
+@opds.route(URL["srchbookanno"], methods=['GET'])
+def opds_search_booksanno(page=0):
+    s_term = request.args.get('searchTerm')
+    s_term = validate_search(s_term)
+    s_term_q = urllib.parse.quote(s_term)
+    params = {
+        "search_term": s_term,
+        "tag": "tag:search:books:",
+        "subtag": "tag:book:",
+        "title": LANG["search_anno"] % s_term,
+        "layout": "search_anno",
+        "page": page,
+        "authref": URL["author"],
+        "seqref": URL["seq"],
+        "self": URL["srchbookanno"] + f"?searchTerm={s_term_q}",
+        "start": URL["start"],
+        "up": URL["search"] + f"?searchTerm={s_term_q}"
+    }
+    return create_opds_response(opds_books_db(params))

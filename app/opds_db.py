@@ -7,7 +7,7 @@ import urllib
 from sqlalchemy.sql.expression import func
 from sqlalchemy import and_
 
-from .db_classes import Book, BookAuthor, BookSequence, dbsession
+from .db_classes import Book, BookAuthor, BookSequence, BookDescription, dbsession
 from .db import (
     get_books_descr,
     get_authors,
@@ -32,6 +32,7 @@ def opds_books_db(params):
 
     authref = params["authref"]
     seqref = params["seqref"]
+    tag = params["tag"]
 
     layout = params["layout"]
     if "page" in params:
@@ -51,6 +52,40 @@ def opds_books_db(params):
             ).filter(
                 Book.genres.any(gen_id)
             ).order_by(func.random()).limit(pagelimit).all()
+        elif layout == "search_book":
+            s_term = params["search_term"]
+            ret["feed"]["id"] = tag + urllib.parse.quote_plus(s_term)
+            maxres = CONFIG["MAX_SEARCH_RES"]
+            s_terms = s_term.split()
+            conditions = []
+            for term in s_terms:
+                conditions.append(
+                    BookDescription.book_title.ilike(f"%{term}%")
+                )
+            book_descr_data = session.query(BookDescription.book_id).filter(
+                and_(*conditions)
+            ).limit(maxres).all()
+            book_ids = []
+            for b in book_descr_data:
+                book_ids.append(b.book_id)
+            books_data = session.query(Book).filter(Book.book_id.in_(book_ids)).all()
+        elif layout == "search_anno":
+            s_term = params["search_term"]
+            ret["feed"]["id"] = tag + urllib.parse.quote_plus(s_term)
+            maxres = CONFIG["MAX_SEARCH_RES"]
+            s_terms = s_term.split()
+            conditions = []
+            for term in s_terms:
+                conditions.append(
+                    BookDescription.annotation.ilike(f"%{term}%")
+                )
+            book_descr_data = session.query(BookDescription.book_id).filter(
+                and_(*conditions)
+            ).limit(maxres).all()
+            book_ids = []
+            for b in book_descr_data:
+                book_ids.append(b.book_id)
+            books_data = session.query(Book).filter(Book.book_id.in_(book_ids)).all()
         else:
             books_data = session.query(Book).order_by(Book.date.desc()).limit(pagelimit).offset(pagelimit * page).all()
         book_ids = []
