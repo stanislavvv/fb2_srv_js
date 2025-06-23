@@ -1,28 +1,30 @@
 # ToDo
 
-  * opds interface for static files + DB
+  * opds interface for static files + DB -- DONE
     * /opds base:
-      * `/opds/authorsindex` -- single letter links to three-letter lists which links to authors
-        * `/opds/author/{id[0:2]}/{id[2:2]}/{id}` -- tree for author
-      * `/opds/sequencesindex` -- as for authors, but for sequences
-        * `/opds/sequence/{id[0:2]}/{id[2:2]}/{id}` -- books list in sequence
-      * `/opds/genresindex` -- genres groups links to genres in group which links to genres
-        * `/opds/genre/{id}` -- paginated books list in genre with `/{number}` in next pages
-  * /opds optional:
+      * `/opds/authorsindex` -- single letter links to three-letter lists which links to authors -- DONE
+        * `/opds/author/{id[0:2]}/{id[2:2]}/{id}` -- tree for author -- DONE
+      * `/opds/sequencesindex` -- as for authors, but for sequences -- DONE
+        * `/opds/sequence/{id[0:2]}/{id[2:2]}/{id}` -- books list in sequence -- DONE
+      * `/opds/genresindex` -- genres groups links to genres in group which links to genres -- DONE
+        * `/opds/genre/{id}` -- paginated books list in genre with `/{number}` in next pages -- DONE
+  * /opds optional: -- PARTIAL
     * `/opds/search`
-    * `/opds/time` -- books by date, simple list with `/{number}` in next pages
-    * `/opds/random-books` -- one page of random books list 
-    * `/opds/random-sequences` -- one page of random sequences list
-    * `/opds/rnd-genresindex` -- as in genresindex but links to `rnd-genre` instead `genre`
-      * `/opds/rnd-genre/{id}` -- one page of random books list in this genre
+      * `/search/authors` -- List of found authors
+      * `/search/sequences` -- List of found sequences
+      * `/search/books` -- List of found books
+    * `/opds/time` -- books by date, simple list with `/{number}` in next pages -- DONE
+    * `/opds/random-books` -- one page of random books list -- DONE
+    * `/opds/random-sequences` -- one page of random sequences list -- DONE
+    * `/opds/rnd-genresindex` -- as in genresindex but links to `rnd-genre` instead `genre` -- DONE
+      * `/opds/rnd-genre/{id}` -- one page of random books list in this genre -- DONE
 
 ## Small parts
 
   * indexing:
     * use URL in data path (with removing `^/opds`)
   * opds:
-    * user URL and LANG arrays instead hardcoded strings -- DONE (may be)
-    * authors non-sequences books page must use prepared data
+    * authors non-sequences books page must use prepared data (opds_struct.py, opds_book_list, `elif layout == "author_nonseq":`)
   * docs:
     * nginx example for covers (`@try_files` and default cover)
     * spec to url tree -- DONE (may be it even complete)
