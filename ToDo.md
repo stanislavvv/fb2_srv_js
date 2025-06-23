@@ -25,6 +25,7 @@
     * use URL in data path (with removing `^/opds`)
   * opds:
     * authors non-sequences books page must use prepared data (opds_struct.py, opds_book_list, `elif layout == "author_nonseq":`)
+    * approot usage in all urls
   * docs:
     * nginx example for covers (`@try_files` and default cover)
     * spec to url tree -- DONE (may be it even complete)

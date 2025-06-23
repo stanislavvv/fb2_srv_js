@@ -10,6 +10,21 @@ fb2_check = re.compile('([ 0-9a-zA-ZА-Яа-я_,.:!-]+.fb2)')  # may be incomple
 genre_check = re.compile('([0-9a-z_]+)')
 
 
+def unurl(string: str):
+    """very simple url to string"""
+    translate = {
+        '%22': '"',
+        '%27': "'",
+        '%2E': ".",
+        '%2F': '/'
+    }
+    ret = string
+    if ret is not None:
+        for k, v in translate.items():  # pylint: disable=C0103
+            ret = ret.replace(k, v)
+    return ret
+
+
 def safe_path(fspath):
     """create safe relative path from input"""
     if fspath is None:
@@ -57,3 +72,13 @@ def validate_genre(string: str):
     if genre_check.match(string):
         return ret
     return None
+
+
+def validate_search(string: str):
+    """search pattern some normalization"""
+    if string is None:
+        return ""
+    ret = unurl(string).replace(';', '')
+    if len(ret) > 128:
+        ret = ret[:128]
+    return ret

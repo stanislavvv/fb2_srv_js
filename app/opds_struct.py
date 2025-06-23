@@ -613,3 +613,83 @@ def opds_book_list(params):
         else:
             ret["feed"]["entry"].append(make_book_entry(book, ts, authref, seqref))
     return ret
+
+
+def opds_search_main(params):
+    s_term = params["search_term"]
+    approot = CONFIG["APPLICATION_ROOT"]
+    ts = get_dtiso()
+
+    params["ts"] = ts
+    # params["tag"] = "tag:root"
+    tag = params["tag"]
+    params["title"] = CONFIG["TITLE"]
+    params["start"] = URL["start"]
+    params["self"] = URL["start"]
+
+    ret = opds_header(params)
+    if s_term is None:
+        ret["feed"]["id"] = tag
+    else:
+        ret["feed"]["id"] = tag + urllib.parse.quote_plus(s_term)
+        ret["feed"]["entry"].append(
+          {
+            "updated": ts,
+            "id": "tag:search:authors:",
+            "title": LANG["schmain_author"],
+            "content": {
+              "@type": "text",
+              "#text": LANG["schmain_author"]
+            },
+            "link": {
+              "@href": approot + URL["srchauth"] + "?searchTerm=%s" % url_str(s_term),
+              "@type": "application/atom+xml;profile=opds-catalog"
+            }
+          }
+        )
+        ret["feed"]["entry"].append(
+          {
+            "updated": ts,
+            "id": "tag:search:sequences:",
+            "title": LANG["schmain_seq"],
+            "content": {
+              "@type": "text",
+              "#text": LANG["schmain_seq"]
+            },
+            "link": {
+              "@href": approot + URL["srchseq"] + "?searchTerm=%s" % url_str(s_term),
+              "@type": "application/atom+xml;profile=opds-catalog"
+            }
+          }
+        )
+        ret["feed"]["entry"].append(
+          {
+            "updated": ts,
+            "id": "tag:search:booktitles:",
+            "title": LANG["schmain_book"],
+            "content": {
+              "@type": "text",
+              "#text": LANG["schmain_book"]
+            },
+            "link": {
+              "@href": approot + URL["srchbook"] + "?searchTerm=%s" % url_str(s_term),
+              "@type": "application/atom+xml;profile=opds-catalog"
+            }
+          }
+        )
+        ret["feed"]["entry"].append(
+          {
+            "updated": ts,
+            "id": "tag:search:bookanno:",
+            "title": LANG["schmain_anno"],
+            "content": {
+              "@type": "text",
+              "#text": LANG["schmain_anno"]
+            },
+            "link": {
+              "@href": approot + URL["srchbookanno"] + "?searchTerm=%s" % url_str(s_term),
+              "@type": "application/atom+xml;profile=opds-catalog"
+            }
+          }
+        )
+    return ret

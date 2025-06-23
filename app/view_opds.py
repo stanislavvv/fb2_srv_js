@@ -4,13 +4,14 @@
 import xmltodict
 import logging
 
-from flask import Blueprint, Response
+from flask import Blueprint, Response, request
 
 from .opds_struct import (
     opds_main,
     opds_simple_list,
     opds_author_page,
-    opds_book_list
+    opds_book_list,
+    opds_search_main
 )
 from .opds_db import opds_books_db, opds_simple_list_db
 from .config import CONFIG, URL, LANG
@@ -19,7 +20,8 @@ from .data import get_meta_name, get_genre_name
 from .validate import (
     validate_prefix,
     validate_id,
-    validate_genre
+    validate_genre,
+    validate_search
 )
 
 opds = Blueprint("opds", __name__)
@@ -501,3 +503,17 @@ def opds_rnd_seqs():
         "up": URL["start"]
     }
     return create_opds_response(opds_simple_list_db(params))
+
+
+@opds.route(URL["search"], methods=['GET'])
+def opds_search():
+    s_term = request.args.get('searchTerm')
+    s_term = validate_search(s_term)
+    params = {
+        "search_term": s_term,
+        "self": URL["search"],
+        "up": URL["start"],
+        "tag": "tag:search:",
+        "title": LANG["search_main"] % s_term
+    }
+    return create_opds_response(opds_search_main(params))
