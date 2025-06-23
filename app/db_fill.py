@@ -33,6 +33,7 @@ PASS_SIZE_HINT = 10485760
 
 
 def dbwrite(data):
+    """write prepared data to db"""
     engine = dbconnect()
     Session = sessionmaker(bind=engine)
     session = Session()

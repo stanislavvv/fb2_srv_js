@@ -108,23 +108,23 @@ def make_auth_data(session):
 
         allbooks = data["books"]
         workfile = workdir + "/all.json"
-        with open(workfile, 'w') as idx:
+        with open(workfile, 'w', encoding="utf-8") as idx:
             json.dump(allbooks, idx, indent=2, ensure_ascii=False)
 
         seqs = seqs_in_data(auth_data[auth_id]["books"])
         workfile = workdir + "/sequences.json"
-        with open(workfile, 'w') as idx:
+        with open(workfile, 'w', encoding="utf-8") as idx:
             json.dump(seqs, idx, indent=2, ensure_ascii=False)
 
         nonseqs = nonseq_from_data(auth_data[auth_id]["books"])
         workfile = workdir + "/sequenceless.json"
-        with open(workfile, 'w') as idx:
+        with open(workfile, 'w', encoding="utf-8") as idx:
             json.dump(nonseqs, idx, indent=2, ensure_ascii=False)
 
         main = data
         del main["books"]
         workfile = workdir + "/index.json"
-        with open(workfile, 'w') as idx:
+        with open(workfile, 'w', encoding="utf-8") as idx:
             json.dump(main, idx, indent=2, ensure_ascii=False)
         auth_processed[auth_id] = 1
     return len(auth_data.keys())
@@ -143,7 +143,7 @@ def make_auth_subindexes(session):
     idx = {}
     for letter in first_letters:
         idx[letter[0]] = 1
-    with open(workdir + "index.json", "w") as f:
+    with open(workdir + "index.json", "w", encoding="utf-8") as f:
         json.dump(idx, f, indent=2, ensure_ascii=False)
 
     for letter in idx.keys():
@@ -162,7 +162,7 @@ def make_auth_subindexes(session):
             t_pad = string2filename("%-3s" % t[0].upper())
             t_idx[t_pad] = 1
         Path(workdir + string2filename(letter)).mkdir(parents=True, exist_ok=True)
-        with open(workdir + string2filename(letter) + "/index.json", "w") as f:
+        with open(workdir + string2filename(letter) + "/index.json", "w", encoding="utf-8") as f:
             json.dump(t_idx, f, indent=2, ensure_ascii=False)
         t_idx = {}
         for t in t_real.keys():
@@ -182,7 +182,7 @@ def make_auth_subindexes(session):
             for a in authors:
                 t_idx[t_pad][a.id] = a.name
         for idx in t_idx.keys():
-            with open(workdir + string2filename(letter) + f"/{idx}.json", "w") as f:
+            with open(workdir + string2filename(letter) + f"/{idx}.json", "w", encoding="utf-8") as f:
                 json.dump(t_idx[idx], f, indent=2, ensure_ascii=False)
 
 
@@ -213,11 +213,12 @@ def make_book_covers():
                 make_book_covers_data(lines, coversdir, hide_deleted)
                 lines = lst.readlines(passhint)
         i = i + 1
-    shutil.copy(CONFIG['DEFAULT_COVER'], coversdir + '/default.jpg')
+    shutil.copy(CONFIG['DEFAULT_COVER_SRC'], pagesdir + CONFIG['DEFAULT_COVER'])
     logging.info("end")
 
 
 def make_book_covers_data(lines, coversdir, hide_deleted=False):
+    """write covers previews from jsonl lines data"""
     for line in lines:
         book = json.loads(line)
         if book is not None and book['book_id'] is not None:
@@ -297,7 +298,7 @@ def make_seq_data(session):
         Path(workdir).mkdir(parents=True, exist_ok=True)
 
         workfile = workdir + f"/{seq_id}.json"
-        with open(workfile, 'w') as idx:
+        with open(workfile, 'w', encoding="utf-8") as idx:
             json.dump(data, idx, indent=2, ensure_ascii=False)
         seq_processed[seq_id] = 1
 
@@ -317,7 +318,7 @@ def make_seq_subindexes(session):
     idx = {}
     for letter in first_letters:
         idx[letter[0]] = 1
-    with open(workdir + "index.json", "w") as f:
+    with open(workdir + "index.json", "w", encoding="utf-8") as f:
         json.dump(idx, f, indent=2, ensure_ascii=False)
 
     for letter in idx.keys():
@@ -337,7 +338,7 @@ def make_seq_subindexes(session):
             t_pad = string2filename("%-3s" % t[0].upper())
             t_idx[t_pad] = 1
         Path(workdir + string2filename(letter)).mkdir(parents=True, exist_ok=True)
-        with open(workdir + string2filename(letter) + "/index.json", "w") as f:
+        with open(workdir + string2filename(letter) + "/index.json", "w", encoding="utf-8") as f:
             json.dump(t_idx, f, indent=2, ensure_ascii=False)
         t_idx = {}
         for t in t_real.keys():
@@ -357,7 +358,7 @@ def make_seq_subindexes(session):
             for a in seqors:
                 t_idx[t_pad][a.id] = a.name
         for idx in t_idx.keys():
-            with open(workdir + string2filename(letter) + f"/{idx}.json", "w") as f:
+            with open(workdir + string2filename(letter) + f"/{idx}.json", "w", encoding="utf-8") as f:
                 json.dump(t_idx[idx], f, indent=2, ensure_ascii=False)
 
 
@@ -429,7 +430,7 @@ def make_genres_data(session):
             data.append(book["book_id"])
 
         workfile = pagesdir + "/genre/" + string2filename(gen) + "/all.json"
-        with open(workfile, 'w') as idx:
+        with open(workfile, 'w', encoding="utf-8") as idx:
             json.dump(data, idx, indent=2, ensure_ascii=False)
 
         i = 0
@@ -438,7 +439,7 @@ def make_genres_data(session):
             wdata = data[:50]
             data = data[50:]
             workfile = pagesdir + "/genre/" + string2filename(gen) + "/" + str(i) + ".json"
-            with open(workfile, 'w') as idx:
+            with open(workfile, 'w', encoding="utf-8") as idx:
                 json.dump(wdata, idx, indent=2, ensure_ascii=False)
             i = i + 1
         gen_processed[gen] = 1
@@ -453,7 +454,7 @@ def make_genres_subindexes(session):
     Path(workdir).mkdir(parents=True, exist_ok=True)
 
     meta_data = get_genres_meta(session)
-    with open(workdir + "index.json", "w") as f:
+    with open(workdir + "index.json", "w", encoding="utf-8") as f:
         json.dump(meta_data, f, indent=2, ensure_ascii=False)
 
     genres = get_genres(session)
@@ -467,5 +468,5 @@ def make_genres_subindexes(session):
         data[meta_id][gen_id] = gen_name
     for meta_id in data:
         meta = data[meta_id]
-        with open(workdir + string2filename(meta_id) + ".json", "w") as f:
+        with open(workdir + string2filename(meta_id) + ".json", "w", encoding="utf-8") as f:
             json.dump(meta, f, indent=2, ensure_ascii=False)

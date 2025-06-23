@@ -114,7 +114,7 @@ def custom_alphabet_book_title_cmp(str1, str2):  # pylint: disable=R0911
 
 def genres_to_meta_init():
     """load genres info from file"""
-    with open('genres.list') as lst:
+    with open('genres.list', encoding="utf-8") as lst:
         while True:
             line = lst.readline()
             if not line:
@@ -133,7 +133,7 @@ def get_genre_name(gen_id):
 
 def meta_init():
     """load genres meta info from file"""
-    with open('genres_meta.list') as lst:
+    with open('genres_meta.list', encoding="utf-8") as lst:
         while True:
             line = lst.readline()
             if not line:
@@ -197,6 +197,7 @@ def fill_authors_book(authors, book):
 
 
 def make_authors_db(authors):
+    """make authors data for writing"""
     ret = []
     for auth in authors:
         if auth is not None and authors[auth] is not None:
@@ -227,6 +228,7 @@ def fill_sequences_book(seqs, book):
 
 
 def make_seqs_db(seqs):
+    """make sequences data for writing"""
     ret = []
     for seq in seqs:
         if seq is not None and seqs[seq] is not None:
@@ -271,6 +273,7 @@ def fill_genres_book(genres, book):
 
 
 def make_genres_db(genre_ids):
+    """make genres data for writing"""
     ret = []
     for genre in genre_ids:
         if genre is not None and genre_ids[genre] is not None:
@@ -425,6 +428,7 @@ def refine_book(book):
 
 
 def decode_b64(data):
+    """decode base64 data with light corruption"""
     try:
         return base64.b64decode(data)
     except Exception as e:

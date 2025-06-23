@@ -74,6 +74,14 @@ def get_book_link(approot: str, zipfile: str, filename: str, ctype: str):
 
 
 def make_book_entry(book, ts, authref, seqref, seq_id=None):
+    """create book entry for xml
+    params:
+        book -- book structure (see "Json book object" in SPEC_lists.md)
+        ts -- timestamp in get_dtiso() format (compartibility)
+        authref -- URL["author"] from config.py or another url for author's id2path(id) struct
+        seqref -- URL["seq"] from config.py or another
+        seq_id -- if exists -- entry for this sequence book list
+    """
     approot = CONFIG['APPLICATION_ROOT']
     book_title = book["book_title"]
     book_id = book["book_id"]
@@ -365,7 +373,7 @@ def opds_simple_list(params):
 
     index = {}
     try:
-        with open(indexfile) as idx:
+        with open(indexfile, encoding="utf-8") as idx:
             index = json.load(idx)
     except Exception as ex:
         logging.error(f"error in index: {index_info}, exception: {ex}")
@@ -443,7 +451,7 @@ def opds_author_page(params):
     if not os.path.isfile(indexfile):
         return None
     try:
-        with open(indexfile) as idx:
+        with open(indexfile, encoding="utf-8") as idx:
             auth_data = json.load(idx)
     except Exception as ex:
         logging.error(f"Error on author {sub1}/{sub2}/{id}, exception: {ex}")
@@ -536,7 +544,7 @@ def opds_book_list(params):
     if layout in ("author_seq", "author_alpha", "author_time", "author_nonseq"):
         auth_name = ""
         try:
-            with open(pagesdir + "/" + index + "index.json") as nm:
+            with open(pagesdir + "/" + index + "index.json", encoding="utf-8") as nm:
                 auth_name = json.load(nm)["name"]
         except Exception as ex:
             logging.error(f"Can't read author data for {index}/index.json, exception: {ex}")
@@ -545,7 +553,7 @@ def opds_book_list(params):
         seq_name = ""
         try:
             seq_id = params["seq_id"]
-            with open(pagesdir + "/" + index + "sequences.json") as seqs:
+            with open(pagesdir + "/" + index + "sequences.json", encoding="utf-8") as seqs:
                 seq_data = json.load(seqs)
             for s in seq_data:
                 if s["id"] == seq_id:
@@ -570,7 +578,7 @@ def opds_book_list(params):
         print(booksidx)
 
     try:
-        with open(pagesdir + "/" + booksidx) as b:
+        with open(pagesdir + "/" + booksidx, encoding="utf-8") as b:
             data = json.load(b)
     except Exception as ex:
         logging.error(f"Can't read books list from {booksidx}, exception: {ex}")
@@ -616,6 +624,7 @@ def opds_book_list(params):
 
 
 def opds_search_main(params):
+    """near-static output for main search page"""
     s_term = params["search_term"]
     approot = CONFIG["APPLICATION_ROOT"]
     ts = get_dtiso()

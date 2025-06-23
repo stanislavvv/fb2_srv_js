@@ -46,12 +46,13 @@ def create_opds_response(data, cache_time=CONFIG["CACHE_TIME"]):
 
 @opds.route(URL["start"], methods=['GET'])
 def opds_root():
-    """root"""
+    """opds root"""
     return create_opds_response(opds_main())
 
 
 @opds.route(URL["authidx"], methods=['GET'])
 def opds_auth_root():
+    """authors root"""
     params = {
         "index": URL["authidx"].replace("/opds/", "", 1),
         "tag": "tag:root:authors",
@@ -69,6 +70,7 @@ def opds_auth_root():
 
 @opds.route(URL["authidx"] + "<sub>", methods=['GET'])
 def opds_auth_sub(sub):
+    """first letter view for authors"""
     sub = validate_prefix(sub)
     params = {
         "index": URL["authidx"].replace("/opds/", "", 1) + sub,
@@ -88,6 +90,7 @@ def opds_auth_sub(sub):
 
 @opds.route(URL["authidx"] + "<sub1>/<sub2>", methods=['GET'])
 def opds_auth_sub2(sub1, sub2):
+    """<first letter>/<first three letters> view for authors"""
     sub1 = validate_prefix(sub1)
     sub2 = validate_prefix(sub2)
     params = {
@@ -107,6 +110,7 @@ def opds_auth_sub2(sub1, sub2):
 
 @opds.route(URL["author"] + "<sub1>/<sub2>/<id>", methods=['GET'])
 def opds_author_main(sub1, sub2, id):
+    """author's main page"""
     sub1 = validate_id(sub1)
     sub2 = validate_id(sub2)
     id = validate_id(id)
@@ -130,6 +134,7 @@ def opds_author_main(sub1, sub2, id):
 
 @opds.route(URL["author"] + "<sub1>/<sub2>/<id>/sequences", methods=['GET'])
 def opds_author_seqs(sub1, sub2, id):
+    """author's sequences list"""
     sub1 = validate_id(sub1)
     sub2 = validate_id(sub2)
     id = validate_id(id)
@@ -154,6 +159,7 @@ def opds_author_seqs(sub1, sub2, id):
 
 @opds.route(URL["author"] + "<sub1>/<sub2>/<id>/<seq_id>", methods=['GET'])
 def opds_author_seq(sub1, sub2, id, seq_id):
+    """author's books in sequence"""
     sub1 = validate_id(sub1)
     sub2 = validate_id(sub2)
     id = validate_id(id)
@@ -181,6 +187,7 @@ def opds_author_seq(sub1, sub2, id, seq_id):
 
 @opds.route(URL["author"] + "<sub1>/<sub2>/<id>/sequenceless", methods=['GET'])
 def opds_author_nonseq(sub1, sub2, id):
+    """author's books not in any sequence"""
     sub1 = validate_id(sub1)
     sub2 = validate_id(sub2)
     id = validate_id(id)
@@ -206,6 +213,7 @@ def opds_author_nonseq(sub1, sub2, id):
 
 @opds.route(URL["author"] + "<sub1>/<sub2>/<id>/alphabet", methods=['GET'])
 def opds_author_alphabet(sub1, sub2, id):
+    """author's all books sort by book_title"""
     sub1 = validate_id(sub1)
     sub2 = validate_id(sub2)
     id = validate_id(id)
@@ -231,6 +239,7 @@ def opds_author_alphabet(sub1, sub2, id):
 
 @opds.route(URL["author"] + "<sub1>/<sub2>/<id>/time", methods=['GET'])
 def opds_author_time(sub1, sub2, id):
+    """author's all books sort by date"""
     sub1 = validate_id(sub1)
     sub2 = validate_id(sub2)
     id = validate_id(id)
@@ -256,6 +265,7 @@ def opds_author_time(sub1, sub2, id):
 
 @opds.route(URL["seqidx"], methods=['GET'])
 def opds_seq_root():
+    """sequences root"""
     params = {
         "index": URL["seqidx"].replace("/opds/", "", 1),
         "tag": "tag:root:sequences",
@@ -273,6 +283,7 @@ def opds_seq_root():
 
 @opds.route(URL["seqidx"] + "<sub>", methods=['GET'])
 def opds_seq_sub(sub):
+    """sequences first letter view"""
     sub = validate_prefix(sub)
     params = {
         "index": URL["seqidx"].replace("/opds/", "", 1) + sub,
@@ -292,6 +303,7 @@ def opds_seq_sub(sub):
 
 @opds.route(URL["seqidx"] + "<sub1>/<sub2>", methods=['GET'])
 def opds_seq_sub2(sub1, sub2):
+    """sequences <first letter>/<first three letters> view"""
     sub1 = validate_prefix(sub1)
     sub2 = validate_prefix(sub2)
     params = {
@@ -311,6 +323,7 @@ def opds_seq_sub2(sub1, sub2):
 
 @opds.route(URL["seq"] + "<sub1>/<sub2>/<id>", methods=['GET'])
 def opds_sequence(sub1, sub2, id):
+    """books in sequences"""
     sub1 = validate_id(sub1)
     sub2 = validate_id(sub2)
     id = validate_id(id)
@@ -336,6 +349,7 @@ def opds_sequence(sub1, sub2, id):
 
 @opds.route(URL["genidx"], methods=['GET'])
 def opds_genres_root():
+    """genres root (genres groups list)"""
     params = {
         "index": URL["genidx"].replace("/opds/", "", 1),
         "tag": "tag:root:genres",
@@ -354,6 +368,7 @@ def opds_genres_root():
 
 @opds.route(URL["genidx"] + "<meta_id>", methods=['GET'])
 def opds_genres_list(meta_id):
+    """genres list in group"""
     meta_id = validate_id(meta_id)
     meta_name = get_meta_name(meta_id)
     params = {
@@ -375,6 +390,7 @@ def opds_genres_list(meta_id):
 @opds.route(URL["genre"] + "<gen_id>", methods=['GET'])
 @opds.route(URL["genre"] + "<gen_id>/<int:page>", methods=['GET'])
 def opds_genre_books(gen_id, page=0):
+    """paginated book list in genre"""
     id = validate_genre(gen_id)
     gen_name = get_genre_name(id)
     params = {
@@ -399,6 +415,7 @@ def opds_genre_books(gen_id, page=0):
 @opds.route(URL["time"], methods=['GET'])
 @opds.route(URL["time"] + "/<int:page>", methods=['GET'])
 def opds_time_books(page=0):
+    """all books in library sort by date"""
     params = {
         "tag": "tag:time:" + str(page),
         "subtag": "tag:time:" + str(page),
@@ -418,6 +435,7 @@ def opds_time_books(page=0):
 
 @opds.route(URL["rndbook"], methods=['GET'])
 def opds_rnd_books():
+    """random books list"""
     params = {
         "tag": "tag:search:books:random",
         "title": LANG["rnd_books"],
@@ -435,6 +453,7 @@ def opds_rnd_books():
 
 @opds.route(URL["rndgenidx"], methods=['GET'])
 def opds_rnd_genres_root():
+    """genres root (genres groups list) for random books"""
     params = {
         "index": URL["genidx"].replace("/opds/", "", 1),
         "tag": "tag:rnd:genres",
@@ -453,6 +472,7 @@ def opds_rnd_genres_root():
 
 @opds.route(URL["rndgenidx"] + "<meta_id>", methods=['GET'])
 def opds_rnd_genres_list(meta_id):
+    """genres list in group for random books"""
     meta_id = validate_id(meta_id)
     meta_name = get_meta_name(meta_id)
     params = {
@@ -473,6 +493,7 @@ def opds_rnd_genres_list(meta_id):
 
 @opds.route(URL["rndgen"] + "<gen_id>", methods=['GET'])
 def opds_rnd_books_genre(gen_id):
+    """random books list in genre"""
     gen_id = validate_genre(gen_id)
     params = {
         "tag": "tag:rnd:genre:" + gen_id,
@@ -492,6 +513,7 @@ def opds_rnd_books_genre(gen_id):
 
 @opds.route(URL["rndseq"], methods=['GET'])
 def opds_rnd_seqs():
+    """random sequences list"""
     params = {
         "tag": "tag:search:sequences:random:",
         "subtag": "tag:search:sequence:random:",
@@ -508,6 +530,7 @@ def opds_rnd_seqs():
 
 @opds.route(URL["search"], methods=['GET'])
 def opds_search():
+    """search root page"""
     s_term = request.args.get('searchTerm')
     s_term = validate_search(s_term)
     params = {
@@ -523,6 +546,7 @@ def opds_search():
 
 @opds.route(URL["srchauth"], methods=['GET'])
 def opds_search_author():
+    """search in author names"""
     s_term = request.args.get('searchTerm')
     s_term = validate_search(s_term)
     s_term_q = urllib.parse.quote(s_term)
@@ -543,6 +567,7 @@ def opds_search_author():
 
 @opds.route(URL["srchseq"], methods=['GET'])
 def opds_search_seq():
+    """search in sequence names"""
     s_term = request.args.get('searchTerm')
     s_term = validate_search(s_term)
     s_term_q = urllib.parse.quote(s_term)
@@ -563,6 +588,7 @@ def opds_search_seq():
 
 @opds.route(URL["srchbook"], methods=['GET'])
 def opds_search_books(page=0):
+    """search in book titles"""
     s_term = request.args.get('searchTerm')
     s_term = validate_search(s_term)
     s_term_q = urllib.parse.quote(s_term)
@@ -584,6 +610,7 @@ def opds_search_books(page=0):
 
 @opds.route(URL["srchbookanno"], methods=['GET'])
 def opds_search_booksanno(page=0):
+    """search in book annotations"""
     s_term = request.args.get('searchTerm')
     s_term = validate_search(s_term)
     s_term_q = urllib.parse.quote(s_term)

@@ -30,6 +30,7 @@ VARS = {
     "mas_genre_pass_length": "MAX_PASS_LENGTH_GEN",  # memory limit param, default see below
     "books_pass_size_hint": "PASS_SIZE_HINT",  # memory limit param, default see below
     "default_cover_image": "DEFAULT_COVER",  # path to default cover
+    "default_cover_source": "DEFAULT_COVER_SRC",  # master-copy of default cover
     "default_cache_seconds": "CACHE_TIME",  # default cache time
     "static_file_cache_seconds": "CACHE_TIME_ST",  # static file cache time, seconds
     "xslt_file": "FB2_XSLT",  # xslt file for fb2 to html conversion
@@ -45,6 +46,7 @@ CONFIG = {  # default values
     "MAX_PASS_LENGTH_GEN": "5",  # default for orange pi
     "PASS_SIZE_HINT": "1048576",  # default for orange pi
     "DEFAULT_COVER": "/covers/default.jpg",
+    "DEFAULT_COVER_SRC": "./app/static/default-cover.jpg",
     "CACHE_TIME": "604800",  # 60 * 60 * 24 * 7 == 7 days
     "CACHE_TIME_ST": "2592000",  # 60 * 60 * 24 * 30 == 30 days
     "FB2_XSLT": "fb2_to_html.xsl",

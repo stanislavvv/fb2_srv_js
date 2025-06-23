@@ -64,14 +64,6 @@ class BookDescription(Base):
     )
 
 
-# class BookCover(Base):
-#     """book cover image"""
-#     __tablename__ = 'books_covers'
-#     book_id = Column(String(32), ForeignKey("books.book_id"), primary_key=True)
-#     cover_ctype = Column(String)
-#     cover = Column(TEXT)
-
-
 class BookAuthor(Base):
     """books author"""
     __tablename__ = 'authors'

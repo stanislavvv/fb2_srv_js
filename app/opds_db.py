@@ -160,6 +160,9 @@ def opds_books_db(params):
 
 
 def opds_simple_list_db(params):
+    """simple list for data from db
+    layout define random or search in authors/sequences
+    """
     approot = CONFIG["APPLICATION_ROOT"]
     pagelimit = int(CONFIG["PAGE_SIZE"])
     ts = get_dtiso()
