@@ -5,6 +5,7 @@ import logging
 import urllib
 
 from sqlalchemy.sql.expression import func
+from sqlalchemy import and_
 
 from .db_classes import Book, BookAuthor, BookSequence, dbsession
 from .db import (
@@ -131,6 +132,7 @@ def opds_simple_list_db(params):
     params["ts"] = ts
 
     baseref = params['baseref']
+    tag = params["tag"]
     subtag = params["subtag"]  # common part of tags in links
     subtitle = params["subtitle"]  # for text part of links
     layout = params["layout"]
@@ -139,10 +141,37 @@ def opds_simple_list_db(params):
 
     try:
         session = dbsession()
+        list_data = []
         if layout == "rnd_authors":
             list_data = session.query(BookAuthor).order_by(func.random()).limit(pagelimit).all()
         elif layout == "rnd_seqs":
             list_data = session.query(BookSequence).order_by(func.random()).limit(pagelimit).all()
+        elif layout == "search_author":
+            s_term = params["search_term"]
+            ret["feed"]["id"] = tag + urllib.parse.quote_plus(s_term)
+            maxres = CONFIG["MAX_SEARCH_RES"]
+            s_terms = s_term.split()
+            conditions = []
+            for term in s_terms:
+                conditions.append(
+                    BookAuthor.name.ilike(f"%{term}%")
+                )
+            list_data = session.query(BookAuthor).filter(
+                and_(*conditions)
+            ).limit(maxres)
+        elif layout == "search_seq":
+            s_term = params["search_term"]
+            ret["feed"]["id"] = tag + urllib.parse.quote_plus(s_term)
+            maxres = CONFIG["MAX_SEARCH_RES"]
+            s_terms = s_term.split()
+            conditions = []
+            for term in s_terms:
+                conditions.append(
+                    BookSequence.name.ilike(f"%{term}%")
+                )
+            list_data = session.query(BookSequence).filter(
+                and_(*conditions)
+            ).limit(maxres)
         data = []
         for i in list_data:
             data.append(

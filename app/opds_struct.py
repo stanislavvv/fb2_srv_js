@@ -623,7 +623,7 @@ def opds_search_main(params):
     params["ts"] = ts
     # params["tag"] = "tag:root"
     tag = params["tag"]
-    params["title"] = CONFIG["TITLE"]
+    # params["title"] = CONFIG["TITLE"]
     params["start"] = URL["start"]
     params["self"] = URL["start"]
 

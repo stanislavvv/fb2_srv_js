@@ -3,6 +3,7 @@
 
 import xmltodict
 import logging
+import urllib
 
 from flask import Blueprint, Response, request
 
@@ -511,9 +512,50 @@ def opds_search():
     s_term = validate_search(s_term)
     params = {
         "search_term": s_term,
-        "self": URL["search"],
+        "self": URL["search"] + f"?searchTerm={s_term}",
+        "start": URL["start"],
         "up": URL["start"],
         "tag": "tag:search:",
         "title": LANG["search_main"] % s_term
     }
     return create_opds_response(opds_search_main(params))
+
+
+@opds.route(URL["srchauth"], methods=['GET'])
+def opds_search_author():
+    s_term = request.args.get('searchTerm')
+    s_term = validate_search(s_term)
+    s_term_q = urllib.parse.quote(s_term)
+    params = {
+        "search_term": s_term,
+        "self": URL["srchauth"] + f"?searchTerm={s_term_q}",
+        "start": URL["start"],
+        "up": URL["search"] + f"?searchTerm={s_term_q}",
+        "tag": "tag:search:authors:",
+        "subtag": "tag:author:",
+        "baseref": URL["author"],
+        "layout": "search_author",
+        "title": LANG["search_author"] % s_term,
+        "subtitle": ""
+    }
+    return create_opds_response(opds_simple_list_db(params))
+
+
+@opds.route(URL["srchseq"], methods=['GET'])
+def opds_search_seq():
+    s_term = request.args.get('searchTerm')
+    s_term = validate_search(s_term)
+    s_term_q = urllib.parse.quote(s_term)
+    params = {
+        "search_term": s_term,
+        "self": URL["srchseq"] + f"?searchTerm={s_term_q}",
+        "start": URL["start"],
+        "up": URL["search"] + f"?searchTerm={s_term_q}",
+        "tag": "tag:search:sequences:",
+        "subtag": "tag:sequence:",
+        "baseref": URL["seq"],
+        "layout": "search_seq",
+        "title": LANG["search_seq"] % s_term,
+        "subtitle": ""
+    }
+    return create_opds_response(opds_simple_list_db(params))
