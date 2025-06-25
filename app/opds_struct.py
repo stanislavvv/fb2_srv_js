@@ -605,9 +605,19 @@ def opds_book_list(params):
         data = sorted(data_seq, key=lambda s: s["seq_num"] or -1)
     elif layout == "author_nonseq":
         data_nonseq = []
-        for book in data:
-            if book["sequences"] is None:
-                data_nonseq.append(book)
+        try:
+            book_ids = []
+            with open(pagesdir + "/" + index + "sequenceless.json", encoding="utf-8") as f:
+                book_ids = json.load(f)
+            data_nonseq = []
+            for book in data:
+                if book["book_id"] in book_ids:
+                    data_nonseq.append(book)
+        except Exception as ex:
+            logging.error(f"Sequenceless book ids load error: {ex}")
+            for book in data:
+                if book["sequences"] is None:
+                    data_nonseq.append(book)
         data = sorted(data_nonseq, key=cmp_to_key(custom_alphabet_book_title_cmp))
     elif layout == "author_time":
         data = sorted(data, key=lambda s: unicode_upper(s["date_time"]))
