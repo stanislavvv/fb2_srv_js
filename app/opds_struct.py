@@ -369,6 +369,7 @@ def opds_simple_list(params):
     elif os.path.isfile(pagesdir + "/" + safe_path(index_info + ".json")):
         indexfile = pagesdir + "/" + safe_path(index_info + ".json")
     else:
+        logging.error(f"Can't get indexfile for {index_info}")
         return None
 
     index = {}
@@ -380,7 +381,7 @@ def opds_simple_list(params):
         return None
 
     data = []
-    if "layout" in params:
+    if "layout" in params and params["layout"] in ("name_id_list", "key_value"):
         if params["layout"] == "name_id_list":  # array of {name: ..., id, ...}
             idx_data = {}
             for i in index:
@@ -403,8 +404,7 @@ def opds_simple_list(params):
     ret = opds_header(params)
 
     for k in data:
-        if "layout" in params:
-            if params["layout"] in ("name_id_list", "key_value"):
+        if "layout" in params and params["layout"] in ("name_id_list", "key_value"):
                 title = idx_data[k]
                 baseref = strong_baseref
                 href = approot + baseref + urllib.parse.quote(k)
@@ -575,7 +575,6 @@ def opds_book_list(params):
             params["prev"] = params["self"]
         elif page > 1:
             params["prev"] = params["self"] + "/" + str(page - 1)
-        print(booksidx)
 
     try:
         with open(pagesdir + "/" + booksidx, encoding="utf-8") as b:
