@@ -23,8 +23,6 @@ OPDS interface is done and working
 
 ## Small parts
 
-  * indexing:
-    * use URL from config.py in data path (with removing `^/opds`)
   * opds:
     * authors non-sequences books page must use prepared data (opds_struct.py, opds_book_list, `elif layout == "author_nonseq":`)
     * approot usage in all urls (for use '/books/opds/' in site subtree)

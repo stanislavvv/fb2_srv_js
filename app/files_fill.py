@@ -36,6 +36,7 @@ from .db import (
     get_genres,
     get_genres_meta
 )
+from .config import URL
 
 auth_processed = {}
 seq_processed = {}
@@ -73,6 +74,7 @@ def make_auth_data(session):
     hide_deleted = CONFIG['HIDE_DELETED']
     zipdir = CONFIG['ZIPS']
     pagesdir = CONFIG['PAGES']
+    authordir = URL["author"].replace("/opds", "", 1)
 
     auth_data = {}
     for booklist in sorted(glob.glob(zipdir + '/*.zip.list') + glob.glob(zipdir + '/*.zip.list.gz')):
@@ -103,7 +105,7 @@ def make_auth_data(session):
     for auth_id in auth_data:
         data = auth_data[auth_id]
 
-        workdir = pagesdir + "/author/" + id2path(auth_id)
+        workdir = pagesdir + authordir + id2path(auth_id)
         Path(workdir).mkdir(parents=True, exist_ok=True)
 
         allbooks = data["books"]
@@ -133,7 +135,8 @@ def make_auth_data(session):
 def make_auth_subindexes(session):
     """make per-letter/three-letter indexes"""
     pagesdir = CONFIG['PAGES']
-    workdir = pagesdir + '/authorsindex/'
+    authidxdir = URL["authidx"].replace("/opds", "", 1)
+    workdir = pagesdir + authidxdir
 
     Path(workdir).mkdir(parents=True, exist_ok=True)
 
@@ -192,7 +195,8 @@ def make_book_covers():
     logging.info("make book covers")
 
     pagesdir = CONFIG['PAGES']
-    coversdir = pagesdir + '/covers'
+
+    coversdir = pagesdir + URL["cover"]
     Path(coversdir).mkdir(parents=True, exist_ok=True)
 
     zipdir = CONFIG['ZIPS']
@@ -228,8 +232,8 @@ def make_book_covers_data(lines, coversdir, hide_deleted=False):
             if "cover" in book and book["cover"] is not None:
                 cover = book["cover"]
                 # cover_ctype = cover["content-type"]
-                cover_data = cover["data"] + '==='  # pad base64 data
-                workdir = coversdir + '/' + id2pathonly(book_id)
+                cover_data = cover["data"] # + '==='  # pad base64 data
+                workdir = coversdir + id2pathonly(book_id)
                 Path(workdir).mkdir(parents=True, exist_ok=True)
                 try:
                     img_bytes = decode_b64(cover_data)
@@ -264,6 +268,7 @@ def make_seq_data(session):
     hide_deleted = CONFIG['HIDE_DELETED']
     zipdir = CONFIG['ZIPS']
     pagesdir = CONFIG['PAGES']
+    seqdir = URL["seq"].replace("/opds", "", 1)
 
     seq_data = {}
     for booklist in sorted(glob.glob(zipdir + '/*.zip.list') + glob.glob(zipdir + '/*.zip.list.gz')):
@@ -294,7 +299,7 @@ def make_seq_data(session):
     for seq_id in seq_data:
         data = seq_data[seq_id]
 
-        workdir = pagesdir + "/sequence/" + id2pathonly(seq_id)
+        workdir = pagesdir + seqdir + id2pathonly(seq_id)
         Path(workdir).mkdir(parents=True, exist_ok=True)
 
         workfile = workdir + f"/{seq_id}.json"
@@ -308,7 +313,7 @@ def make_seq_data(session):
 def make_seq_subindexes(session):
     """make per-letter/three-letter indexes for sequences"""
     pagesdir = CONFIG['PAGES']
-    workdir = pagesdir + '/sequencesindex/'
+    workdir = pagesdir + URL["seqidx"].replace("/opds", "", 1)
 
     Path(workdir).mkdir(parents=True, exist_ok=True)
 
@@ -419,17 +424,18 @@ def make_genres_data(session):
                                 s.append(book)
                                 gen_data[gen_id] = s
 
-    workdir = pagesdir + "/genre/"
+    genredir = URL["genre"].replace("/opds", "", 1)
+    workdir = pagesdir + genredir
     Path(workdir).mkdir(parents=True, exist_ok=True)
     for gen in gen_data:
-        workdir = pagesdir + "/genre/" + string2filename(gen)
+        workdir = pagesdir + genredir + string2filename(gen)
         Path(workdir).mkdir(parents=True, exist_ok=True)
 
         data = []
         for book in gen_data[gen]:
             data.append(book["book_id"])
 
-        workfile = pagesdir + "/genre/" + string2filename(gen) + "/all.json"
+        workfile = pagesdir + genredir + string2filename(gen) + "/all.json"
         with open(workfile, 'w', encoding="utf-8") as idx:
             json.dump(data, idx, indent=2, ensure_ascii=False)
 
@@ -438,7 +444,7 @@ def make_genres_data(session):
         while len(data) > 0:
             wdata = data[:50]
             data = data[50:]
-            workfile = pagesdir + "/genre/" + string2filename(gen) + "/" + str(i) + ".json"
+            workfile = pagesdir + genredir + string2filename(gen) + "/" + str(i) + ".json"
             with open(workfile, 'w', encoding="utf-8") as idx:
                 json.dump(wdata, idx, indent=2, ensure_ascii=False)
             i = i + 1
@@ -449,7 +455,7 @@ def make_genres_data(session):
 def make_genres_subindexes(session):
     """make meta/genres indexes"""
     pagesdir = CONFIG['PAGES']
-    workdir = pagesdir + '/genresindex/'
+    workdir = pagesdir + URL["genidx"].replace("/opds", "", 1)
 
     Path(workdir).mkdir(parents=True, exist_ok=True)
 
