@@ -152,7 +152,8 @@ def make_auth_subindexes(session):
     for letter in idx.keys():
         three_l = session.query(
             func.upper(func.left(BookAuthor.name, 3))
-            .label('first_three')
+            .label('first_three'),
+            func.count().label('cnt')
         ).filter(
             # BookAuthor.name.ilike(f'{letter}%')
             func.upper(func.left(BookAuthor.name, 1)) == letter
@@ -163,7 +164,7 @@ def make_auth_subindexes(session):
         for t in three_l:
             t_real[t[0]] = 1
             t_pad = string2filename("%-3s" % t[0].upper())
-            t_idx[t_pad] = 1
+            t_idx[t_pad] = int(t[1])
         Path(workdir + string2filename(letter)).mkdir(parents=True, exist_ok=True)
         with open(workdir + string2filename(letter) + "/index.json", "w", encoding="utf-8") as f:
             json.dump(t_idx, f, indent=2, ensure_ascii=False)
@@ -331,7 +332,8 @@ def make_seq_subindexes(session):
             continue
         three_l = session.query(
             func.upper(func.left(BookSequence.name, 3))
-            .label('first_three')
+            .label('first_three'),
+            func.count().label('cnt')
         ).filter(
             func.upper(func.left(BookSequence.name, 1)) == letter
         ).group_by('first_three').all()
@@ -341,7 +343,7 @@ def make_seq_subindexes(session):
         for t in three_l:
             t_real[t[0]] = 1
             t_pad = string2filename("%-3s" % t[0].upper())
-            t_idx[t_pad] = 1
+            t_idx[t_pad] = int(t[1])
         Path(workdir + string2filename(letter)).mkdir(parents=True, exist_ok=True)
         with open(workdir + string2filename(letter) + "/index.json", "w", encoding="utf-8") as f:
             json.dump(t_idx, f, indent=2, ensure_ascii=False)
