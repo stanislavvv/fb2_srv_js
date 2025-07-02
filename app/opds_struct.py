@@ -372,6 +372,10 @@ def opds_simple_list(params):
         logging.error(f"Can't get indexfile for {index_info}")
         return None
 
+    use_nums = None  # list without nums
+    if "use_nums" in params:
+        use_nums = params["use_nums"]
+
     index = {}
     try:
         with open(indexfile, encoding="utf-8") as idx:
@@ -384,12 +388,25 @@ def opds_simple_list(params):
     if "layout" in params and params["layout"] in ("name_id_list", "key_value"):
         if params["layout"] == "name_id_list":  # array of {name: ..., id, ...}
             idx_data = {}
+            name_data = {}
             for i in index:
                 name = i["name"]
                 i_id = i["id"]
-                idx_data[i_id] = name
-            for k, v in sorted(idx_data.items(), key=lambda item: item[1]):  # pylint: disable=W0612
-                data.append(k)
+                if use_nums:
+                    cnt = i["cnt"]
+                    idx_data[i_id] = {
+                        "name": name,
+                        "cnt": cnt
+                    }
+                    name_data[i_id] = name
+                else:
+                    idx_data[i_id] = name
+            if use_nums:
+                for k, v in sorted(name_data.items(), key=lambda item: item[1]):  # pylint: disable=W0612
+                    data.append(k)
+            else:
+                for k, v in sorted(idx_data.items(), key=lambda item: item[1]):  # pylint: disable=W0612
+                    data.append(k)
         if params["layout"] == "key_value":
             idx_data = {}
             for k, v in sorted(index.items(), key=lambda item: item[1]):  # pylint: disable=W0612
@@ -398,22 +415,34 @@ def opds_simple_list(params):
     elif simple_links:  # id: name dict
         data = sorted(index.keys(), key=cmp_to_key(custom_alphabet_cmp))
     else:  # key_value by default in not simple_links
+        idx_data = {}
         for k, v in sorted(index.items(), key=lambda item: item[1]):  # pylint: disable=W0612
             data.append(k)
+            idx_data[k] = v
 
     ret = opds_header(params)
 
     for k in data:
         if "layout" in params and params["layout"] in ("name_id_list", "key_value"):
+            baseref = strong_baseref
+            href = approot + baseref + urllib.parse.quote(k)
+            if use_nums:
+                title = idx_data[k]["name"]
+                text = subtitle % str(idx_data[k]["cnt"])
+            else:
                 title = idx_data[k]
-                baseref = strong_baseref
-                href = approot + baseref + urllib.parse.quote(k)
+                text = idx_data[k]
         elif simple_links:
             title = k
+            if use_nums:
+                text = subtitle % str(index[k])
+            else:
+                text = title
             baseref = simple_baseref
             href = approot + baseref + urllib.parse.quote(k)
         else:
             title = index[k]
+            text = index[k]
             baseref = strong_baseref
             href = approot + baseref + urllib.parse.quote(id2path(k))
         ret["feed"]["entry"].append(
@@ -423,7 +452,7 @@ def opds_simple_list(params):
                 "title": title,
                 "content": {
                     "@type": "text",
-                    "#text": subtitle + "'" + title + "'"
+                    "#text": text
                 },
                 "link": {
                     "@href": href,

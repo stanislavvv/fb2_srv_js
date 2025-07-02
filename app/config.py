@@ -91,7 +91,7 @@ LANG = {
 
     "book_dl": "Скачать",
     "book_read": "Читать онлайн",
-    "books_num": "%d книг(и)",
+    "books_num": "%s книг(и)",
     "books_author_alphabet": "Книги автора '%s' по алфавиту",
     "books_author_time": "Книги автора '%s' по времени поступления",
     "books_author_nonseq": "Книги автора '%s' вне серий",
@@ -113,13 +113,13 @@ LANG = {
     "auth_root_subtitle": "Авторы на ",
     "author": "Автор ",
     "author_tpl": "Автор '%s'",
-    "authors_num": "%d авт.",
+    "authors_num": "%s авт.",
 
     "sequences": "Серии",
     "seq_root_subtitle": "Серии на ",
     "sequence": "Серия ",
     "seq_tpl": "Серия '%s'",
-    "seqs_num": "%d сер.",
+    "seqs_num": "%s сер.",
     "seqs_author": "Серии автора '%s'",
 
     "pubinfo_isbn": "<p>ISBN: %s</p>",

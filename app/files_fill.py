@@ -233,7 +233,7 @@ def make_book_covers_data(lines, coversdir, hide_deleted=False):
             if "cover" in book and book["cover"] is not None:
                 cover = book["cover"]
                 # cover_ctype = cover["content-type"]
-                cover_data = cover["data"] # + '==='  # pad base64 data
+                cover_data = cover["data"]
                 workdir = coversdir + id2pathonly(book_id)
                 Path(workdir).mkdir(parents=True, exist_ok=True)
                 try:

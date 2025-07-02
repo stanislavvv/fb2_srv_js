@@ -233,7 +233,7 @@ def opds_simple_list_db(params):
                 "title": title,
                 "content": {
                     "@type": "text",
-                    "#text": subtitle + "'" + title + "'"
+                    "#text": subtitle % title
                 },
                 "link": {
                     "@href": href,
