@@ -44,7 +44,7 @@ CONFIG = {  # default values
     "AUTHOR_PLACEHOLDER": "Автор Неизвестен",
     "MAX_PASS_LENGTH": "4000",  # default for orange pi
     "MAX_PASS_LENGTH_GEN": "5",  # default for orange pi
-    "PASS_SIZE_HINT": "1048576",  # default for orange pi
+    "PASS_SIZE_HINT": "10485760",  # default for orange pi
     "DEFAULT_COVER": "/covers/default.jpg",
     "DEFAULT_COVER_SRC": "./app/static/default-cover.jpg",
     "CACHE_TIME": "604800",  # 60 * 60 * 24 * 7 == 7 days

@@ -26,10 +26,10 @@ from .data import (
 
 
 # ToDo: test it on OrangePi with bigger values
-MAX_PASS_LENGTH = 4000
-MAX_PASS_LENGTH_GEN = 5
+# MAX_PASS_LENGTH = 4000
+# MAX_PASS_LENGTH_GEN = 5
 
-PASS_SIZE_HINT = 10485760
+# PASS_SIZE_HINT = 10485760
 
 
 def dbwrite(data):
@@ -80,13 +80,13 @@ def process_booklist(booklist, hide_deleted=False):
     """get data from booklist and fill it to db"""
     with open_booklist(booklist) as lst:
         count = 0
-        lines = lst.readlines(PASS_SIZE_HINT)
+        lines = lst.readlines(int(CONFIG["PASS_SIZE_HINT"]))
         while len(lines) > 0:
             count = count + len(lines)
             # print("   %s" % count)
             logging.info("   %s", count)
             process_books_batch(lines, hide_deleted)
-            lines = lst.readlines(PASS_SIZE_HINT)
+            lines = lst.readlines(int(CONFIG["PASS_SIZE_HINT"]))
 
 
 def process_books_batch(lines, hide_deleted):

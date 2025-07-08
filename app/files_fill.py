@@ -203,20 +203,18 @@ def make_book_covers():
     zipdir = CONFIG['ZIPS']
     hide_deleted = CONFIG['HIDE_DELETED']
 
-    passhint = int(CONFIG['PASS_SIZE_HINT'])
-
     i = 0
     for booklist in sorted(glob.glob(zipdir + '/*.zip.list') + glob.glob(zipdir + '/*.zip.list.gz')):
         logging.info("[%s] %s", str(i), booklist)
         with open_booklist(booklist) as lst:
             count = 0
-            lines = lst.readlines(passhint)
+            lines = lst.readlines(int(CONFIG['PASS_SIZE_HINT']))
             while len(lines) > 0:
                 count = count + len(lines)
                 # print("   %s" % count)
                 logging.info("   %s", count)
                 make_book_covers_data(lines, coversdir, hide_deleted)
-                lines = lst.readlines(passhint)
+                lines = lst.readlines(int(CONFIG['MAX_PASS_LENGTH']))
         i = i + 1
     shutil.copy(CONFIG['DEFAULT_COVER_SRC'], pagesdir + CONFIG['DEFAULT_COVER'])
     logging.info("end")
