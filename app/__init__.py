@@ -27,8 +27,4 @@ def create_app():
     app.register_blueprint(static, url_prefix=app.config['APPLICATION_ROOT'])
     app.register_blueprint(opds, url_prefix=app.config['APPLICATION_ROOT'])
 
-    @app.route('/')
-    def root():
-        return 'Hello, World!'
-
     return app

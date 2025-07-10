@@ -1,0 +1,64 @@
+<html>
+    <head>
+        <title id="title">Books</title>
+        <style>
+            html { font-size: 62.5%; }
+            .navi { font-size: 1em; padding-right 1em; }
+            body { font-size: 1em; }
+            @media (max-width: 400px) {
+                html { font-size: 300%; }
+            }
+            @media (min-width: 500px) {
+                html { font-size: 180%; }
+            }
+            @media (min-width: 700px) {
+                html { font-size: 140%; }
+            }
+            @media (min-width: 1200px) {
+                html { font-size: 100%; }
+            }
+            .rowlist_single {
+                display: grid;
+                grid-gap: 1pt;
+                grid-template-columns: 1rfr;
+                margin-left: 1em;
+            }
+            .author_info {
+                margin-left: 1em;
+            }
+            .seq_info {
+                margin-left: 1em;
+            }
+            .rowlist {
+                display: grid;
+                grid-gap: 1pt;
+                grid-template-columns: minmax(10%,80%) minmax(20%,80%);
+                margin-left: 1em;
+            }
+            .row {
+                clear: both;
+            }
+            .col1 {
+            }
+            .col2 {
+            }
+        </style>
+    </head>
+    <body>
+        <h1 id="title">Books</h1>
+        <div id="search-section" style="margin-bottom: 20px;">
+            <input type="text" id="search-input">
+            <button onclick="performSearch()">Поиск</button>
+        </div>
+        <div id="navigation-section" class="navi"></div>
+        <hr>
+        <div id="content"></div>
+
+        <script src="/interface.js"></script>
+        <script>
+            window.onload = function() {
+                fetchOPDSData('/opds/');
+            };
+        </script>
+    </body>
+</html>

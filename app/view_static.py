@@ -14,7 +14,8 @@ from flask import (
     current_app,
     send_file,
     url_for,
-    redirect
+    redirect,
+    render_template
 )
 
 from .validate import (
@@ -69,6 +70,20 @@ def html_out(zip_file: str, filename: str):
     except Exception as ex:  # pylint: disable=W0703
         print(ex)
         return None
+
+
+def create_html_response(data, tpl_name, cache_period=int(CONFIG['CACHE_TIME'])):
+    """return html response from opds data"""
+    title = data["title"]
+    path = data["path"]
+    if "urlparams" in data:
+        urlparams = data["urlparams"]
+    else:
+        urlparams = ""
+    page = render_template(tpl_name, title=title, path=path, urlparams=urlparams)
+    resp = Response(page, mimetype='text/html')
+    resp.headers['Cache-Control'] = "max-age=%d, must-revalidate" % cache_period
+    return resp
 
 
 @static.route(URL["cover"] + "<sub1>/<sub2>/<book_id>.jpg")
@@ -142,3 +157,19 @@ def fb2_read(zip_file=None, filename=None):
         resp.headers['Cache-Control'] = cachectl
         return resp
     return Response("Book not found", status=404)
+
+
+@static.route("/")
+def webroot():
+    data = {
+        "title": CONFIG["TITLE"],
+        "approot": CONFIG["APPLICATION_ROOT"],
+        "path": "/",
+    }
+    tpl = "index.html"
+    return create_html_response(data, tpl)
+
+
+@static.route("/interface.js")
+def interface_js():
+    return current_app.send_static_file("interface.js")

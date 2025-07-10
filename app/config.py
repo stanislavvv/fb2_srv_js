@@ -53,6 +53,7 @@ CONFIG = {  # default values
     # internal configs
     "REDIR_FROM_ERR": 'root',
     "APP_ICO": "/favicon.ico",
+    "TITLE": "Home OPDS directory",
 }
 
 # internal configuration for opds interface
