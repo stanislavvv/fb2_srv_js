@@ -1,3 +1,12 @@
+// navigation links text
+const linkTexts = {
+    'start': 'HOME',
+    'self': 'RELOAD',
+    'up': 'UP',
+    'next': 'NEXT',
+    'prev': 'PREV'
+};
+
 function fetchOPDSData(url) {
     let xmlHttp = new XMLHttpRequest();
     xmlHttp.open("GET", url, true);
@@ -12,14 +21,14 @@ function fetchOPDSData(url) {
 }
 
 function parseAndRenderXML(xmlDoc) {
-    // Получаем заголовок
+    // title from opds
     let titleElement = xmlDoc.getElementsByTagName("title")[0];
     const titleText = titleElement.textContent;
     document.querySelectorAll("#title").forEach(elem => {
         elem.textContent = titleText;
     });
 
-    // Строка навигации по ссылкам вне entry
+    // navigation from opds
     let navigationSection = document.getElementById('navigation-section');
     navigationSection.innerHTML = '';
     Array.from(xmlDoc.getElementsByTagName("link")).forEach(link => {
@@ -27,7 +36,8 @@ function parseAndRenderXML(xmlDoc) {
             (link.getAttribute('rel') !== "search")) {
             let a = document.createElement("a");
             a.href = '#';
-            a.textContent = link.getAttribute('rel') || link.getAttribute('href');
+            const relValue = link.getAttribute('rel');
+            a.textContent = linkTexts[relValue] || relValue || link.getAttribute('href');
             a.onclick = function() { fetchOPDSData(link.getAttribute('href')); return false; };
             // Вставляем разделитель (пробел) между ссылками, если это не первая ссылка
             if (navigationSection.firstChild) {
@@ -36,7 +46,7 @@ function parseAndRenderXML(xmlDoc) {
             navigationSection.appendChild(a);        }
     });
 
-    // Поле ввода для поиска, если есть ссылка с rel="search"
+    // search if in opds
     let searchLink = Array.from(xmlDoc.getElementsByTagName("link"))
                            .find(l => l.getAttribute('rel') === 'search');
     if (searchLink) {
@@ -45,8 +55,9 @@ function parseAndRenderXML(xmlDoc) {
         document.getElementById('search-section').style.display = 'none';
     }
 
-    // Рендерим каждую запись в формате entry
+    // entry rendering (simple list)
     let contentSection = document.getElementById('content');
+    contentSection.classList.add('rowlist_single');
     contentSection.innerHTML = '';
 
     Array.from(xmlDoc.getElementsByTagName("entry")).forEach(entry => {
@@ -61,13 +72,14 @@ function parseAndRenderXML(xmlDoc) {
             }
         });
 
-        let p = document.createElement("p");
+        let d = document.createElement("div");
         let a = document.createElement("a");
+        d.classList.add('col1')
         a.href = '#';
         a.textContent = title;
         a.onclick = function () { fetchOPDSData(linkHref); return false; };
-        p.appendChild(a);
-        contentSection.appendChild(p);
+        d.appendChild(a);
+        contentSection.appendChild(d);
     });
 }
 

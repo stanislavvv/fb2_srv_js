@@ -3,8 +3,25 @@
         <title id="title">Books</title>
         <style>
             html { font-size: 62.5%; }
-            .navi { font-size: 1em; }
-            body { font-size: 1em; }
+            .topheader {
+                display: flex;
+                justify-content: space-between;
+                position: sticky;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 1.5em;
+                z-index: 1001;
+                padding-left: 2em;
+                padding-right: 2em;
+                background-color: inherit;
+            }
+            body {
+                font-size: 1em;
+                padding-top: 1.5em;
+                background-color: white;
+                color: black;
+            }
             @media (max-width: 400px) {
                 html { font-size: 300%; }
             }
@@ -38,15 +55,18 @@
             .row {
                 clear: both;
             }
+
         </style>
     </head>
     <body>
-        <h1 id="title">Books</h1>
-        <div id="search-section" style="margin-bottom: 20px;">
-            <input type="text" id="search-input">
-            <button onclick="performSearch()">Поиск</button>
+        <div class="topheader">
+            <div id="navigation-section" class="navi"></div>
+            <div id="search-section" class="search-section">
+                <input type="text" id="search-input">
+                <button onclick="performSearch()">Поиск</button>
+            </div>
         </div>
-        <div id="navigation-section" class="navi"></div>
+        <h1 id="title">Books</h1>
         <hr>
         <div id="content"></div>
 
