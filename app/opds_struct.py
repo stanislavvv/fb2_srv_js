@@ -372,6 +372,20 @@ def opds_simple_list(params):
         logging.error(f"Can't get indexfile for {index_info}")
         return None
 
+    if "nameindex" in params:
+        nameindex = params["nameindex"]
+        nameindexfile = pagesdir + "/" + f"{nameindex}/index.json"
+        if not os.path.isfile(nameindexfile):
+            return None
+        try:
+            with open(nameindexfile, encoding="utf-8") as idx:
+                name_data = json.load(idx)
+        except Exception as ex:
+            logging.error(f"Error on author {sub1}/{sub2}/{id}, exception: {ex}")
+            return None
+        page_name = name_data["name"]
+        params["title"] = params["title"] % page_name
+
     use_nums = None  # list without nums
     if "use_nums" in params:
         use_nums = params["use_nums"]

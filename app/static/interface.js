@@ -1,4 +1,4 @@
-// navigation links text
+// begin template data
 const linkTexts = {
     'start': 'HOME',
     'self': 'RELOAD',
@@ -6,6 +6,9 @@ const linkTexts = {
     'next': 'NEXT',
     'prev': 'PREV'
 };
+
+const prefix = 'opds';
+// end template data
 
 function updateNavigationPath(path) {
     window.history.pushState(null, '', `#${path}`);
@@ -21,7 +24,7 @@ function fetchOPDSData(url) {
 
     xmlHttp.onload = function() {
         if(xmlHttp.status === 200) {
-            parseAndRenderXML(xmlHttp.responseXML);
+            parseAndRenderXML(xmlHttp.responseXML, url);
         } else {
             alert('Failed to fetch OPDS data');
         }
@@ -34,7 +37,158 @@ function navigateLink(link) {
     updateNavigationPath(link);
 }
 
-function parseAndRenderXML(xmlDoc) {
+
+function renderSimpleList(xmlDoc) {
+    // entry rendering (simple list)
+    let contentSection = document.getElementById('content');
+    contentSection.className = 'rowlist_single';
+    contentSection.innerHTML = '';
+
+    Array.from(xmlDoc.getElementsByTagName("entry")).forEach(entry => {
+        let title = entry.getElementsByTagName("title")[0].textContent;
+        let linkHref = '';
+        Array.from(entry.getElementsByTagName("link")).forEach(link => {
+            if ((link.getAttribute('type') === 'application/atom+xml;profile=opds-catalog' ||
+                link.getAttribute('type').startsWith('application/atom')) &&
+                link.getAttribute('rel') != 'search'
+            ) {
+                linkHref = link.getAttribute('href');
+            }
+        });
+
+        let d = document.createElement("div");
+        let a = document.createElement("a");
+        d.classList.add('col1')
+        a.href = '#' + linkHref;
+        a.textContent = title;
+        a.onclick = function () { navigateLink(linkHref); return false; };
+        d.appendChild(a);
+        contentSection.appendChild(d);
+    });
+}
+
+function render2elemList(xmlDoc) {
+    // entry rendering (simple list)
+    let contentSection = document.getElementById('content');
+    contentSection.className = 'rowlist';
+    contentSection.innerHTML = '';
+
+    Array.from(xmlDoc.getElementsByTagName("entry")).forEach(entry => {
+        let title = entry.getElementsByTagName("title")[0].textContent;
+        let cont = entry.getElementsByTagName("content")[0].textContent;
+        let linkHref = '';
+        Array.from(entry.getElementsByTagName("link")).forEach(link => {
+            if ((link.getAttribute('type') === 'application/atom+xml;profile=opds-catalog' ||
+                link.getAttribute('type').startsWith('application/atom')) &&
+                link.getAttribute('rel') != 'search'
+            ) {
+                linkHref = link.getAttribute('href');
+            }
+        });
+
+        let d = document.createElement("div");
+        let a = document.createElement("a");
+        d.classList.add('col1')
+        a.href = '#' + linkHref;
+        a.textContent = title;
+        a.onclick = function () { navigateLink(linkHref); return false; };
+        d.appendChild(a);
+        contentSection.appendChild(d);
+
+        let d2 = document.createElement("div");
+        d2.classList.add('col2')
+        d2.textContent = cont;
+        contentSection.appendChild(d2);
+    });
+}
+
+function decodeHtml(html) {
+    let txt = document.createElement('textarea');
+    txt.innerHTML = html;
+    return txt.value;
+}
+
+function renderBook(elem, entry) {
+    
+}
+
+function renderBookList(xmlDoc) {  // placeholder
+    // entry rendering (books list)
+    let contentSection = document.getElementById('content');
+    contentSection.className = 'rowlist';
+    contentSection.innerHTML = '';
+
+    Array.from(xmlDoc.getElementsByTagName("entry")).forEach(entry => {
+        let title = entry.getElementsByTagName("title")[0].textContent;
+        let cont = entry.getElementsByTagName("content")[0].textContent;
+        let linkHref = '';
+        Array.from(entry.getElementsByTagName("link")).forEach(link => {
+            if ((link.getAttribute('type') === 'application/atom+xml;profile=opds-catalog' ||
+                link.getAttribute('type').startsWith('application/atom')) &&
+                link.getAttribute('rel') != 'search'
+            ) {
+                linkHref = link.getAttribute('href');
+            }
+        });
+
+        let d = document.createElement("div");
+        let a = document.createElement("a");
+        d.classList.add('col1')
+        a.href = '#' + linkHref;
+        a.textContent = title;
+        a.onclick = function () { navigateLink(linkHref); return false; };
+        d.appendChild(a);
+        contentSection.appendChild(d);
+
+        let d2 = document.createElement("div");
+        d2.classList.add('col2')
+        d2.textContent = cont;
+        contentSection.appendChild(d2);
+    });
+}
+
+function renderAuthorMain(xmlDoc, url) {
+    let contentSection = document.getElementById('content');
+    contentSection.className = 'author_info';
+    contentSection.innerHTML = '';
+
+    Array.from(xmlDoc.getElementsByTagName("entry")).forEach(entry => {
+        let title = entry.getElementsByTagName("title")[0].textContent;
+        let tag = entry.getElementsByTagName("id")[0].textContent;
+        if (tag.startsWith('tag:author:bio')) {
+            let cont = entry.getElementsByTagName("content")[0].innerHTML;
+            let d = document.createElement("div");
+            let h2 = document.createElement("h2");
+            h2.textContent = title;
+            d.appendChild(h2);
+            let p = document.createElement("p");
+            // p.textContent = cont;
+            p.innerHTML = decodeHtml(cont);
+            d.appendChild(p);
+            contentSection.appendChild(d);
+        } else {
+            let linkHref = '';
+            Array.from(entry.getElementsByTagName("link")).forEach(link => {
+                if ((link.getAttribute('type') === 'application/atom+xml;profile=opds-catalog' ||
+                    link.getAttribute('type').startsWith('application/atom')) &&
+                    link.getAttribute('rel') != 'search'
+                ) {
+                    linkHref = link.getAttribute('href');
+                }
+            });
+
+            let d = document.createElement("div");
+            let a = document.createElement("a");
+            a.href = '#' + linkHref;
+            a.textContent = title;
+            a.onclick = function () { navigateLink(linkHref); return false; };
+            d.appendChild(a);
+            contentSection.appendChild(d);
+        }
+    });
+}
+
+function parseAndRenderXML(xmlDoc, path) {
     // title from opds
     let titleElement = xmlDoc.getElementsByTagName("title")[0];
     const titleText = titleElement.textContent;
@@ -74,32 +228,20 @@ function parseAndRenderXML(xmlDoc) {
         document.getElementById('search-section').style.display = 'none';
     }
 
-    // entry rendering (simple list)
-    let contentSection = document.getElementById('content');
-    contentSection.classList.add('rowlist_single');
-    contentSection.innerHTML = '';
-
-    Array.from(xmlDoc.getElementsByTagName("entry")).forEach(entry => {
-        let title = entry.getElementsByTagName("title")[0].textContent;
-        let linkHref = '';
-        Array.from(entry.getElementsByTagName("link")).forEach(link => {
-            if ((link.getAttribute('type') === 'application/atom+xml;profile=opds-catalog' ||
-                link.getAttribute('type').startsWith('application/atom')) &&
-                link.getAttribute('rel') != 'search'
-            ) {
-                linkHref = link.getAttribute('href');
-            }
-        });
-
-        let d = document.createElement("div");
-        let a = document.createElement("a");
-        d.classList.add('col1')
-        a.href = '#' + linkHref;
-        a.textContent = title;
-        a.onclick = function () { navigateLink(linkHref); return false; };
-        d.appendChild(a);
-        contentSection.appendChild(d);
-    });
+    subpath = path.replace(prefix, '').replace(/^(\/*)/g, '');
+    pathElems = subpath.split('/')
+    pathLength = pathElems.length;
+    if (pathElems[0] === 'author') {
+        if (pathLength === 4) {
+            renderAuthorMain(xmlDoc);
+        } else if (pathElems[4] === 'sequences') {
+            render2elemList(xmlDoc);
+        } else if (pathLength === 5) {
+            renderBookList(xmlDoc);
+        }
+    } else {
+        renderSimpleList(xmlDoc);
+    }
 }
 
 function performSearch() {
@@ -119,7 +261,7 @@ window.onload = function() {
         fetchOPDSData(hashPath);
         updateNavigationPath(hashPath);
     } else {
-        fetchOPDSData('/opds/');  // Default fallback if no hash is present
+        fetchOPDSData(`/${prefix}/`);  // Default fallback if no hash is present
     }
 };
 
@@ -128,6 +270,6 @@ window.onpopstate = function(event) {
     if (hashPath) {
         fetchOPDSData(hashPath);
     } else {
-        fetchOPDSData('/opds/');  // Default fallback if no hash is present
+        fetchOPDSData(`/${prefix}/`);  // Default fallback if no hash is present
     }
 };

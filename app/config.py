@@ -112,7 +112,7 @@ LANG = {
 
     "authors": "Авторы",
     "auth_root_subtitle": "Авторы на ",
-    "author": "Автор ",
+    "author": "Автор %s",
     "author_tpl": "Автор '%s'",
     "authors_num": "%s авт.",
 
