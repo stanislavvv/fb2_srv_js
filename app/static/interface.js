@@ -7,17 +7,32 @@ const linkTexts = {
     'prev': 'PREV'
 };
 
+function updateNavigationPath(path) {
+    window.history.pushState(null, '', path);
+}
+
 function fetchOPDSData(url) {
     let xmlHttp = new XMLHttpRequest();
-    xmlHttp.open("GET", url, true);
+    // url = url.replace(/^(\/*)|(\/*$)/g, '');
+    url = url.replace(/^(\/*)/g, '');
+
+    xmlHttp.open("GET", `/${url}`, true);
+
     xmlHttp.onload = function() {
         if(xmlHttp.status === 200) {
             parseAndRenderXML(xmlHttp.responseXML);
+            updateNavigationPath(`/${url}`);  // Update navigation path with the fetched URL
         } else {
             alert('Failed to fetch OPDS data');
         }
     };
     xmlHttp.send();
+}
+
+function navigateLink(link) {
+    // let url = link.getAttribute('href');
+    // fetchOPDSData(url);  // Fetch new data and update history
+    fetchOPDSData(link);  // Fetch new data and update history
 }
 
 function parseAndRenderXML(xmlDoc) {
@@ -38,8 +53,8 @@ function parseAndRenderXML(xmlDoc) {
             a.href = '#';
             const relValue = link.getAttribute('rel');
             a.textContent = linkTexts[relValue] || relValue || link.getAttribute('href');
-            a.onclick = function() { fetchOPDSData(link.getAttribute('href')); return false; };
-            // Вставляем разделитель (пробел) между ссылками, если это не первая ссылка
+            a.onclick = function () { navigateLink(link.getAttribute('href')); return false; };
+
             if (navigationSection.firstChild) {
                 navigationSection.appendChild(document.createTextNode(" "));
             }
@@ -77,7 +92,7 @@ function parseAndRenderXML(xmlDoc) {
         d.classList.add('col1')
         a.href = '#';
         a.textContent = title;
-        a.onclick = function () { fetchOPDSData(linkHref); return false; };
+        a.onclick = function () { navigateLink(linkHref); return false; };
         d.appendChild(a);
         contentSection.appendChild(d);
     });
