@@ -8,12 +8,13 @@ const linkTexts = {
 };
 
 function updateNavigationPath(path) {
-    window.history.pushState(null, '', path);
+    window.history.pushState(null, '', `#${path}`);
 }
 
 function fetchOPDSData(url) {
     let xmlHttp = new XMLHttpRequest();
-    // url = url.replace(/^(\/*)|(\/*$)/g, '');
+
+    // Ensure URL starts with a slash
     url = url.replace(/^(\/*)/g, '');
 
     xmlHttp.open("GET", `/${url}`, true);
@@ -30,8 +31,6 @@ function fetchOPDSData(url) {
 }
 
 function navigateLink(link) {
-    // let url = link.getAttribute('href');
-    // fetchOPDSData(url);  // Fetch new data and update history
     fetchOPDSData(link);  // Fetch new data and update history
 }
 
@@ -50,15 +49,20 @@ function parseAndRenderXML(xmlDoc) {
         if ((link.parentNode.tagName !== "entry") && 
             (link.getAttribute('rel') !== "search")) {
             let a = document.createElement("a");
-            a.href = '#';
+            a.href = '#' + link.getAttribute('href');
             const relValue = link.getAttribute('rel');
             a.textContent = linkTexts[relValue] || relValue || link.getAttribute('href');
-            a.onclick = function () { navigateLink(link.getAttribute('href')); return false; };
+
+            // Navigate using the new fetchOPDSData function with the hash path
+            a.onclick = function () {
+                navigateLink(link.getAttribute('href')); return false;
+            };
 
             if (navigationSection.firstChild) {
                 navigationSection.appendChild(document.createTextNode(" "));
             }
-            navigationSection.appendChild(a);        }
+            navigationSection.appendChild(a);
+        }
     });
 
     // search if in opds
@@ -90,7 +94,7 @@ function parseAndRenderXML(xmlDoc) {
         let d = document.createElement("div");
         let a = document.createElement("a");
         d.classList.add('col1')
-        a.href = '#';
+        a.href = '#' + linkHref;
         a.textContent = title;
         a.onclick = function () { navigateLink(linkHref); return false; };
         d.appendChild(a);
@@ -106,3 +110,23 @@ function performSearch() {
         alert("Введите поисковой запрос");
     }
 }
+
+window.onload = function() {
+    // Check the hash in the URL and fetch data for it
+
+    let hashPath = window.location.hash.substring(1);  // Remove the leading '#'
+    if (hashPath) {
+        fetchOPDSData(hashPath);
+    } else {
+        fetchOPDSData('/opds/');  // Default fallback if no hash is present
+    }
+};
+
+window.onpopstate = function(event) {
+    let hashPath = window.location.hash.substring(1);  // Remove the leading '#'
+    if (hashPath) {
+        fetchOPDSData(hashPath);
+    } else {
+        fetchOPDSData('/opds/');  // Default fallback if no hash is present
+    }
+};
