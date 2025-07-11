@@ -22,7 +22,6 @@ function fetchOPDSData(url) {
     xmlHttp.onload = function() {
         if(xmlHttp.status === 200) {
             parseAndRenderXML(xmlHttp.responseXML);
-            updateNavigationPath(`/${url}`);  // Update navigation path with the fetched URL
         } else {
             alert('Failed to fetch OPDS data');
         }
@@ -32,6 +31,7 @@ function fetchOPDSData(url) {
 
 function navigateLink(link) {
     fetchOPDSData(link);  // Fetch new data and update history
+    updateNavigationPath(link);
 }
 
 function parseAndRenderXML(xmlDoc) {
@@ -117,6 +117,7 @@ window.onload = function() {
     let hashPath = window.location.hash.substring(1);  // Remove the leading '#'
     if (hashPath) {
         fetchOPDSData(hashPath);
+        updateNavigationPath(hashPath);
     } else {
         fetchOPDSData('/opds/');  // Default fallback if no hash is present
     }
