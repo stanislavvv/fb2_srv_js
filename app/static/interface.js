@@ -108,43 +108,85 @@ function decodeHtml(html) {
     return txt.value;
 }
 
-function renderBook(elem, entry) {
-    
+function renderBook(entry) {
+    let contentSection = document.getElementById('content');
+
+    let title = entry.getElementsByTagName("title")[0].textContent;
+    let cont = entry.getElementsByTagName("content")[0].innerHTML;
+    let updated = entry.getElementsByTagName("updated")[0].textContent;
+
+    let d = document.createElement("div")
+    d.classList.add("book_info")
+    let h2 = document.createElement("h2");
+    h2.textContent = title;
+    d.appendChild(h2)
+
+    let auths = document.createElement("p");
+    auths.textContent = "Авторы:";
+    Array.from(entry.getElementsByTagName("author")).forEach(auth => {
+        auth_name = auth.getElementsByTagName("name")[0].textContent;
+        auth_uri = auth.getElementsByTagName("uri")[0].textContent;
+        let a = document.createElement("a");
+        a.href = '#' + auth_uri;
+        a.textContent = auth_name;
+
+        a.onclick = function () {
+            navigateLink(auth_uri); return false;
+        };
+
+        if (auths.firstChild) {
+            auths.appendChild(document.createTextNode(" "));
+        }
+        auths.appendChild(a);
+    });
+    d.appendChild(auths)
+
+    let cover_uri = document.createElement("img");
+    let links = document.createElement("p");
+    links.textContent = "Ссылки:";
+    Array.from(entry.getElementsByTagName("link")).forEach(link => {
+        rel = link.getAttribute("rel");
+        href = link.getAttribute("href");
+        if (rel == 'related') {
+            title = link.getAttribute("title");
+            let a = document.createElement("a");
+            a.href = '#' + href;
+            a.textContent = title;
+            a.onclick = function () {
+                navigateLink(auth_uri); return false;
+            };
+            if (links.firstChild) {
+                links.appendChild(document.createTextNode(" "));
+            }
+            links.appendChild(a)
+        } else if ( rel == 'http://opds-spec.org/acquisition/open-access' || rel == 'alternate') {
+            title = link.getAttribute("title");
+            let a = document.createElement("a");
+            a.href = href;
+            a.textContent = title;
+            if (links.firstChild) {
+                links.appendChild(document.createTextNode(" "));
+            }
+            links.appendChild(a)
+        } else if (rel == 'x-stanza-cover-image') {
+            cover_uri.alt = 'x-stanza-cover-image';
+            cover_uri.src = href
+        }
+    });
+    contentSection.appendChild(cover_uri);
+    contentSection.appendChild(links);
+    contentSection.appendChild(d);
+    hr = document.createElement("hr");
+    contentSection.appendChild(hr)
 }
 
 function renderBookList(xmlDoc) {  // placeholder
     // entry rendering (books list)
     let contentSection = document.getElementById('content');
-    contentSection.className = 'rowlist';
+    contentSection.className = 'book';
     contentSection.innerHTML = '';
 
-    Array.from(xmlDoc.getElementsByTagName("entry")).forEach(entry => {
-        let title = entry.getElementsByTagName("title")[0].textContent;
-        let cont = entry.getElementsByTagName("content")[0].textContent;
-        let linkHref = '';
-        Array.from(entry.getElementsByTagName("link")).forEach(link => {
-            if ((link.getAttribute('type') === 'application/atom+xml;profile=opds-catalog' ||
-                link.getAttribute('type').startsWith('application/atom')) &&
-                link.getAttribute('rel') != 'search'
-            ) {
-                linkHref = link.getAttribute('href');
-            }
-        });
-
-        let d = document.createElement("div");
-        let a = document.createElement("a");
-        d.classList.add('col1')
-        a.href = '#' + linkHref;
-        a.textContent = title;
-        a.onclick = function () { navigateLink(linkHref); return false; };
-        d.appendChild(a);
-        contentSection.appendChild(d);
-
-        let d2 = document.createElement("div");
-        d2.classList.add('col2')
-        d2.textContent = cont;
-        contentSection.appendChild(d2);
-    });
+    Array.from(xmlDoc.getElementsByTagName("entry")).forEach(renderBook);
 }
 
 function renderAuthorMain(xmlDoc, url) {
@@ -231,16 +273,28 @@ function parseAndRenderXML(xmlDoc, path) {
     subpath = path.replace(prefix, '').replace(/^(\/*)/g, '');
     pathElems = subpath.split('/')
     pathLength = pathElems.length;
-    if (pathElems[0] === 'author') {
-        if (pathLength === 4) {
-            renderAuthorMain(xmlDoc);
-        } else if (pathElems[4] === 'sequences') {
-            render2elemList(xmlDoc);
-        } else if (pathLength === 5) {
+    switch(pathElems[0]) {
+        case 'author':
+            if (pathLength === 4) {
+                renderAuthorMain(xmlDoc);
+            } else if (pathElems[4] === 'sequences') {
+                render2elemList(xmlDoc);
+            } else {
+                renderBookList(xmlDoc);
+            }
+            break;
+        case 'sequence':
             renderBookList(xmlDoc);
-        }
-    } else {
-        renderSimpleList(xmlDoc);
+            break;
+        case time:
+            renderBookList(xmlDoc);
+            break;
+        case genre:
+            renderBookList(xmlDoc);
+            break;
+        default:
+            renderSimpleList(xmlDoc);
+            break;
     }
 }
 
