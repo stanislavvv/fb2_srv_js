@@ -8,6 +8,7 @@ const linkTexts = {
 };
 
 const prefix = 'opds';
+const genre_prfx = 'genre';
 // end template data
 
 function updateNavigationPath(path) {
@@ -173,9 +174,40 @@ function renderBook(entry) {
             cover_uri.src = href
         }
     });
+
+    let categories = document.createElement("p");
+    categories.textContent = "Жанры:"
+    Array.from(entry.getElementsByTagName("category")).forEach(categ => {
+        let label = categ.getAttribute("label");
+        let genreid = categ.getAttribute("term")
+        let a = document.createElement("a");
+        let href = `/${prefix}/${genre_prfx}/${genreid}`;
+        a.href = '#' + href;
+        a.textContent = label;
+        a.onclick = function () {
+            navigateLink(href); return false;
+        };
+        if (categories.firstChild) {
+            categories.appendChild(document.createTextNode(" "));
+        }
+        categories.appendChild(a)
+
+    });
+
+    let descr = document.createElement("div");
+    let dcont = entry.getElementsByTagName("content")[0].innerHTML;
+    descr.innerHTML = decodeHtml(dcont);
+    let upd = document.createElement("p");
+    updated = entry.getElementsByTagName("updated")[0].innerHTML;
+    upd.textContent = `Добавлено: ${updated}`;
+
+    contentSection.appendChild(d);
     contentSection.appendChild(cover_uri);
     contentSection.appendChild(links);
-    contentSection.appendChild(d);
+    contentSection.appendChild(categories);
+    contentSection.appendChild(descr);
+    contentSection.appendChild(upd);
+
     hr = document.createElement("hr");
     contentSection.appendChild(hr)
 }
@@ -286,10 +318,10 @@ function parseAndRenderXML(xmlDoc, path) {
         case 'sequence':
             renderBookList(xmlDoc);
             break;
-        case time:
+        case 'time':
             renderBookList(xmlDoc);
             break;
-        case genre:
+        case 'genre':
             renderBookList(xmlDoc);
             break;
         default:

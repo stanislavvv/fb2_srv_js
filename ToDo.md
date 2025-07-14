@@ -10,6 +10,7 @@ Nothing global ToDo
     * use pass hint from config instead hardcoded -- testing
     * test deleted flag in config
   * opds:
+    * template js file (use URLS and LANG)
   * docs:
     * nginx example for covers (`@try_files` and default cover)
     * [maybe] spec to THIS library opds output

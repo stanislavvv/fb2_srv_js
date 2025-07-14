@@ -146,7 +146,7 @@ def opds_author_seqs(sub1, sub2, id):
         "sub2": sub2,
         "tag": "tag:author:" + id + ":sequences",
         "subtag": "tag:author:" + id,
-        "title": LANG["author"],
+        "title": LANG["author_tpl"],
         "subtitle": LANG["books_num"],
         "layout": "name_id_list",
         "use_nums": True,
