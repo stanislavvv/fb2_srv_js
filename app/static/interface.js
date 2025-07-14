@@ -197,8 +197,8 @@ function renderBook(entry) {
     let descr = document.createElement("div");
     let dcont = entry.getElementsByTagName("content")[0].innerHTML;
     descr.innerHTML = decodeHtml(dcont);
+
     let upd = document.createElement("p");
-    updated = entry.getElementsByTagName("updated")[0].innerHTML;
     upd.textContent = `Добавлено: ${updated}`;
 
     contentSection.appendChild(d);
