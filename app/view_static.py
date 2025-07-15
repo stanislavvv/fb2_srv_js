@@ -80,7 +80,7 @@ def create_html_response(data, tpl_name, cache_period=int(CONFIG['CACHE_TIME']))
         urlparams = data["urlparams"]
     else:
         urlparams = ""
-    page = render_template(tpl_name, title=title, path=path, urlparams=urlparams)
+    page = render_template(tpl_name, title=title, path=path, urlparams=urlparams, data=data)
     resp = Response(page, mimetype='text/html')
     resp.headers['Cache-Control'] = "max-age=%d, must-revalidate" % cache_period
     return resp
@@ -176,6 +176,8 @@ def interface_js():
         "title": CONFIG["TITLE"],
         "approot": CONFIG["APPLICATION_ROOT"],
         "path": "/",
+        "opds_prefix": URL["start"].strip('/'),
+        "genre_prefix": URL["genre"].strip('/').replace('opds/', ''),
     }
     tpl = "interface.js"
     return create_html_response(data, tpl, cache_period=int(CONFIG['CACHE_TIME_ST']))

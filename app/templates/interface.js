@@ -7,8 +7,8 @@ const linkTexts = {
     'prev': 'PREV'
 };
 
-const prefix = 'opds';
-const genre_prfx = 'genre';
+const prefix = '{{ data["opds_prefix"] }}';
+const genre_prfx = '{{ data["genre_prefix"] }}';
 // end template data
 
 function updateNavigationPath(path) {
@@ -118,21 +118,22 @@ function renderBook(entry) {
     links.textContent = "Ссылки:";
     Array.from(entry.getElementsByTagName("link")).forEach(link => {
         rel = link.getAttribute("rel");
-        href = link.getAttribute("href");
         if (rel == 'related') {
-            title = link.getAttribute("title");
+            let href = link.getAttribute("href");
+            let title = link.getAttribute("title");
             let a = document.createElement("a");
             a.href = '#' + href;
             a.textContent = title;
             a.onclick = function () {
-                navigateLink(auth_uri); return false;
+                navigateLink(href); return false;
             };
             if (links.firstChild) {
                 links.appendChild(document.createTextNode(" "));
             }
             links.appendChild(a)
         } else if ( rel == 'http://opds-spec.org/acquisition/open-access' || rel == 'alternate') {
-            title = link.getAttribute("title");
+            let href = link.getAttribute("href");
+            let title = link.getAttribute("title");
             let a = document.createElement("a");
             a.href = href;
             a.textContent = title;
@@ -141,6 +142,7 @@ function renderBook(entry) {
             }
             links.appendChild(a)
         } else if (rel == 'x-stanza-cover-image') {
+            let href = link.getAttribute("href");
             cover_uri.alt = 'x-stanza-cover-image';
             cover_uri.src = href
         }
@@ -236,7 +238,7 @@ function renderAuthorMain(xmlDoc, url) {
 function parseAndRenderXML(xmlDoc, path) {
     // title from opds
     let titleElement = xmlDoc.getElementsByTagName("title")[0];
-    const titleText = titleElement.textContent;
+    let titleText = titleElement.textContent;
     document.querySelectorAll("#title").forEach(elem => {
         elem.textContent = titleText;
     });
