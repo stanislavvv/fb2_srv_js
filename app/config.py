@@ -149,7 +149,12 @@ LANG = {
     "rnd_seqs": "Случайные серии",
     "rnd_genre_books": "Случайные книги в жанре '%s'",
 
-    "all_books_by_time": "Все книги по дате поступления"
+    "all_books_by_time": "Все книги по дате поступления",
+
+    # js text
+    "js_authors": "Авторы:",
+    "js_links": "Ссылки:",
+    "js_genres": "Жанры:",
 }
 
 

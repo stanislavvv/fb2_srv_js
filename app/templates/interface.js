@@ -9,6 +9,9 @@ const linkTexts = {
 
 const prefix = '{{ data["opds_prefix"] }}';
 const genre_prfx = '{{ data["genre_prefix"] }}';
+const lang_authors = '{{ data["lang_authors"] }}';
+const lang_links = '{{ data["lang_links"] }}';
+const lang_genres = '{{ data["lang_genres"] }}';
 // end template data
 
 function updateNavigationPath(path) {
@@ -94,7 +97,7 @@ function renderBook(entry) {
     d.appendChild(h2)
 
     let auths = document.createElement("p");
-    auths.textContent = "Авторы:";
+    auths.textContent = lang_authors;
     Array.from(entry.getElementsByTagName("author")).forEach(auth => {
         auth_name = auth.getElementsByTagName("name")[0].textContent;
         auth_uri = auth.getElementsByTagName("uri")[0].textContent;
@@ -115,7 +118,7 @@ function renderBook(entry) {
 
     let cover_uri = document.createElement("img");
     let links = document.createElement("p");
-    links.textContent = "Ссылки:";
+    links.textContent = lang_links;
     Array.from(entry.getElementsByTagName("link")).forEach(link => {
         rel = link.getAttribute("rel");
         if (rel == 'related') {
@@ -149,7 +152,7 @@ function renderBook(entry) {
     });
 
     let categories = document.createElement("p");
-    categories.textContent = "Жанры:"
+    categories.textContent = lang_genres;
     Array.from(entry.getElementsByTagName("category")).forEach(categ => {
         let label = categ.getAttribute("label");
         let genreid = categ.getAttribute("term")

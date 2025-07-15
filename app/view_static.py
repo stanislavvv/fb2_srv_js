@@ -24,7 +24,7 @@ from .validate import (
     validate_zip,
     validate_fb2
 )
-from .config import CONFIG, URL
+from .config import CONFIG, URL, LANG
 
 static = Blueprint("static", __name__)
 
@@ -180,6 +180,9 @@ def interface_js():
         "path": "/interface.js",  # mandatory param
         "opds_prefix": f"{approot}{start}".strip('/'),
         "genre_prefix": URL["genre"].strip('/').replace('opds/', ''),
+        "lang_authors": LANG["js_authors"],
+        "lang_links": LANG["js_links"],
+        "lang_genres": LANG["js_genres"],
     }
     tpl = "interface.js"
     return create_html_response(data, tpl, cache_period=int(CONFIG['CACHE_TIME_ST']))
