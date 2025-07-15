@@ -324,6 +324,26 @@ function parseAndRenderXML(xmlDoc, path) {
         case 'genre':
             renderBookList(xmlDoc);
             break;
+        case 'random-books':
+            renderBookList(xmlDoc);
+            break;
+        case 'rnd':
+            switch(pathElems[1]) {
+                case 'genre':
+                    renderBookList(xmlDoc);
+                    break;
+                default:
+                    renderSimpleList(xmlDoc);
+                    break;
+            };
+            break;
+        case 'search':
+            if (pathElems[1].startsWith('books')) { // books or booksanno
+                renderBookList(xmlDoc);
+            } else {
+                renderSimpleList(xmlDoc);
+            };
+            break;
         default:
             renderSimpleList(xmlDoc);
             break;
@@ -333,7 +353,7 @@ function parseAndRenderXML(xmlDoc, path) {
 function performSearch() {
     let searchTerm = document.getElementById('search-input').value;
     if (searchTerm.trim()) {
-        window.location.href = '/opds/search?searchTerm=' + encodeURIComponent(searchTerm);
+        window.location.href = '#/opds/search?searchTerm=' + encodeURIComponent(searchTerm);
     } else {
         alert("Введите поисковой запрос");
     }

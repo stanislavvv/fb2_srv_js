@@ -447,7 +447,7 @@ def opds_rnd_books():
         "start": URL["start"],
         "up": URL["start"]
     }
-    return create_opds_response(opds_books_db(params))
+    return create_opds_response(opds_books_db(params), cache_time=CONFIG["CACHE_TIME_RND"])
 
 
 @opds.route(URL["rndgenidx"], methods=['GET'])
@@ -461,12 +461,12 @@ def opds_rnd_genres_root():
         "subtitle": "%s",
         "layout": "key_value",
         "simple_baseref": URL["rndgenidx"],
-        "strong_baseref": URL["rndgen"],
+        "strong_baseref": URL["rndgenidx"],
         "self": URL["rndgenidx"],
         "start": URL["start"],
         "up": URL["start"]
     }
-    return create_opds_response(opds_simple_list(params))
+    return create_opds_response(opds_simple_list(params), cache_time=CONFIG["CACHE_TIME_RND"])
 
 
 @opds.route(URL["rndgenidx"] + "<meta_id>", methods=['GET'])
@@ -487,7 +487,7 @@ def opds_rnd_genres_list(meta_id):
         "start": URL["start"],
         "up": URL["rndgenidx"]
     }
-    return create_opds_response(opds_simple_list(params))
+    return create_opds_response(opds_simple_list(params), cache_time=CONFIG["CACHE_TIME_RND"])
 
 
 @opds.route(URL["rndgen"] + "<gen_id>", methods=['GET'])
@@ -505,7 +505,7 @@ def opds_rnd_books_genre(gen_id):
         "start": URL["start"],
         "up": URL["rndgenidx"]
     }
-    return create_opds_response(opds_books_db(params))
+    return create_opds_response(opds_books_db(params), cache_time=CONFIG["CACHE_TIME_RND"])
 
 
 @opds.route(URL["rndseq"], methods=['GET'])
@@ -522,7 +522,7 @@ def opds_rnd_seqs():
         "start": URL["start"],
         "up": URL["start"]
     }
-    return create_opds_response(opds_simple_list_db(params))
+    return create_opds_response(opds_simple_list_db(params), cache_time=CONFIG["CACHE_TIME_RND"])
 
 
 @opds.route(URL["search"], methods=['GET'])

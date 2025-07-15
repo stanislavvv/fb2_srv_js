@@ -33,6 +33,7 @@ VARS = {
     "default_cover_source": "DEFAULT_COVER_SRC",  # master-copy of default cover
     "default_cache_seconds": "CACHE_TIME",  # default cache time
     "static_file_cache_seconds": "CACHE_TIME_ST",  # static file cache time, seconds
+    "random_cache_seconds": "CACHE_TIME_RND",
     "xslt_file": "FB2_XSLT",  # xslt file for fb2 to html conversion
     "app_ico": "APP_ICO",  # application .ico
 }
@@ -49,6 +50,7 @@ CONFIG = {  # default values
     "DEFAULT_COVER_SRC": "./app/static/default-cover.jpg",
     "CACHE_TIME": "604800",  # 60 * 60 * 24 * 7 == 7 days
     "CACHE_TIME_ST": "2592000",  # 60 * 60 * 24 * 30 == 30 days
+    "CACHE_TIME_RND": "300",  # 5 min
     "FB2_XSLT": "fb2_to_html.xsl",
     # internal configs
     "REDIR_FROM_ERR": 'root',
