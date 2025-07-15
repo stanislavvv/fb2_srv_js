@@ -42,42 +42,13 @@ function navigateLink(link) {
 function renderSimpleList(xmlDoc) {
     // entry rendering (simple list)
     let contentSection = document.getElementById('content');
-    contentSection.className = 'rowlist_single';
-    contentSection.innerHTML = '';
-
-    Array.from(xmlDoc.getElementsByTagName("entry")).forEach(entry => {
-        let title = entry.getElementsByTagName("title")[0].textContent;
-        let linkHref = '';
-        Array.from(entry.getElementsByTagName("link")).forEach(link => {
-            if ((link.getAttribute('type') === 'application/atom+xml;profile=opds-catalog' ||
-                link.getAttribute('type').startsWith('application/atom')) &&
-                link.getAttribute('rel') != 'search'
-            ) {
-                linkHref = link.getAttribute('href');
-            }
-        });
-
-        let d = document.createElement("div");
-        let a = document.createElement("a");
-        d.classList.add('col1')
-        a.href = '#' + linkHref;
-        a.textContent = title;
-        a.onclick = function () { navigateLink(linkHref); return false; };
-        d.appendChild(a);
-        contentSection.appendChild(d);
-    });
-}
-
-function render2elemList(xmlDoc) {
-    // entry rendering (simple list)
-    let contentSection = document.getElementById('content');
     contentSection.className = 'rowlist';
     contentSection.innerHTML = '';
 
     Array.from(xmlDoc.getElementsByTagName("entry")).forEach(entry => {
         let title = entry.getElementsByTagName("title")[0].textContent;
-        let cont = entry.getElementsByTagName("content")[0].textContent;
         let linkHref = '';
+        let cont = entry.getElementsByTagName("content")[0].textContent;
         Array.from(entry.getElementsByTagName("link")).forEach(link => {
             if ((link.getAttribute('type') === 'application/atom+xml;profile=opds-catalog' ||
                 link.getAttribute('type').startsWith('application/atom')) &&
@@ -86,7 +57,6 @@ function render2elemList(xmlDoc) {
                 linkHref = link.getAttribute('href');
             }
         });
-
         let d = document.createElement("div");
         let a = document.createElement("a");
         d.classList.add('col1')
@@ -95,10 +65,11 @@ function render2elemList(xmlDoc) {
         a.onclick = function () { navigateLink(linkHref); return false; };
         d.appendChild(a);
         contentSection.appendChild(d);
-
         let d2 = document.createElement("div");
         d2.classList.add('col2')
-        d2.textContent = cont;
+        if (title != cont) {
+            d2.textContent = cont;
+        }
         contentSection.appendChild(d2);
     });
 }
@@ -310,7 +281,7 @@ function parseAndRenderXML(xmlDoc, path) {
             if (pathLength === 4) {
                 renderAuthorMain(xmlDoc);
             } else if (pathElems[4] === 'sequences') {
-                render2elemList(xmlDoc);
+                renderSimpleList(xmlDoc);
             } else {
                 renderBookList(xmlDoc);
             }

@@ -40,6 +40,12 @@ def opds_books_db(params):
     else:
         page = 0
 
+    if page > 0 and layout is "time":
+        if page == 1:
+            params["prev"] = params["strong_baseref"]
+        else:
+            params["prev"] = params["strong_baseref"] + f"/{page - 1}"
+
     ret = opds_header(params)
     try:
         session = dbsession()

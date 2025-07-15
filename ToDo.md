@@ -9,9 +9,9 @@ Nothing global ToDo
   * indexing:
     * test deleted flag in config
   * opds:
-    * [bug] pagination in /time
-    * [bug|feature] last+1 page in paginated must be empty page with opds header (need testing in booreaders)
-    * try css for xml as in https://www.w3schools.com/xml/cd_catalog_with_css.xml and test book reader
+    * [feature] last+1 page in paginated must be empty page with opds header (need testing in booreaders)
+    * css in simple lists (test in mobile browser)
+    * [far] [feature] try css for xml as in https://www.w3schools.com/xml/cd_catalog_with_css.xml (with `text/xhtml` content-type) and test book reader
     * template js file (use URLS and LANG)
     * test app root from config
   * docs:
