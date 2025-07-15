@@ -40,7 +40,7 @@ def opds_books_db(params):
     else:
         page = 0
 
-    if page > 0 and layout is "time":
+    if page > 0 and layout == "time":
         if page == 1:
             params["prev"] = params["strong_baseref"]
         else:

@@ -173,3 +173,8 @@ def webroot():
 @static.route("/interface.js")
 def interface_js():
     return current_app.send_static_file("interface.js")
+
+
+@static.route("/favicon.ico")
+def favicon():
+    return current_app.send_static_file("favicon.ico")

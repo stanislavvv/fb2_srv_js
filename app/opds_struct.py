@@ -381,7 +381,7 @@ def opds_simple_list(params):
             with open(nameindexfile, encoding="utf-8") as idx:
                 name_data = json.load(idx)
         except Exception as ex:
-            logging.error(f"Error on author {sub1}/{sub2}/{id}, exception: {ex}")
+            logging.error(f"Error on author, nameindex {nameindex}, exception: {ex}")
             return None
         page_name = name_data["name"]
         params["title"] = params["title"] % page_name
