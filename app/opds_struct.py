@@ -218,21 +218,21 @@ def opds_header(params):
                 "@type": "application/atom+xml;profile=opds-catalog"
             }
         )
-    if "next" in params:
-        next_link = params["next"]
-        feed["link"].append(
-            {
-                "@href": approot + next_link,
-                "@rel": "next",
-                "@type": "application/atom+xml;profile=opds-catalog"
-            }
-        )
     if "prev" in params:
         prev_link = params["prev"]
         feed["link"].append(
             {
                 "@href": approot + prev_link,
                 "@rel": "prev",
+                "@type": "application/atom+xml;profile=opds-catalog"
+            }
+        )
+    if "next" in params:
+        next_link = params["next"]
+        feed["link"].append(
+            {
+                "@href": approot + next_link,
+                "@rel": "next",
                 "@type": "application/atom+xml;profile=opds-catalog"
             }
         )

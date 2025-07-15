@@ -352,12 +352,12 @@ def opds_genres_root():
     params = {
         "index": URL["genidx"].replace("/opds/", "", 1),
         "tag": "tag:root:genres",
-        "subtag": "tag:genres:",
+        "subtag": "tag:genresindex:",
         "title": LANG["genres_meta"],
         "subtitle": "%s",
         "layout": "key_value",
         "simple_baseref": URL["genidx"],
-        "strong_baseref": URL["genre"],
+        "strong_baseref": URL["genidx"],
         "self": URL["genidx"],
         "start": URL["start"],
         "up": URL["start"]
