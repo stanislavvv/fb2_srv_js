@@ -172,7 +172,13 @@ def webroot():
 
 @static.route("/interface.js")
 def interface_js():
-    return current_app.send_static_file("interface.js")
+    data = {
+        "title": CONFIG["TITLE"],
+        "approot": CONFIG["APPLICATION_ROOT"],
+        "path": "/",
+    }
+    tpl = "interface.js"
+    return create_html_response(data, tpl)
 
 
 @static.route("/favicon.ico")

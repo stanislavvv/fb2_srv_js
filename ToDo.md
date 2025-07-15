@@ -8,6 +8,7 @@ Nothing global ToDo
 
   * indexing:
     * test deleted flag in config
+    * pagination from config (hardcoded to 50 at now)
   * opds:
     * [feature] last+1 page in paginated must be empty page with opds header (need testing in booreaders)
     * css in simple lists (test in mobile browser)
