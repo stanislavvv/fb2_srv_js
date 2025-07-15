@@ -172,11 +172,13 @@ def webroot():
 
 @static.route("/interface.js")
 def interface_js():
+    start = URL["start"]
+    approot = CONFIG["APPLICATION_ROOT"]
     data = {
-        "title": CONFIG["TITLE"],
-        "approot": CONFIG["APPLICATION_ROOT"],
-        "path": "/",
-        "opds_prefix": URL["start"].strip('/'),
+        "title": CONFIG["TITLE"],  # mandatory param
+        "approot": approot,
+        "path": "/interface.js",  # mandatory param
+        "opds_prefix": f"{approot}{start}".strip('/'),
         "genre_prefix": URL["genre"].strip('/').replace('opds/', ''),
     }
     tpl = "interface.js"
