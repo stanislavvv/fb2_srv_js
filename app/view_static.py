@@ -178,7 +178,7 @@ def interface_js():
         "path": "/",
     }
     tpl = "interface.js"
-    return create_html_response(data, tpl)
+    return create_html_response(data, tpl, cache_period=int(CONFIG['CACHE_TIME_ST']))
 
 
 @static.route("/favicon.ico")
