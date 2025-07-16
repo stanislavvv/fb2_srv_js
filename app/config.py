@@ -56,6 +56,7 @@ CONFIG = {  # default values
     "REDIR_FROM_ERR": 'root',
     "APP_ICO": "/favicon.ico",  # ToDo: draw it
     "TITLE": "Home OPDS directory",
+    "HIDE_DELETED": False,
 }
 
 # internal configuration for opds interface

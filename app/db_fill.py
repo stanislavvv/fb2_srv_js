@@ -25,13 +25,6 @@ from .data import (
 )
 
 
-# ToDo: test it on OrangePi with bigger values
-# MAX_PASS_LENGTH = 4000
-# MAX_PASS_LENGTH_GEN = 5
-
-# PASS_SIZE_HINT = 10485760
-
-
 def dbwrite(data):
     """write prepared data to db"""
     engine = dbconnect()
@@ -76,7 +69,7 @@ def process_booklists_db(stage='fillonly'):
     logging.info("end stage %s", stage)
 
 
-def process_booklist(booklist, hide_deleted=False):
+def process_booklist(booklist, hide_deleted="no"):
     """get data from booklist and fill it to db"""
     with open_booklist(booklist) as lst:
         count = 0
@@ -84,7 +77,7 @@ def process_booklist(booklist, hide_deleted=False):
         while len(lines) > 0:
             count = count + len(lines)
             # print("   %s" % count)
-            logging.info("   %s", count)
+            logging.debug("   %s", count)
             process_books_batch(lines, hide_deleted)
             lines = lst.readlines(int(CONFIG["PASS_SIZE_HINT"]))
 
@@ -95,9 +88,13 @@ def process_books_batch(lines, hide_deleted):
     seqs = {}
     genres = {}
     books = {}
+    deleted_cnt = 0
     for line in lines:
         book = json.loads(line)
         if book is None:
+            continue
+        if hide_deleted == "yes" and "deleted" in book and book["deleted"] == 1:
+            deleted_cnt = deleted_cnt + 1
             continue
         authors = fill_authors_book(authors, book)
         seqs = fill_sequences_book(seqs, book)
@@ -108,3 +105,4 @@ def process_books_batch(lines, hide_deleted):
     dbwrite(make_genres_db(genres))
     dbwrite(make_seqs_db(seqs))
     dbwrite(make_authors_db(authors))
+    logging.debug(f"      deleted {deleted_cnt}")

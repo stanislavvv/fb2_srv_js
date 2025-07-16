@@ -83,7 +83,7 @@ def make_auth_data(session):
                 book = json.loads(b)
                 if book is None:
                     continue
-                if hide_deleted and "deleted" in book and book["deleted"] != 0:
+                if hide_deleted == "yes" and "deleted" in book and book["deleted"] != 0:
                     continue
                 book = refine_book(book)
                 if book["authors"] is not None:
@@ -155,7 +155,6 @@ def make_auth_subindexes(session):
             .label('first_three'),
             func.count().label('cnt')
         ).filter(
-            # BookAuthor.name.ilike(f'{letter}%')
             func.upper(func.left(BookAuthor.name, 1)) == letter
         ).group_by('first_three').all()
         logging.debug("- %s", letter)
@@ -211,8 +210,7 @@ def make_book_covers():
             lines = lst.readlines(int(CONFIG['PASS_SIZE_HINT']))
             while len(lines) > 0:
                 count = count + len(lines)
-                # print("   %s" % count)
-                logging.info("   %s", count)
+                logging.debug("   %s", count)
                 make_book_covers_data(lines, coversdir, hide_deleted)
                 lines = lst.readlines(int(CONFIG['MAX_PASS_LENGTH']))
         i = i + 1
@@ -220,10 +218,12 @@ def make_book_covers():
     logging.info("end")
 
 
-def make_book_covers_data(lines, coversdir, hide_deleted=False):
+def make_book_covers_data(lines, coversdir, hide_deleted="no"):
     """write covers previews from jsonl lines data"""
     for line in lines:
         book = json.loads(line)
+        if book is None or (hide_deleted == "yes" and "deleted" in book and book["deleted"] == 1):
+            continue
         if book is not None and book['book_id'] is not None:
             book_id = book['book_id']
             zip_file = book['zipfile']
@@ -276,7 +276,7 @@ def make_seq_data(session):
                 book = json.loads(b)
                 if book is None:
                     continue
-                if hide_deleted and "deleted" in book and book["deleted"] != 0:
+                if hide_deleted == "yes" and "deleted" in book and book["deleted"] != 0:
                     continue
                 book = refine_book(book)
                 if book["sequences"] is not None:
@@ -380,9 +380,9 @@ def make_genresindex():
         processed = make_genres_data(session)
         logging.debug(" - processed genres: %d/%d, in pass: %d", len(gen_processed), seq_cnt, processed)
 
-    logging.debug("Creating genres tree indexes")
+    logging.info("Creating genres tree indexes")
     make_genres_subindexes(session)
-    logging.debug("end")
+    logging.info("end")
     session.close()
 
 
@@ -403,7 +403,7 @@ def make_genres_data(session):
                 book = json.loads(b)
                 if book is None:
                     continue
-                if hide_deleted and "deleted" in book and book["deleted"] != 0:
+                if hide_deleted  == "yes" and "deleted" in book and book["deleted"] != 0:
                     continue
                 book = refine_book(book)
                 if book["genres"] is not None:
