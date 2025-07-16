@@ -12,9 +12,30 @@
                 right: 0;
                 height: 1.5em;
                 z-index: 1001;
-                padding-left: 1em;
-                padding-right: 1em;
+                padding-left: 0.5em;
+                padding-right: 0.5em;
                 background-color: inherit;
+            }
+            .rowlist {
+                display: grid;
+                align-items: flex-start;
+                margin-left: 1em;
+                flex-wrap: wrap; /* Enable wrapping if needed */
+                grid-template-columns: minmax(30%, auto) minmax(auto, auto);
+            }
+
+            .col1 {
+                text-align: left;
+                width: auto;
+                max-width: none; /* Allow columns to grow based on content */
+                min-width: 30%; /* Min width of the first column */
+                box-sizing: border-box;
+            }
+            .col2{
+                text-align: left;
+                width: auto;
+                max-width: none; /* Allow columns to grow based on content */
+                box-sizing: border-box;
             }
             body {
                 font-size: 1em;
@@ -23,40 +44,60 @@
                 color: black;
             }
             @media (max-width: 400px) {
-                html { font-size: 300%; }
-            }
-            @media (min-width: 500px) {
-                html { font-size: 180%; }
-            }
-            @media (min-width: 700px) {
-                html { font-size: 140%; }
-            }
-            @media (min-width: 1200px) {
-                html { font-size: 100%; }
-            }
-            .rowlist_single {
-                display: grid;
-                grid-gap: 1pt;
-                grid-template-columns: 1rfr;
-                margin-left: 1em;
-            }
-            .author_info {
-                margin-left: 1em;
-            }
-            .book_info {
-                margin-left: 1em;
-            }
-            .rowlist {
-                display: grid;
-                grid-gap: 1pt;
-                grid-template-columns: minmax(10%,80%) minmax(20%,80%);
-                margin-left: 1em;
-            }
-            .row {
-                clear: both;
+                html { font-size: 200%; }
+                .rowlist {
+                    display: block; /* Change to a single column layout */
+                    margin-left: 0.5em;
+                }
+                .col1, .col2 {
+                    width: 100%;
+                }
+                .topheader {
+                    position: relative;
+                }
             }
 
+            @media (min-width: 401px) and (max-width: 700px) {
+                html { font-size: 235%; } /* Adjusted for small mobile devices */
+                .col1, .col2 {
+                    text-align: left;
+                    width: auto; /* Adapt width to content */
+                    max-width: 90%;
+                }
+            }
+
+            @media (min-width: 701px) and (max-width: 992px) {
+                html { font-size: 200%; } /* Adjusted for medium devices */
+                .col1, .col2 {
+                    text-align: left;
+                    width: auto; /* Adapt width to content */
+                    max-width: 90%;
+                }
+            }
+
+            @media (min-width: 993px) and (max-width: 1200px) {
+                html { font-size: 200%; } /* Adjusted for tablets */
+                .col1, .col2 {
+                    text-align: left;
+                    width: auto; /* Adapt width to content */
+                    max-width: 90%;
+                }
+            }
+
+            @media (min-width: 1201px) {
+                html { font-size: 100%; } /* Laptops/Desktops */
+                .col1, .col2 {
+                    text-align: left;
+                    width: auto; /* Adapt width to content */
+                    max-width: 90%;
+                }
+            }
+
+            .author_info, .book_info {
+                margin-left: 2em;
+            }
         </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     </head>
     <body>
         <div class="topheader">

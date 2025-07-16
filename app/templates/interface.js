@@ -167,7 +167,6 @@ function renderBook(entry) {
             categories.appendChild(document.createTextNode(" "));
         }
         categories.appendChild(a)
-
     });
 
     let descr = document.createElement("div");
