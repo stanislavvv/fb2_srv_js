@@ -105,4 +105,5 @@ def process_books_batch(lines, hide_deleted):
     dbwrite(make_genres_db(genres))
     dbwrite(make_seqs_db(seqs))
     dbwrite(make_authors_db(authors))
-    logging.debug(f"      deleted {deleted_cnt}")
+    if hide_deleted == "yes":
+        logging.debug(f"      deleted {deleted_cnt}")
