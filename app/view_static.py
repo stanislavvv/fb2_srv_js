@@ -138,6 +138,26 @@ def fb2_download(zip_file=None, filename=None):
     return Response("Book not found", status=404)
 
 
+@static.route(URL["plain"] + "<zip_file>/<filename>")
+def fb2_plain(zip_file=None, filename=None):
+    """send plain fb2 on download request"""
+    if filename.endswith('.zip'):  # will accept any of .fb2 or .fb2.zip with right filename in .zip
+        filename = filename[:-4]
+    if not zip_file.endswith('.zip'):
+        zip_file = zip_file + '.zip'
+    zip_file = validate_zip(zip_file)
+    filename = validate_fb2(filename)
+    if zip_file is None or filename is None:
+        return redir_invalid(CONFIG['REDIR_FROM_ERR'])
+    fb2data = fb2_out(zip_file, filename)
+    if fb2data is not None:  # pylint: disable=R1705
+        cachectl = "maxage=%d, must-revalidate" % int(CONFIG['CACHE_TIME_ST'])
+        resp = Response(fb2data, content_type='application/x-fb2+xml')
+        resp.headers['Cache-Control'] = cachectl
+        return resp
+    return Response("Book not found", status=404)
+
+
 @static.route(URL["read"] + "<zip_file>/<filename>")
 def fb2_read(zip_file=None, filename=None):
     """translate fb2 to html for read request"""

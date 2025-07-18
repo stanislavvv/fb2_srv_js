@@ -403,7 +403,7 @@ def make_genres_data(session):
                 book = json.loads(b)
                 if book is None:
                     continue
-                if hide_deleted  == "yes" and "deleted" in book and book["deleted"] != 0:
+                if hide_deleted == "yes" and "deleted" in book and book["deleted"] != 0:
                     continue
                 book = refine_book(book)
                 if book["genres"] is not None:
