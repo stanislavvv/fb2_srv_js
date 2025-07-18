@@ -5,9 +5,11 @@ import os
 import io
 import time
 import zipfile
+import re
 import lxml.etree as et
 
 from bs4 import BeautifulSoup
+from io import BytesIO
 from flask import (
     Blueprint,
     Response,
@@ -24,7 +26,7 @@ from .validate import (
     validate_zip,
     validate_fb2
 )
-from .config import CONFIG, URL, LANG
+from .config import CONFIG, URL, LANG, XSL_READ
 
 static = Blueprint("static", __name__)
 
@@ -84,6 +86,25 @@ def create_html_response(data, tpl_name, cache_period=int(CONFIG['CACHE_TIME']))
     resp = Response(page, mimetype='text/html')
     resp.headers['Cache-Control'] = "max-age=%d, must-revalidate" % cache_period
     return resp
+
+
+def add_xsl_line(fb2data, xsl_line):
+    # Проверяем кодировку из XML декларации или используем 'utf-8' по умолчанию
+    match = re.search(r'^<\?xml.*encoding=["\']([^"\']+)["\']', fb2data.decode('utf-8', errors='ignore'))
+    encoding = match.group(1) if match else 'utf-8'
+
+    # Преобразуем fb2data в строку
+    xml_string = fb2data.decode(encoding)
+
+    # Находим конец XML декларации
+    xml_declaration_end = xml_string.find('>') + 1
+
+    # Вставляем xsl_line после XML декларации
+    modified_xml_string = (xml_string[:xml_declaration_end] + '\n' +
+                           xsl_line.strip() +
+                           xml_string[xml_declaration_end:])
+
+    return modified_xml_string.encode(encoding)
 
 
 @static.route(URL["cover"] + "<sub1>/<sub2>/<book_id>.jpg")
@@ -152,11 +173,12 @@ def fb2_plain(zip_file=None, filename=None):
     fb2data = fb2_out(zip_file, filename)
     if fb2data is not None:  # pylint: disable=R1705
         cachectl = "maxage=%d, must-revalidate" % int(CONFIG['CACHE_TIME_ST'])
+        xsl_line = XSL_READ % URL["xsl_read"]
 
-        # # Add the XML stylesheet processing instruction for XSLT before <FictionBook>
-        # fb2data_with_stylesheet = re.sub(r'(<\?xml.+?\?>)(<FictionBook)', r'\1<?xml-stylesheet type="text/xsl" href="/fb2.xsl"?>\2', fb2data, flags=re.DOTALL)
+        fb2prepared = add_xsl_line(fb2data, xsl_line)
 
-        resp = Response(fb2data, content_type='application/x-fb2+xml')
+        # resp = Response(fb2data, content_type='application/x-fb2+xml')
+        resp = Response(fb2prepared, content_type='text/xhtml')
         resp.headers['Cache-Control'] = cachectl
         return resp
     return Response("Book not found", status=404)
@@ -215,3 +237,8 @@ def interface_js():
 @static.route("/favicon.ico")
 def favicon():
     return current_app.send_static_file("favicon.ico")
+
+
+@static.route("/fb2.xsl")
+def fb2_xsl():
+    return current_app.send_static_file("fb2.xsl")

@@ -80,8 +80,13 @@ URL = {
     "time": "/opds/time",  # all books by time (from new to old)
     "read": "/read/",  # read book
     "dl": "/fb2/",  # download book
+    "plain": "/plain/",  # read via browser xsl processing
     "cover": "/covers/",  # books cover images
+    "xsl_read": "/fb2.xsl",  # xsl for browser processing
 }
+
+# xsl line template
+XSL_READ = '<?xml-stylesheet type="text/xsl" href="%s"?>'
 
 # interface strings
 LANG = {
