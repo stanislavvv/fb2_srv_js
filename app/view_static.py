@@ -152,6 +152,10 @@ def fb2_plain(zip_file=None, filename=None):
     fb2data = fb2_out(zip_file, filename)
     if fb2data is not None:  # pylint: disable=R1705
         cachectl = "maxage=%d, must-revalidate" % int(CONFIG['CACHE_TIME_ST'])
+
+        # # Add the XML stylesheet processing instruction for XSLT before <FictionBook>
+        # fb2data_with_stylesheet = re.sub(r'(<\?xml.+?\?>)(<FictionBook)', r'\1<?xml-stylesheet type="text/xsl" href="/fb2.xsl"?>\2', fb2data, flags=re.DOTALL)
+
         resp = Response(fb2data, content_type='application/x-fb2+xml')
         resp.headers['Cache-Control'] = cachectl
         return resp
