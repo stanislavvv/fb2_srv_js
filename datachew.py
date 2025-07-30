@@ -11,7 +11,7 @@ from app.zips import renew_lists, new_lists
 from app.db import dbtables, dbclean
 from app.db_fill import process_booklists_db
 from app.files_fill import (
-    make_book_covers,
+    make_book_struct,
     make_authorsindex,
     make_sequencesindex,
     make_genresindex
@@ -48,8 +48,8 @@ def parse_arguments():
     fillonly_db_parser = subparsers.add_parser('fillonly', help='Fill all .zip.list to database, update if exists')
     fillonly_db_parser.description = 'Fill all .zip.list to database, skip if exists'
 
-    cover_parser = subparsers.add_parser('covers', help='Make static data for book covers previews')
-    cover_parser.description = 'Make static data for book covers previews'
+    cover_parser = subparsers.add_parser('books', help='Make static data for books/covers')
+    cover_parser.description = 'Make static data for book/covers'
 
     authindex_parser = subparsers.add_parser('authors', help='Make static json struct for authors')
     authindex_parser.description = 'Make static json struct for authors'
@@ -62,9 +62,9 @@ def parse_arguments():
 
     allindex_parser = subparsers.add_parser(
         'all',
-        help='Run new_lists fillonly covers authors sequences genres sequentially'
+        help='Run new_lists fillonly books authors sequences genres sequentially'
     )
-    allindex_parser.description = 'Run new_lists fillonly covers authors sequences genres sequentially'
+    allindex_parser.description = 'Run new_lists fillonly books authors sequences genres sequentially'
 
     pargs = parser.parse_args()
     return pargs
@@ -94,8 +94,8 @@ if __name__ == "__main__":
         process_booklists_db()
     elif args.command == 'authors':
         make_authorsindex()
-    elif args.command == 'covers':
-        make_book_covers()
+    elif args.command == 'books':
+        make_book_struct()
     elif args.command == 'sequences':
         make_sequencesindex()
     elif args.command == 'genres':
@@ -104,7 +104,7 @@ if __name__ == "__main__":
         new_lists()
         dbtables()
         process_booklists_db()
-        make_book_covers()
+        make_book_struct()
         make_authorsindex()
         make_sequencesindex()
         make_genresindex()

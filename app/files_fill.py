@@ -189,15 +189,15 @@ def make_auth_subindexes(session):
                 json.dump(t_idx[idx], f, indent=2, ensure_ascii=False)
 
 
-def make_book_covers():
-    """walk over .list's and extract book covers to struct"""
+def make_book_struct():
+    """walk over .list's and extract book info and covers to struct"""
 
-    logging.info("make book covers")
+    logging.info("make books struct")
 
     pagesdir = CONFIG['PAGES']
 
-    coversdir = pagesdir + URL["cover"]
-    Path(coversdir).mkdir(parents=True, exist_ok=True)
+    books_struct_dir = pagesdir + URL["cover"]
+    Path(books_struct_dir).mkdir(parents=True, exist_ok=True)
 
     zipdir = CONFIG['ZIPS']
     hide_deleted = CONFIG['HIDE_DELETED']
@@ -211,15 +211,15 @@ def make_book_covers():
             while len(lines) > 0:
                 count = count + len(lines)
                 logging.debug("   %s", count)
-                make_book_covers_data(lines, coversdir, hide_deleted)
+                make_book_struct_data(lines, books_struct_dir, hide_deleted)
                 lines = lst.readlines(int(CONFIG['MAX_PASS_LENGTH']))
         i = i + 1
     shutil.copy(CONFIG['DEFAULT_COVER_SRC'], pagesdir + CONFIG['DEFAULT_COVER'])
     logging.info("end")
 
 
-def make_book_covers_data(lines, coversdir, hide_deleted="no"):
-    """write covers previews from jsonl lines data"""
+def make_book_struct_data(lines, books_struct_dir, hide_deleted="no"):
+    """write book info and covers previews from jsonl lines data"""
     for line in lines:
         book = json.loads(line)
         if book is None or (hide_deleted == "yes" and "deleted" in book and book["deleted"] == 1):
@@ -232,7 +232,7 @@ def make_book_covers_data(lines, coversdir, hide_deleted="no"):
                 cover = book["cover"]
                 # cover_ctype = cover["content-type"]
                 cover_data = cover["data"]
-                workdir = coversdir + id2pathonly(book_id)
+                workdir = books_struct_dir + id2pathonly(book_id)
                 Path(workdir).mkdir(parents=True, exist_ok=True)
                 try:
                     img_bytes = decode_b64(cover_data)
@@ -240,6 +240,12 @@ def make_book_covers_data(lines, coversdir, hide_deleted="no"):
                         img.write(img_bytes)
                 except Exception as ex:
                     logging.error('image error in %s/%s: %s', zip_file, filename, ex)
+                del book["cover"]
+            try:
+                with open(workdir + '/' + book_id + ".json", "w") as b:
+                    json.dump(book, b, indent=2, ensure_ascii=False)
+            except Exception as ex:
+                logging.error("Can't write book data: %s", ex)
 
 
 def make_sequencesindex():

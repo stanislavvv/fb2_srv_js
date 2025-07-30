@@ -120,7 +120,12 @@ def fb2_cover(sub1=None, sub2=None, book_id=None):
         return Response("Cover not found", status=404)
 
     pagesdir = CONFIG['PAGES']
-    coverfile = safe_path(f"/covers/{sub1}/{sub2}/{book_id}.jpg")
+    coverfile = safe_path("%s%s/%s/%s.jpg" % (
+        URL["cover"],
+        sub1,
+        sub2,
+        book_id
+    ))
 
     fullpath = os.path.join(pagesdir, coverfile)
 

@@ -20,7 +20,6 @@ from .data import (
     make_genres_db,
     make_books_db,
     make_book_descr_db,
-    # make_book_covers_db,
     open_booklist
 )
 

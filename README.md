@@ -20,7 +20,7 @@
 
 ### Create static indexes
 
-  * `./datachew.sh covers` -- make dir/file struct for book covers previews
+  * `./datachew.sh books` -- make dir/file struct for books/covers
   * `./datachew.sh authors` -- make static indexes for authors
 
 ### Run development server

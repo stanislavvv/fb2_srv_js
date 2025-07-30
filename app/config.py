@@ -46,7 +46,7 @@ CONFIG = {  # default values
     "MAX_PASS_LENGTH": "4000",  # default for orange pi
     "MAX_PASS_LENGTH_GEN": "5",  # default for orange pi
     "PASS_SIZE_HINT": "10485760",  # default for orange pi
-    "DEFAULT_COVER": "/covers/default.jpg",
+    "DEFAULT_COVER": "/books/default.jpg",
     "DEFAULT_COVER_SRC": "./app/static/default-cover.jpg",
     "CACHE_TIME": "604800",  # 60 * 60 * 24 * 7 == 7 days
     "CACHE_TIME_ST": "2592000",  # 60 * 60 * 24 * 30 == 30 days
@@ -81,7 +81,7 @@ URL = {
     "read": "/read/",  # read book
     "dl": "/fb2/",  # download book
     "plain": "/plain/",  # read via browser xsl processing
-    "cover": "/covers/",  # books cover images
+    "cover": "/books/",  # books cover images
     "xsl_read": "/fb2.xsl",  # xsl for browser processing
 }
 
