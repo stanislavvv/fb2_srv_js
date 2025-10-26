@@ -1,0 +1,39 @@
+[common]
+; more logs for logs god
+debug = yes
+; postgres connection
+pg_host = 127.0.0.1
+pg_base = books
+pg_user = books
+pg_pass = ExamplePassword
+; data dirs
+zips_path = /path/data
+pages_path = /path/data/pages
+; for cover pics resize
+pic_width = 200
+; show books with deleted=1
+hide_deleted = no
+; web/opds interface root
+web_title = Home OPDS directory
+listen_host = 127.0.0.1
+listen_port = 8000
+; used in indexing and in random pages
+page_size = 50
+search_result_limit = 500
+inpx_file = flibusta_fb2_local.inpx
+max_pass_lenth = 20000
+mas_genre_pass_length = 40
+books_pass_size_hint = 104857600
+
+[development]
+;app_root = /books
+page_size = 10
+search_result_limit = 50
+debug = yes
+listen_host = 0.0.0.0
+hide_deleted = no
+
+[production]
+app_root = /books
+debug = no
+hide_deleted = yes
