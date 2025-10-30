@@ -229,11 +229,11 @@ def make_book_struct_data(lines, books_struct_dir, hide_deleted="no"):
             zip_file = book['zipfile']
             filename = book['filename']
             workdir = books_struct_dir + id2pathonly(book_id)
+            Path(workdir).mkdir(parents=True, exist_ok=True)
             if "cover" in book and book["cover"] is not None:
                 cover = book["cover"]
                 # cover_ctype = cover["content-type"]
                 cover_data = cover["data"]
-                Path(workdir).mkdir(parents=True, exist_ok=True)
                 try:
                     img_bytes = decode_b64(cover_data)
                     with open(workdir + '/' + book_id + '.jpg', 'wb') as img:
