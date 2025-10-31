@@ -328,7 +328,7 @@ function parseAndRenderXML(xmlDoc, path) {
 function performSearch() {
     let searchTerm = document.getElementById('search-input').value;
     if (searchTerm.trim()) {
-        window.location.href = '#/opds/search?searchTerm=' + encodeURIComponent(searchTerm);
+        window.location.href = '#/' + prefix + '/search?searchTerm=' + encodeURIComponent(searchTerm);
     } else {
         alert("Введите поисковой запрос");
     }
