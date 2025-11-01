@@ -486,3 +486,29 @@ def sizeof_fmt(num: int, suffix="B"):
             return f"{num:3.1f}{unit}{suffix}"
         num /= 1024.0
     return f"{num:.1f}Yi{suffix}"
+
+
+def is_auth(user, password):
+    """
+    check user:pass in zips_path/passwd
+    """
+    import os
+    passwd_path = os.path.join(CONFIG["ZIPS"], "passwd")
+    try:
+        with open(passwd_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.rstrip("\n")
+                if not line:  # пропускаем пустые строки
+                    continue
+                if line.lstrip().startswith("#"):  # туда же комменты
+                    continue
+                try:
+                    u, p = line.split(":", 1)
+                except ValueError:
+                    continue  # невалидная строка
+                if u == user and p == password:
+                    return True
+        return False
+    except FileNotFoundError:
+        # при отсутствии файла -- режим без авторизации
+        return True

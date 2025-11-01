@@ -9,7 +9,7 @@ import re
 import lxml.etree as et
 
 from bs4 import BeautifulSoup
-from io import BytesIO
+from io import BytesIO  # noqa
 from flask import (
     Blueprint,
     Response,
@@ -17,6 +17,7 @@ from flask import (
     send_file,
     url_for,
     redirect,
+    request,
     render_template
 )
 
@@ -27,6 +28,7 @@ from .validate import (
     validate_fb2
 )
 from .config import CONFIG, URL, LANG, XSL_READ
+from .data import is_auth
 
 static = Blueprint("static", __name__)
 
@@ -105,6 +107,19 @@ def add_xsl_line(fb2data, xsl_line):
                            xml_string[xml_declaration_end:])
 
     return modified_xml_string.encode(encoding)
+
+
+@static.before_request
+def require_auth():
+    """Require HTTP Basic auth on every request handled by this blueprint."""
+    auth = request.authorization
+    if not auth or not is_auth(auth.username, auth.password):
+        # 401 response forces the browser to show the login dialog
+        return Response(
+            'Authentication required',
+            401,
+            {'WWW-Authenticate': 'Basic realm="Login Required"'}
+        )
 
 
 @static.route(URL["cover"] + "<sub1>/<sub2>/<book_id>.jpg")

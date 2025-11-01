@@ -17,7 +17,7 @@ from .opds_struct import (
 from .opds_db import opds_books_db, opds_simple_list_db
 from .config import CONFIG, URL, LANG
 from .strings import id2path
-from .data import get_meta_name, get_genre_name
+from .data import get_meta_name, get_genre_name, is_auth
 from .validate import (
     validate_prefix,
     validate_id,
@@ -42,6 +42,18 @@ def create_opds_response(data, cache_time=CONFIG["CACHE_TIME"]):
         logging.error(f"Error creating OPDS response: {e}")
         # Return an error response (you might want a more specific error page)
         return Response("Internal Server Error", status=500, mimetype='text/plain')
+
+
+@opds.before_request
+def require_auth():
+    """Require HTTP Basic auth on every request handled by this blueprint."""
+    auth = request.authorization
+    if not auth or not is_auth(auth.username, auth.password):
+        return Response(
+            'Authentication required',
+            401,
+            {'WWW-Authenticate': 'Basic realm="Login Required"'}
+        )
 
 
 @opds.route(URL["start"], methods=['GET'])
