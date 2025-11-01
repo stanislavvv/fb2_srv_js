@@ -109,17 +109,19 @@ def add_xsl_line(fb2data, xsl_line):
     return modified_xml_string.encode(encoding)
 
 
-@static.before_request
-def require_auth():
-    """Require HTTP Basic auth on every request handled by this blueprint."""
-    auth = request.authorization
-    if not auth or not is_auth(auth.username, auth.password):
-        # 401 response forces the browser to show the login dialog
-        return Response(
-            'Authentication required',
-            401,
-            {'WWW-Authenticate': 'Basic realm="Login Required"'}
-        )
+def require_auth(f):
+    """Require HTTP Basic auth decorator"""
+    def decorated_function(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not is_auth(auth.username, auth.password):
+            # 401 response forces the browser to show the login dialog
+            return Response(
+                'Authentication required',
+                401,
+                {'WWW-Authenticate': 'Basic realm="Login Required"'}
+            )
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 @static.route(URL["cover"] + "<sub1>/<sub2>/<book_id>.jpg")
@@ -151,6 +153,7 @@ def fb2_cover(sub1=None, sub2=None, book_id=None):
     return send_file(fullpath, mimetype='image/jpeg', max_age=max_age)
 
 
+@require_auth
 @static.route(URL["dl"] + "<zip_file>/<filename>")
 def fb2_download(zip_file=None, filename=None):
     """send fb2.zip on download request"""
@@ -179,6 +182,7 @@ def fb2_download(zip_file=None, filename=None):
     return Response("Book not found", status=404)
 
 
+@require_auth
 @static.route(URL["plain"] + "<zip_file>/<filename>")
 def fb2_plain(zip_file=None, filename=None):
     """send plain fb2 on download request"""
