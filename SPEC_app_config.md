@@ -87,3 +87,16 @@ app_root = /books
 debug = no
 hide_deleted = yes
 ```
+
+## Users and passwords file
+
+Should be `zips_path/passwd`
+
+Format:
+
+```
+user1:password1
+user2:password2
+```
+
+If file omitted -- any user/password allowed
