@@ -11,6 +11,7 @@ Nothing global ToDo
   * indexing:
     * [lowprio] pagination from config (hardcoded to 50 at now)
   * opds:
+    * [BUG] must sort by number in sequence books list
     * [bug] wrong headers in random books in genre, author sequences
     * [bug] no language field in book entry
     * [feature] add plain-fb2 output and use in-js xslt for book reading
