@@ -158,7 +158,7 @@ def opds_author_seqs(sub1, sub2, id):
         "sub2": sub2,
         "tag": "tag:author:" + id + ":sequences",
         "subtag": "tag:author:" + id,
-        "title": LANG["author_tpl"],
+        "title": LANG["seqs_author"],
         "subtitle": LANG["books_num"],
         "layout": "name_id_list",
         "use_nums": True,
@@ -507,9 +507,10 @@ def opds_rnd_genres_list(meta_id):
 def opds_rnd_books_genre(gen_id):
     """random books list in genre"""
     gen_id = validate_genre(gen_id)
+    gen_name = get_genre_name(gen_id)
     params = {
         "tag": "tag:rnd:genre:" + gen_id,
-        "title": LANG["rnd_books"],
+        "title": LANG["rnd_genre_books"] % gen_name,
         "layout": "rnd_books_genre",
         "gen_id": gen_id,
         "authref": URL["author"],

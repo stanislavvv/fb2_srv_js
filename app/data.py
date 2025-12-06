@@ -112,6 +112,13 @@ def custom_alphabet_book_title_cmp(str1, str2):  # pylint: disable=R0911
     return custom_alphabet_cmp(book_title1, book_title2)
 
 
+def custom_alphabet_name_cmp(str1, str2):  # pylint: disable=R0911
+    """custom compare name fields"""
+    name1 = str1["name"]
+    name2 = str2["name"]
+    return custom_alphabet_cmp(name1, name2)
+
+
 def genres_to_meta_init():
     """load genres info from file"""
     with open('genres.list', encoding="utf-8") as lst:

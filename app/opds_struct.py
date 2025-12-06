@@ -12,6 +12,7 @@ from functools import cmp_to_key
 from .data import (
     custom_alphabet_cmp,
     custom_alphabet_book_title_cmp,
+    custom_alphabet_name_cmp,
     url_str,
     html_refine,
     get_genre_name,
@@ -427,6 +428,7 @@ def opds_simple_list(params):
             else:
                 for k, v in sorted(idx_data.items(), key=lambda item: item[1]):  # pylint: disable=W0612
                     data.append(k)
+                data = sorted(data, key=cmp_to_key(custom_alphabet_name_cmp))
         if params["layout"] == "key_value":
             idx_data = {}
             for k, v in sorted(index.items(), key=lambda item: item[1]):  # pylint: disable=W0612
@@ -671,7 +673,18 @@ def opds_book_list(params):
         data = sorted(data, key=lambda s: unicode_upper(s["date_time"]))
     elif layout == "sequence":
         seq_id = data["id"]
+        data_seq = []
         data = sorted(data["books"], key=cmp_to_key(custom_alphabet_book_title_cmp))
+        for book in data:
+            for s in book["sequences"]:
+                seq_num = 0
+                if s.get("id") == seq_id:
+                    snum = s.get("num")
+                    if snum is not None:
+                        seq_num = int(snum)
+                    book["seq_num"] = seq_num
+                    data_seq.append(book)
+        data = sorted(data_seq, key=lambda s: s["seq_num"] or -1)
 
     for book in data:
         if layout in ("sequence", "author_seq"):
