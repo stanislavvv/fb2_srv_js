@@ -161,6 +161,7 @@ LANG = {
     "js_authors": "Авторы:",
     "js_links": "Ссылки:",
     "js_genres": "Жанры:",
+    "js_lang": "Язык:",
 }
 
 

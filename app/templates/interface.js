@@ -12,6 +12,7 @@ const genre_prfx = '{{ data["genre_prefix"] }}';
 const lang_authors = '{{ data["lang_authors"] }}';
 const lang_links = '{{ data["lang_links"] }}';
 const lang_genres = '{{ data["lang_genres"] }}';
+const lang_lang = '{{ data["lang_lang"] }}';
 // end template data
 
 function updateNavigationPath(path) {
@@ -172,6 +173,13 @@ function renderBook(entry) {
     let descr = document.createElement("div");
     let dcont = entry.getElementsByTagName("content")[0].innerHTML;
     descr.innerHTML = decodeHtml(dcont);
+
+    let languageElement = entry.getElementsByTagName("dc:language")[0];
+    if (languageElement) {
+        let lang = document.createElement("p");
+        lang.textContent = `${lang_lang}: ${languageElement.textContent}`;
+        descr.appendChild(lang);
+    }
 
     let upd = document.createElement("p");
     upd.textContent = `Добавлено: ${updated}`;

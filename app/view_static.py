@@ -253,6 +253,7 @@ def interface_js():
         "lang_authors": LANG["js_authors"],
         "lang_links": LANG["js_links"],
         "lang_genres": LANG["js_genres"],
+        "lang_lang": LANG["js_lang"],
     }
     tpl = "interface.js"
     return create_html_response(data, tpl, cache_period=int(CONFIG['CACHE_TIME_ST']))
