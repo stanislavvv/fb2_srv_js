@@ -36,3 +36,13 @@ useful for debug configuration
 ```shell
 ./gunicorn.sh
 ```
+
+### Simple authorization if need
+
+Sometimes library must not be open for all internet as by default now.
+
+If you need login-pass access to library -- create file `passwords` in `zips_path` directory with lines like:
+
+```
+login:password
+```
