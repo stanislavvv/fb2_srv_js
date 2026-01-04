@@ -9,11 +9,10 @@ Nothing global ToDo
   * common:
     * configfile fields types (hide_deleted must be boolean)
   * indexing:
+    * per-zip/global author name replacement (mostly for joining nickname and real name)
     * [lowprio] pagination from config (hardcoded to 50 at now)
   * opds:
-    * [BUG] must sort by number in sequence books list -- testing
-    * [BUG] wrong sort in author's sequenses list -- testing
-    * [feature] add plain-fb2 output and use in-js xslt for book reading
+    * [feature] add plain-fb2 output and use in-js xslt for book reading (in-browser xslt works bad)
     * [feature] last+1 page in paginated must be empty page with opds header (need testing in booreaders)
   * docs:
     * nginx example for covers (`@try_files` and default cover)
