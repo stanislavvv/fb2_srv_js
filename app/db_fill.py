@@ -8,7 +8,7 @@ import json
 from sqlalchemy.orm import sessionmaker
 
 from .config import CONFIG
-from .db_classes import dbconnect, GenresMeta
+from .db_classes import dbconnect, dbsession, GenresMeta, BookDescription, VectorType, VectorsData
 from .data import (
     genres_to_meta_init,
     fill_authors_book,
@@ -20,7 +20,9 @@ from .data import (
     make_genres_db,
     make_books_db,
     make_book_descr_db,
-    open_booklist
+    open_booklist,
+    make_anno_vectors,
+    get_count
 )
 
 
@@ -106,3 +108,44 @@ def process_books_batch(lines, hide_deleted):
     dbwrite(make_authors_db(authors))
     if hide_deleted == "yes":
         logging.debug(f"      deleted {deleted_cnt}")
+
+
+def get_book_ids(session, limit=CONFIG["MAX_PASS_LENGTH"], offset=0):
+    """return array of book_id"""
+    ret = []
+    data = session.query(BookDescription).offset(offset).limit(limit)
+    for a in data:
+        ret.append(a.book_id)
+    return ret
+
+
+def check_ids_vectors(session, book_ids, type):
+    """return array of book_ids that are not processed"""
+    existing_ids = session.query(VectorsData.id).filter(
+        VectorsData.id.in_(book_ids),
+        VectorsData.type == type
+    ).all()
+
+    existing_ids_set = {row[0] for row in existing_ids}
+    return [id for id in book_ids if id not in existing_ids_set]
+
+
+def make_vectors():
+    """use pre-filled db data for make vectors"""
+    if CONFIG["VECTOR_SEARCH"] not in (True, 'yes', 'YES', 'Yes'):
+        logging.error("Vector search is not enabled")
+        return
+    limit = int(CONFIG["MAX_PASS_LENGTH"])
+    offset = 0
+    session = dbsession()
+    book_cnt = get_count(session, BookDescription)
+    logging.info("Making annotations vectors, total: %s, batch limit: %s", str(book_cnt), str(limit))
+    book_ids = get_book_ids(session, limit, offset)
+    while len(book_ids) > 0:
+        ids = check_ids_vectors(session, book_ids, VectorType.BOOK_ANNO)
+        dbwrite(make_anno_vectors(session, ids))
+
+        logging.debug("  offset: %s, processed: %s", offset, len(ids))
+        offset = offset + limit
+        book_ids = get_book_ids(session, limit, offset)
+    logging.info("end")

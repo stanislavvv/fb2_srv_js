@@ -8,6 +8,7 @@ import urllib
 
 from sqlalchemy.orm import sessionmaker
 from bs4 import BeautifulSoup
+import openai
 
 from .config import CONFIG
 from .strings import make_id
@@ -17,6 +18,8 @@ from .db_classes import (
     BookGenre,
     Book,
     BookDescription,
+    VectorsData,
+    VectorType,
     dbconnect
 )
 
@@ -519,3 +522,65 @@ def is_auth(user, password):
     except FileNotFoundError:
         # при отсутствии файла -- режим без авторизации
         return True
+
+
+def get_vector(text: str):
+    """get text and return vector"""
+    ret = None
+    if text is None or len(text.strip()) < 1:
+        return ret
+    client = openai.OpenAI(base_url=CONFIG["OPENAI_URL"], api_key=CONFIG["OPENAI_KEY"])
+    response = client.embeddings.create(
+        model=CONFIG["OPENAI_MODEL"],
+        input=text,
+        dimensions=10
+    )
+    ret = response.data[0].embedding
+    return ret
+
+
+def get_books_text(session, bookids):
+    """return dict for: book_id: {BookDescription named fields dict}"""
+    ret = {}
+    data = session.query(BookDescription).filter(BookDescription.book_id.in_(bookids)).all()
+    for b in data:
+        book_id = b.book_id
+        ret[book_id] = {
+            "book_id": b.book_id,
+            "book_title": b.book_title,
+            "annotation": b.annotation
+        }
+    return ret
+
+
+def get_count(session, obj):
+    """return count of obj in database"""
+    return session.query(obj).count()
+
+
+def make_anno_vectors(session, book_ids):
+    """return data for dbwrite for vector table with type == book annotation"""
+    ret = []
+    descr = get_books_text(session, book_ids)
+    # disable debug logs for openai internals
+    logging.getLogger("openai").setLevel(logging.ERROR)
+    logging.getLogger("httpx").setLevel(logging.ERROR)
+    logging.getLogger("httpcore").setLevel(logging.ERROR)
+
+    for book_id in descr:
+        try:
+            vector = get_vector(descr[book_id]["annotation"])
+            is_bad = False
+            if vector is None:
+                is_bad = True
+            ret.append(
+                VectorsData(
+                    id=book_id,
+                    type=VectorType.BOOK_ANNO,
+                    is_bad=is_bad,
+                    embedding=vector
+                )
+            )
+        except Exception as ex:
+            logging.error("ERR: Make descr vectors at book_id %s: %s", book_id, ex)
+    return ret

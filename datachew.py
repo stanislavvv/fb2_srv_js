@@ -9,7 +9,7 @@ import sys
 from app.config import read_config, CONFIG
 from app.zips import renew_lists, new_lists
 from app.db import dbtables, dbclean
-from app.db_fill import process_booklists_db
+from app.db_fill import process_booklists_db, make_vectors
 from app.files_fill import (
     make_book_struct,
     make_authorsindex,
@@ -66,6 +66,9 @@ def parse_arguments():
     )
     allindex_parser.description = 'Run new_lists fillonly books authors sequences genres sequentially'
 
+    vectors_parser = subparsers.add_parser('vectors', help='[optional] Make vector data in db for vector search')
+    vectors_parser.description = 'Make vector data in db for vector search -- only if vector_search is set in config'
+
     pargs = parser.parse_args()
     return pargs
 
@@ -108,6 +111,8 @@ if __name__ == "__main__":
         make_authorsindex()
         make_sequencesindex()
         make_genresindex()
+    elif args.command == 'vectors':
+        make_vectors()
     else:
         print("-h or --help for help")
         sys.exit(1)

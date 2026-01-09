@@ -36,6 +36,10 @@ VARS = {
     "random_cache_seconds": "CACHE_TIME_RND",
     "xslt_file": "FB2_XSLT",  # xslt file for fb2 to html conversion
     "app_ico": "APP_ICO",  # application .ico
+    "vector_search": "VECTOR_SEARCH",  # true if use vector search
+    "openai_url": "OPENAI_URL",  # url to embedded neural network openai api
+    "openai_model": "OPENAI_MODEL",  # by default 'text-embedding-3-small'
+    "openai_key": "OPENAI_KEY",  # does not need for ollama
 }
 
 CONFIG = {  # default values
@@ -57,6 +61,10 @@ CONFIG = {  # default values
     "APP_ICO": "/favicon.ico",  # ToDo: draw it
     "TITLE": "Home OPDS directory",
     "HIDE_DELETED": False,
+    "VECTOR_SEARCH": False,
+    "OPENAI_URL": "http://localhost:18000/v1",
+    "OPENAI_MODEL": "text-embedding-3-small",
+    "OPENAI_KEY": "-",  # no keys for ollama
 }
 
 # internal configuration for opds interface
