@@ -23,6 +23,16 @@
   * `./datachew.sh books` -- make dir/file struct for books/covers
   * `./datachew.sh authors` -- make static indexes for authors
 
+### Create vector data
+
+Used in vector search if enabled in config
+
+`./datachew.sh vectors`
+
+1. get books annotations from database
+2. get per-book vectors from openai-like embeddings service
+3. store books vectors in database
+
 ### Run development server
 
 useful for debug configuration
