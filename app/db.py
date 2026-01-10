@@ -3,7 +3,7 @@
 
 import logging
 
-from sqlalchemy import text
+from sqlalchemy import text, select
 
 from .db_classes import Base, dbconnect, BookAuthor, BookDescription, BookSequence, BookGenre, GenresMeta, VectorsData
 from .config import CONFIG
@@ -111,4 +111,13 @@ def get_seqs(session, seqids):
             "id": a.id,
             "name": a.name
         }
+    return ret
+
+
+def get_ids_nearest(session, vector, type, limit):
+    """return array of ids"""
+    ret = []
+    data = session.scalars(select(VectorsData).order_by(VectorsData.embedding.l2_distance(vector)).limit(limit))
+    for i in data:
+        ret.append(i.id)
     return ret

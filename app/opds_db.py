@@ -7,12 +7,14 @@ import urllib
 from sqlalchemy.sql.expression import func
 from sqlalchemy import and_
 
-from .db_classes import Book, BookAuthor, BookSequence, BookDescription, dbsession
+from .db_classes import Book, BookAuthor, BookSequence, BookDescription, dbsession, VectorType
 from .db import (
     get_books_descr,
     get_authors,
-    get_seqs
+    get_seqs,
+    get_ids_nearest
 )
+from data import get_vector
 from .opds_struct import (
     get_dtiso,
     opds_header,
@@ -91,6 +93,14 @@ def opds_books_db(params):
             book_ids = []
             for b in book_descr_data:
                 book_ids.append(b.book_id)
+            books_data = session.query(Book).filter(Book.book_id.in_(book_ids)).all()
+        elif layout == "search_vector_anno":
+            s_term = params["search_term"]
+            ret["feed"]["id"] = tag + urllib.parse.quote_plus(s_term)
+            maxres = CONFIG["MAX_SEARCH_RES"]
+            type = VectorType.BOOK_ANNO
+            vector = get_vector(s_term)
+            book_ids = get_ids_nearest(session, vector, type, maxres)
             books_data = session.query(Book).filter(Book.book_id.in_(book_ids)).all()
         else:
             books_data = session.query(Book).order_by(Book.date.desc()).limit(pagelimit).offset(pagelimit * page).all()
