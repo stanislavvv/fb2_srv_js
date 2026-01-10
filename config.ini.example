@@ -24,10 +24,18 @@ inpx_file = flibusta_fb2_local.inpx
 max_pass_lenth = 20000
 mas_genre_pass_length = 40
 books_pass_size_hint = 104857600
+; uncomment for enable
+;vector_search = yes
+; local ollama url
+openai_url = http://127.0.0.1:11434/v1
+; example openai model, in ollama use something like "embeddinggemma"
+opeai_model = text-embedding-3-small
+; does not need for ollama
+;openai_key = ...
 
 [development]
 ;app_root = /books
-page_size = 10
+;page_size = 10
 search_result_limit = 50
 debug = yes
 listen_host = 0.0.0.0

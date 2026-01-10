@@ -20,7 +20,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from pgvector.sqlalchemy import Vector
 
-from .config import CONFIG
+from .config import CONFIG, VECTOR_SIZE
 
 Base = declarative_base()
 
@@ -121,7 +121,7 @@ class VectorsData(Base):
     id = Column(String(32), nullable=False, primary_key=True)
     type = Column(Enum(VectorType))
     is_bad = Column(Boolean, nullable=False, default=False)
-    embedding = Column(Vector(10))
+    embedding = Column(Vector(VECTOR_SIZE))
     __table_args__ = (
         Index(
             'vectors_idx',

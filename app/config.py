@@ -81,6 +81,7 @@ URL = {
     "srchseq": "/opds/search/sequences",
     "srchbook": "/opds/search/books",
     "srchbookanno": "/opds/search/booksanno",
+    "srchbookannovector": "/opds/search/booksannovector",
     "rndbook": "/opds/random-books/",
     "rndseq": "/opds/random-sequences/",
     "rndgen": "/opds/rnd/genre/",
@@ -154,10 +155,12 @@ LANG = {
     "schmain_seq": "Поиск в сериях",
     "schmain_book": "Поиск в названиях книг",
     "schmain_anno": "Поиск в аннотациях книг",
+    "schmain_anno_vector": "Векторный поиск в аннотациях книг",
     "search_author": "Поиск среди авторов по '%s'",
     "search_seq": "Поиск среди серий по '%s'",
-    "search_book": "Поиск по заголовкам книг по '%s'",
-    "search_anno": "Поиск по описаниям книг по '%s'",
+    "search_book": "Поиск в заголовках книг по '%s'",
+    "search_anno": "Поиск в описаниях книг по '%s'",
+    "search_anno_vector": "Векторный поиск в описаниях книг по '%s'",
 
     "rnd_books": "Случайные книги",
     "rnd_seqs": "Случайные серии",
@@ -171,6 +174,8 @@ LANG = {
     "js_genres": "Жанры:",
     "js_lang": "Язык:",
 }
+
+VECTOR_SIZE = 256
 
 
 def read_config(conf: str):

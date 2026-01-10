@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker
 from bs4 import BeautifulSoup
 import openai
 
-from .config import CONFIG
+from .config import CONFIG, VECTOR_SIZE
 from .strings import make_id
 from .db_classes import (
     BookAuthor,
@@ -533,7 +533,7 @@ def get_vector(text: str):
     response = client.embeddings.create(
         model=CONFIG["OPENAI_MODEL"],
         input=text,
-        dimensions=10
+        dimensions=VECTOR_SIZE
     )
     ret = response.data[0].embedding
     return ret

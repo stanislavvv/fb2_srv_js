@@ -639,3 +639,25 @@ def opds_search_booksanno(page=0):
         "up": URL["search"] + f"?searchTerm={s_term_q}"
     }
     return create_opds_response(opds_books_db(params))
+
+
+@opds.route(URL["srchbookannovector"], methods=['GET'])
+def opds_search_booksannovector(page=0):
+    """search in book annotations by vector"""
+    s_term = request.args.get('searchTerm')
+    s_term = validate_search(s_term)
+    s_term_q = urllib.parse.quote(s_term)
+    params = {
+        "search_term": s_term,
+        "tag": "tag:search:booksvector:",
+        "subtag": "tag:book:",
+        "title": LANG["search_anno_vector"] % s_term,
+        "layout": "search_anno_vector",
+        "page": page,
+        "authref": URL["author"],
+        "seqref": URL["seq"],
+        "self": URL["srchbookannovector"] + f"?searchTerm={s_term_q}",
+        "start": URL["start"],
+        "up": URL["search"] + f"?searchTerm={s_term_q}"
+    }
+    return create_opds_response(opds_books_db(params))

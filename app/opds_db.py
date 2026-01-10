@@ -14,7 +14,7 @@ from .db import (
     get_seqs,
     get_ids_nearest
 )
-from data import get_vector
+from .data import get_vector
 from .opds_struct import (
     get_dtiso,
     opds_header,
@@ -94,7 +94,7 @@ def opds_books_db(params):
             for b in book_descr_data:
                 book_ids.append(b.book_id)
             books_data = session.query(Book).filter(Book.book_id.in_(book_ids)).all()
-        elif layout == "search_vector_anno":
+        elif layout == "search_anno_vector":
             s_term = params["search_term"]
             ret["feed"]["id"] = tag + urllib.parse.quote_plus(s_term)
             maxres = CONFIG["MAX_SEARCH_RES"]
