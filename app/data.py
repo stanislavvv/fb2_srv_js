@@ -580,8 +580,14 @@ def make_anno_vectors(session, book_ids):
     vect_cnt = 0
     for book_id in descr:
         try:
-            text = "%s\n%s\n%s" % (descr[book_id]["book_title"], descr[book_id]["genres"], descr[book_id]["annotation"])
-            vector = get_vector(text)
+            txt = []
+            for s in [descr[book_id]["book_title"], descr[book_id]["genres"], descr[book_id]["annotation"]]:
+                if s is not None and len(s) >= 1:
+                    txt.append(s)
+            vector = None
+            if len(txt) > 0:
+                text = "\n".join(txt)
+                vector = get_vector(text)
             is_bad = False
             if vector is None:
                 is_bad = True
