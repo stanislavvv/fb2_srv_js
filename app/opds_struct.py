@@ -779,12 +779,12 @@ def opds_search_main(params):
                     "id": "tag:search:bookannovector:",
                     "title": LANG["schmain_anno_vector"],
                     "content": {
-                    "@type": "text",
-                    "#text": LANG["schmain_anno_vector"]
+                        "@type": "text",
+                        "#text": LANG["schmain_anno_vector"]
                     },
                     "link": {
-                    "@href": approot + URL["srchbookannovector"] + "?searchTerm=%s" % url_str(s_term),
-                    "@type": "application/atom+xml;profile=opds-catalog"
+                        "@href": approot + URL["srchbookannovector"] + "?searchTerm=%s" % url_str(s_term),
+                        "@type": "application/atom+xml;profile=opds-catalog"
                     }
                 }
             )

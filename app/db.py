@@ -117,7 +117,12 @@ def get_seqs(session, seqids):
 def get_ids_nearest(session, vector, type, limit):
     """return array of ids"""
     ret = []
-    data = session.scalars(select(VectorsData).order_by(VectorsData.embedding.l2_distance(vector)).limit(limit))
+    data = session.scalars(
+        select(VectorsData)
+        .where(VectorsData.is_bad == False)
+        .order_by(VectorsData.embedding.l2_distance(vector))
+        .limit(limit)
+    )
     for i in data:
         ret.append(i.id)
     return ret

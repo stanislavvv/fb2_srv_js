@@ -539,17 +539,27 @@ def get_vector(text: str):
     return ret
 
 
-def get_books_text(session, bookids):
+def get_books_textinfo(session, bookids):
     """return dict for: book_id: {BookDescription named fields dict}"""
     ret = {}
-    data = session.query(BookDescription).filter(BookDescription.book_id.in_(bookids)).all()
-    for b in data:
+    descr_data = session.query(BookDescription).filter(BookDescription.book_id.in_(bookids)).all()
+    other_data = session.query(Book).filter(Book.book_id.in_(bookids)).all()
+    for b in descr_data:
         book_id = b.book_id
         ret[book_id] = {
             "book_id": b.book_id,
             "book_title": b.book_title,
             "annotation": b.annotation
         }
+    for b in other_data:
+        book_id = b.book_id
+        book_genres = []
+        for g in b.genres:
+            gen_name = get_genre_name(g)
+            book_genres.append(gen_name)
+        book_data = ret[book_id]
+        book_data["genres"] = ", ".join(book_genres)
+        ret[book_id] = book_data
     return ret
 
 
@@ -561,18 +571,22 @@ def get_count(session, obj):
 def make_anno_vectors(session, book_ids):
     """return data for dbwrite for vector table with type == book annotation"""
     ret = []
-    descr = get_books_text(session, book_ids)
+    descr = get_books_textinfo(session, book_ids)
     # disable debug logs for openai internals
     logging.getLogger("openai").setLevel(logging.ERROR)
     logging.getLogger("httpx").setLevel(logging.ERROR)
     logging.getLogger("httpcore").setLevel(logging.ERROR)
 
+    vect_cnt = 0
     for book_id in descr:
         try:
-            vector = get_vector(descr[book_id]["annotation"])
+            text = "%s\n%s\n%s" % (descr[book_id]["book_title"], descr[book_id]["genres"], descr[book_id]["annotation"])
+            vector = get_vector(text)
             is_bad = False
             if vector is None:
                 is_bad = True
+            else:
+                vect_cnt = vect_cnt + 1
             ret.append(
                 VectorsData(
                     id=book_id,
@@ -583,4 +597,4 @@ def make_anno_vectors(session, book_ids):
             )
         except Exception as ex:
             logging.error("ERR: Make descr vectors at book_id %s: %s", book_id, ex)
-    return ret
+    return ret, vect_cnt

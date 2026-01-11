@@ -132,6 +132,10 @@ def check_ids_vectors(session, book_ids, type):
 
 def make_vectors():
     """use pre-filled db data for make vectors"""
+
+    # for genre names
+    genres_to_meta_init()
+
     if CONFIG["VECTOR_SEARCH"] not in (True, 'yes', 'YES', 'Yes'):
         logging.error("Vector search is not enabled")
         return
@@ -143,9 +147,10 @@ def make_vectors():
     book_ids = get_book_ids(session, limit, offset)
     while len(book_ids) > 0:
         ids = check_ids_vectors(session, book_ids, VectorType.BOOK_ANNO)
-        dbwrite(make_anno_vectors(session, ids))
+        data, real_vect = make_anno_vectors(session, ids)
+        dbwrite(data)
 
-        logging.debug("  offset: %s, processed: %s", offset, len(ids))
+        logging.debug("  offset: %s, processed: %s, vectors: %s", offset, len(ids), real_vect)
         offset = offset + limit
         book_ids = get_book_ids(session, limit, offset)
     logging.info("end")
