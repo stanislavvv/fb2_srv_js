@@ -33,6 +33,8 @@ Used in vector search if enabled in config
 2. get per-book vectors from openai-like embeddings service
 3. store books vectors in database
 
+Require access to any openai-like api with embedding network.
+
 ### Run development server
 
 useful for debug configuration

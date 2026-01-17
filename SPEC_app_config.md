@@ -48,6 +48,16 @@ max_pass_lenth = 4000
 mas_genre_pass_length = 5
 ; hint for .list processing in bytes
 books_pass_size_hint = 1048576
+
+; vector search configuration
+; make tables, may create vectors and use vector search in interface
+vector_search = yes
+; local ollama url
+openai_url = http://127.0.0.1:11434/v1
+; example openai model, in ollama use something like "embeddinggemma"
+opeai_model = text-embedding-3-small
+; does not need for ollama
+;openai_key = ...
 ```
 
 Section `[common]` will be used with any `APP_ENV` content with low priority. Something like this:
