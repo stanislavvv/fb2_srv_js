@@ -175,7 +175,8 @@ LANG = {
     "js_lang": "Язык:",
 }
 
-VECTOR_SIZE = 512
+# VECTOR_SIZE = 512
+VECTOR_SIZE = 256
 
 
 def read_config(conf: str):

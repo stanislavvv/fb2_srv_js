@@ -15,10 +15,11 @@ from sqlalchemy import (
     ForeignKey,
     create_engine
 )
+from pgvector.sqlalchemy import Vector, HALFVEC
 from sqlalchemy.dialects.postgresql import ARRAY, TEXT
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from pgvector.sqlalchemy import Vector
+from sqlalchemy.sql import func
 
 from .config import CONFIG, VECTOR_SIZE
 
@@ -121,14 +122,21 @@ class VectorsData(Base):
     id = Column(String(32), nullable=False, primary_key=True)
     type = Column(Enum(VectorType))
     is_bad = Column(Boolean, nullable=False, default=False)
-    embedding = Column(Vector(VECTOR_SIZE))
+    # embedding = Column(Vector(VECTOR_SIZE))
+    embedding = Column(HALFVEC(VECTOR_SIZE))
     __table_args__ = (
+        # Index(
+        #     'vectors_idx',
+        #     'embedding',
+        #     postgresql_using="hnsw",
+        #     # postgresql_with={'m': 16, 'ef_construction': 64},
+        #     postgresql_ops={'embedding': 'vector_l2_ops'},
+        # ),
         Index(
-            'vectors_idx',
-            'embedding',
-            postgresql_using="hnsw",
-            # postgresql_with={'m': 16, 'ef_construction': 64},
-            postgresql_ops={'embedding': 'vector_l2_ops'},
+            'sqlalchemy_orm_half_precision_index',
+            func.cast(embedding, HALFVEC(VECTOR_SIZE)).label('embedding'),
+            postgresql_using='hnsw',
+            postgresql_ops={'embedding': 'halfvec_l2_ops'}
         ),
     )
 
