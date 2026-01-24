@@ -10,7 +10,8 @@ Nothing global ToDo
     * configfile fields types (hide_deleted must be boolean)
   * indexing:
     * per-zip/global author name replacement (mostly for joining nickname and real name)
-    * [lowprio] pagination from config (hardcoded to 50 at now)
+    * [bug] `vector` parameter need run several times with different max_pass_lenth for process all books (may be rewrite into .zip.list processing?)
+    * [lowprio] pagination from config (hardcoded to 50 at now) -- won't fix
   * opds:
     * [BUG] after inter-booklist navigaton (next page in genre, from author's sequence to sequence, reload by link) page MUST scroll to beginnig
     * [feature] add plain-fb2 output and use in-js xslt for book reading (in-browser xslt works bad)
