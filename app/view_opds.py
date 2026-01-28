@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """opds responses"""
 
+import os
 import xmltodict
 import logging
 import urllib
@@ -47,6 +48,11 @@ def create_opds_response(data, cache_time=CONFIG["CACHE_TIME"]):
 @opds.before_request
 def require_auth():
     """Require HTTP Basic auth on every request handled by this blueprint."""
+    # Check if passwd file exists before requiring auth
+    passwd_file = os.path.join(CONFIG["ZIPS"], "passwd")
+    if not os.path.exists(passwd_file):
+        return  # Skip authentication if passwd file doesn't exist
+
     auth = request.authorization
     if not auth or not is_auth(auth.username, auth.password):
         return Response(

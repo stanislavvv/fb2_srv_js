@@ -53,7 +53,7 @@ def fb2_out(zip_file: str, filename: str):
                 data = fb2.read()
         return data
     except Exception as ex:  # pylint: disable=W0703
-        print(ex)
+        current_app.logger.error("Error in file: %s/%s: %s", zip_file, filename, ex)
         return None
 
 
@@ -72,7 +72,7 @@ def html_out(zip_file: str, filename: str):
                 html = transform(dom)
                 return str(html)
     except Exception as ex:  # pylint: disable=W0703
-        print(ex)
+        current_app.logger.error("Error in file: %s/%s: %s", zip_file, filename, ex)
         return None
 
 
@@ -112,6 +112,11 @@ def add_xsl_line(fb2data, xsl_line):
 def require_auth(f):
     """Require HTTP Basic auth decorator"""
     def decorated_function(*args, **kwargs):
+        # есть ли файл с паролями
+        passwd_path = os.path.join(CONFIG["ZIPS"], "passwd")
+        if not os.path.exists(passwd_path):
+            # Если файла нет, пропускаем авторизацию
+            return f(*args, **kwargs)
         auth = request.authorization
         if not auth or not is_auth(auth.username, auth.password):
             # 401 response forces the browser to show the login dialog
