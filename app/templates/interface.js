@@ -66,7 +66,8 @@ function renderSimpleList(xmlDoc) {
         d.classList.add('col1')
         a.href = '#' + linkHref;
         a.textContent = title;
-        a.onclick = function () { navigateLink(linkHref); return false; };
+        // a.onclick = function () { navigateLink(linkHref); return false; };
+        a.onclick = function() { window.open('#' + linkHref, '_blank'); return false; };
         d.appendChild(a);
         contentSection.appendChild(d);
         let d2 = document.createElement("div");
@@ -107,7 +108,8 @@ function renderBook(entry) {
         a.textContent = auth_name;
 
         a.onclick = function () {
-            navigateLink(auth_uri); return false;
+            // navigateLink(auth_uri); return false;
+            window.open('#' + auth_uri, '_blank'); return false;
         };
 
         if (auths.firstChild) {
@@ -129,7 +131,8 @@ function renderBook(entry) {
             a.href = '#' + href;
             a.textContent = title;
             a.onclick = function () {
-                navigateLink(href); return false;
+                // navigateLink(href); return false;
+                window.open('#' + href, '_blank'); return false;
             };
             if (links.firstChild) {
                 links.appendChild(document.createTextNode(" "));
@@ -141,6 +144,9 @@ function renderBook(entry) {
             let a = document.createElement("a");
             a.href = href;
             a.textContent = title;
+            a.onclick = function () {
+                window.open(href, '_blank'); return false;
+            };
             if (links.firstChild) {
                 links.appendChild(document.createTextNode(" "));
             }
@@ -238,7 +244,8 @@ function renderAuthorMain(xmlDoc, url) {
             let a = document.createElement("a");
             a.href = '#' + linkHref;
             a.textContent = title;
-            a.onclick = function () { navigateLink(linkHref); return false; };
+            // a.onclick = function () { navigateLink(linkHref); return false; };
+            a.onclick = function() { window.open('#' + linkHref, '_blank'); return false; };
             d.appendChild(a);
             contentSection.appendChild(d);
         }
