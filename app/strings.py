@@ -34,12 +34,6 @@ def unicode_upper(string: str) -> str:
     ret = ret.replace('Й', 'И')
     ret = ret.replace('Ъ', 'Ь')
     return ret
-    # upper_str = ud.normalize('NFKD', string).upper()
-    # ret = ''.join(
-    #     char for char in upper_str
-    #     if ud.category(char) == 'Ll' or ud.category(char) == 'Lu'
-    # )
-    # return ret
 
 
 def strlist(string) -> str:
@@ -69,7 +63,7 @@ def num2int(num: str, context: str) -> int:
     except Exception as ex:  # not exception, but error in data
         logging.error("Error: %s", str(ex))
         logging.error("Context: %s", context)
-        return -1
+        return -1  # invalid num indicator, valid numbers >=0
 
 
 def id2path(id: str):  # pylint: disable=W0622
