@@ -213,6 +213,7 @@ def fb2_plain(zip_file=None, filename=None):
     return Response("Book not found", status=404)
 
 
+@require_auth
 @static.route(URL["read"] + "<zip_file>/<filename>")
 def fb2_read(zip_file=None, filename=None):
     """translate fb2 to html for read request"""
