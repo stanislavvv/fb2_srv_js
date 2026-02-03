@@ -247,7 +247,7 @@ def get_pub_info(pubinfo):
                 year = None
             publisher = pubinfo.get("publisher")
             if isinstance(publisher, dict):
-                publisher = publisher["#text"]
+                publisher = publisher.get("#text")
             if isinstance(publisher, list):
                 publisher = array2string(publisher)
         elif isinstance(pubinfo, list):
@@ -259,6 +259,10 @@ def get_pub_info(pubinfo):
                     year = tmpyear
                 if tmppub is not None:
                     publisher = tmppub
+    if isbn in ('@xmlns'):
+        isbn = None
+    if year in ('@xmlns'):
+        year = None
     return isbn, year, publisher
 
 

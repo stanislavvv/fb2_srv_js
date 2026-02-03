@@ -101,31 +101,34 @@ def create_booklist(inpx_data, zip_file) -> None:  # pylint: disable=C0103
 
             for filename in files:
                 logging.debug("%s/%s            ", zip_file, filename)
-                _, book = fb2parse(z_file, filename, replace_data, inpx_meta)
-                if book is None:
-                    continue
-                if "genres" in book and book["genres"] is not None and len(book["genres"]) > 0:
-                    book_genres = book["genres"]
-                    new_genres = []
-                    for genre in book_genres:
-                        if genre not in genres_list and genre != "":
-                            if genre in genres_replacements:
-                                new_genres.append(genres_replacements[genre])
+                try:
+                    _, book = fb2parse(z_file, filename, replace_data, inpx_meta)
+                    if book is None:
+                        continue
+                    if "genres" in book and book["genres"] is not None and len(book["genres"]) > 0:
+                        book_genres = book["genres"]
+                        new_genres = []
+                        for genre in book_genres:
+                            if genre not in genres_list and genre != "":
+                                if genre in genres_replacements:
+                                    new_genres.append(genres_replacements[genre])
+                                else:
+                                    new_genres.append('other')
                             else:
-                                new_genres.append('other')
-                        else:
-                            new_genres.append(genre)
-                    book["genres"] = new_genres
-                else:
-                    book["genres"] = ['other']
-                if "lang" in book and book["lang"] != "":
-                    lang = book["lang"]
-                    if lang in langs_replacements:
-                        book["lang"] = langs_replacements[lang]
-                else:
-                    book["lang"] = 'en'
-                blist.write(json.dumps(book, ensure_ascii=False))  # jsonl in blist
-                blist.write("\n")
+                                new_genres.append(genre)
+                        book["genres"] = new_genres
+                    else:
+                        book["genres"] = ['other']
+                    if "lang" in book and book["lang"] != "":
+                        lang = book["lang"]
+                        if lang in langs_replacements:
+                            book["lang"] = langs_replacements[lang]
+                    else:
+                        book["lang"] = 'en'
+                    blist.write(json.dumps(book, ensure_ascii=False))  # jsonl in blist
+                    blist.write("\n")
+                except Exception as ex:
+                    logging.error("error processing %s/%s: %s", zip_file, filename, ex)
     except Exception as ex:  # pylint: disable=W0703
         logging.error("error processing zip_file: %s", ex)
         logging.info("removing %s", booklist)
