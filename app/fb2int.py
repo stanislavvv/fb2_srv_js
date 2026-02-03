@@ -259,9 +259,9 @@ def get_pub_info(pubinfo):
                     year = tmpyear
                 if tmppub is not None:
                     publisher = tmppub
-    if isbn in ('@xmlns'):
+    if isbn is not None and isbn in ('@xmlns'):
         isbn = None
-    if year in ('@xmlns'):
+    if year is not None and year in ('@xmlns'):
         year = None
     return isbn, year, publisher
 
