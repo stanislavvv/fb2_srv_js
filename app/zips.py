@@ -138,7 +138,7 @@ def create_booklist(inpx_data, zip_file) -> None:  # pylint: disable=C0103
         sys.exit(1)
 
 
-def booklist_up_to_date(zip_file, booklist):
+def booklist_up_to_date(zip_file, booklist, replacelist):
     """booklist is newer than zip_file"""
     ziptime = os.path.getmtime(zip_file)
     listtime = os.path.getmtime(booklist)
@@ -154,10 +154,10 @@ def update_booklist(inpx_data, zip_file) -> bool:  # pylint: disable=C0103
     replacelist = zip_file + ".replace"
 
     if os.path.exists(booklist):
-        if booklist_up_to_date(zip_file, booklist):
+        if booklist_up_to_date(zip_file, booklist, replacelist):
             return False
     elif os.path.exists(booklistgz):
-        if booklist_up_to_date(zip_file, booklistgz):
+        if booklist_up_to_date(zip_file, booklistgz, replacelist):
             return False
         os.remove(booklistgz)  # remove outdated .list.gz, because it is not .list
 
