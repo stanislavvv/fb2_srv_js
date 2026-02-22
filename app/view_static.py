@@ -76,7 +76,7 @@ def html_out(zip_file: str, filename: str):
         return None
 
 
-def create_html_response(data, tpl_name, cache_period=int(CONFIG['CACHE_TIME'])):
+def create_http_response(data, tpl_name, cache_period=int(CONFIG['CACHE_TIME']), mimetype='text/html'):
     """return html response from opds data"""
     title = data["title"]
     path = data["path"]
@@ -85,7 +85,7 @@ def create_html_response(data, tpl_name, cache_period=int(CONFIG['CACHE_TIME']))
     else:
         urlparams = ""
     page = render_template(tpl_name, title=title, path=path, urlparams=urlparams, data=data)
-    resp = Response(page, mimetype='text/html')
+    resp = Response(page, mimetype=mimetype)
     resp.headers['Cache-Control'] = "max-age=%d, must-revalidate" % cache_period
     return resp
 
@@ -243,7 +243,7 @@ def webroot():
         "path": "/",
     }
     tpl = "index.html"
-    return create_html_response(data, tpl)
+    return create_http_response(data, tpl)
 
 
 @static.route("/interface.js")
@@ -262,7 +262,7 @@ def interface_js():
         "lang_lang": LANG["js_lang"],
     }
     tpl = "interface.js"
-    return create_html_response(data, tpl, cache_period=int(CONFIG['CACHE_TIME_ST']))
+    return create_http_response(data, tpl, cache_period=int(CONFIG['CACHE_TIME_ST']), mimetype='application/javascript')
 
 
 @static.route("/favicon.ico")
