@@ -3,9 +3,58 @@
         <title id="title">Books</title>
         <style>
             html { font-size: 62.5%; }
+            /* Loading spinner */
+            .loading-spinner {
+                border: 2px solid #f3f3f3;
+                border-top: 2px solid #3498db;
+                border-radius: 50%;
+                width: 16px;
+                height: 16px;
+                animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            /* Error message */
+            .error-message {
+                color: #d32f2f;
+                padding: 1em;
+                background-color: #ffebee;
+                border-radius: 4px;
+                margin: 1em 0;
+            }
+            /* Dark mode support */
+            body {
+                background-color: var(--bg, white);
+                color: var(--color, black);
+            }
+            body.dark-mode {
+                --bg: #1a1a1a;
+                --color: #e0e0e0;
+            }
+            body.dark-mode .topheader {
+                background-color: #2d2d2d;
+            }
+            body.dark-mode .error-message {
+                background-color: #2d1b1b;
+                color: #ef9a9a;
+            }
+            body.dark-mode a {
+                color: #64b5f6;
+            }
+            body.dark-mode a:visited {
+                color: #ab47bc;
+            }
+            body.dark-mode #search-input {
+                background-color: #424242;
+                color: #e0e0e0;
+                border-color: #616161;
+            }
             .topheader {
                 display: flex;
                 justify-content: space-between;
+                align-items: center;
                 position: sticky;
                 top: 0;
                 left: 0;
@@ -36,12 +85,6 @@
                 width: auto;
                 max-width: none; /* Allow columns to grow based on content */
                 box-sizing: border-box;
-            }
-            body {
-                font-size: 1em;
-                padding-top: 1.5em;
-                background-color: white;
-                color: black;
             }
             @media (max-width: 400px) {
                 html { font-size: 200%; }
@@ -96,15 +139,42 @@
             .author_info, .book_info {
                 margin-left: 2em;
             }
+            /* Header right section */
+            .header-right-section {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            /* Search input styling */
+            #search-input {
+                width: 150px;
+                padding: 2px 6px;
+                font-size: 1em;
+                border: 1px solid #ccc;
+                border-radius: 3px;
+            }
+            #search-section button {
+                padding: 2px 8px;
+                font-size: 1em;
+                cursor: pointer;
+            }
         </style>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     </head>
     <body>
         <div class="topheader">
             <div id="navigation-section" class="navi"></div>
-            <div id="search-section" class="search-section">
-                <input type="text" id="search-input">
-                <button onclick="performSearch()">Поиск</button>
+            <div class="header-right-section">
+                <div class="loading-container">
+                    <div id="loading-indicator" class="loading-spinner" style="display: none;"></div>
+                </div>
+                <div id="search-section" class="search-section">
+                    <input type="text" id="search-input" placeholder="Поиск...">
+                    <button onclick="performSearch()">Поиск</button>
+                </div>
+                <div class="theme-toggle">
+                    <button id="theme-btn" title="Переключить тему (🌙/☀️)">🌙</button>
+                </div>
             </div>
         </div>
         <h1 id="title">Books</h1>

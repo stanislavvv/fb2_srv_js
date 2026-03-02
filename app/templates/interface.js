@@ -19,8 +19,19 @@ function updateNavigationPath(path) {
     window.history.pushState(null, '', `#${path}`);
 }
 
+let isLoading = false;
+
 function fetchOPDSData(url) {
+    // Auto-scroll to top on navigation
+    window.scrollTo(0, 0);
+
     let xmlHttp = new XMLHttpRequest();
+
+    // Show loading indicator
+    const loadingIndicator = document.getElementById('loading-indicator');
+    if (loadingIndicator) {
+        loadingIndicator.style.display = 'block';
+    }
 
     // Ensure URL starts with a slash
     url = url.replace(/^(\/*)/g, '');
@@ -28,13 +39,32 @@ function fetchOPDSData(url) {
     xmlHttp.open("GET", `/${url}`, true);
 
     xmlHttp.onload = function() {
+        if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+        }
         if(xmlHttp.status === 200) {
             parseAndRenderXML(xmlHttp.responseXML, url);
         } else {
-            alert('Failed to fetch OPDS data');
+            showError(`Ошибка загрузки: HTTP ${xmlHttp.status} - ${xmlHttp.statusText}`);
         }
     };
+
+    xmlHttp.onerror = function() {
+        if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+        }
+        showError('Ошибка сети. Проверьте подключение.');
+    };
+
     xmlHttp.send();
+}
+
+function showError(message) {
+    const contentSection = document.getElementById('content');
+    if (contentSection) {
+        contentSection.className = '';
+        contentSection.innerHTML = `<div class="error-message">${message}</div>`;
+    }
 }
 
 function navigateLink(link) {
@@ -345,7 +375,7 @@ function performSearch() {
     if (searchTerm.trim()) {
         window.location.href = '#/' + prefix + '/search?searchTerm=' + encodeURIComponent(searchTerm);
     } else {
-        alert("Введите поисковой запрос");
+        showError('Введите поисковой запрос');
     }
 }
 
@@ -369,3 +399,63 @@ window.onpopstate = function(event) {
         fetchOPDSData(`/${prefix}/`);  // Default fallback if no hash is present
     }
 };
+
+// Dark mode initialization (default: light)
+function initDarkMode() {
+    const savedTheme = localStorage.getItem('darkMode');
+    const body = document.body;
+    const themeBtn = document.getElementById('theme-btn');
+    
+    // Default to light theme if no saved preference
+    if (savedTheme === 'dark') {
+        body.classList.add('dark-mode');
+        if (themeBtn) themeBtn.textContent = '☀️';
+    } else {
+        body.classList.remove('dark-mode');
+        if (themeBtn) themeBtn.textContent = '🌙';
+    }
+}
+
+// Theme toggle
+function toggleTheme() {
+    const body = document.body;
+    const themeBtn = document.getElementById('theme-btn');
+    
+    if (body.classList.contains('dark-mode')) {
+        body.classList.remove('dark-mode');
+        localStorage.setItem('darkMode', 'light');
+        if (themeBtn) themeBtn.textContent = '🌙';
+    } else {
+        body.classList.add('dark-mode');
+        localStorage.setItem('darkMode', 'dark');
+        if (themeBtn) themeBtn.textContent = '☀️';
+    }
+}
+
+// Initialize dark mode on load
+initDarkMode();
+
+// Theme button handler
+const themeBtn = document.getElementById('theme-btn');
+if (themeBtn) {
+    themeBtn.addEventListener('click', toggleTheme);
+}
+
+// Ctrl+S to focus search input
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) searchInput.focus();
+    }
+});
+
+// Enter key in search input
+const searchInput = document.getElementById('search-input');
+if (searchInput) {
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            performSearch();
+        }
+    });
+}
