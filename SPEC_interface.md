@@ -2,10 +2,11 @@
 
 some commons in url params:
 
+  * `<id>` -- string, alphanumeric (md5 result at this implementation)
   * `<sub1>` -- `<id[:2]>` two chars part of id
   * `<sub2>` -- `<id[2:2]>` two chars part of id
   * `<sub>` -- other string param
-  * `<page>` -- page number. If ==0 may be omitted with omitted `/` at end
+  * `<page>` -- page number, int >=0. If ==0 may be omitted with omitted `/` at end
 
 ## Interface-independed urls
 
@@ -47,11 +48,13 @@ all urls are in interface base url (`/opds` for example and `/` is equal `/opds/
   * `/search/sequences` -- simple list. List of found sequences. Links to `/sequence/<sub1>/<sub2>/<seq_id>`
   * `/search/books` -- books list. List of found books.
   * `/search/booksanno` -- books list. List of found books.
+  * `/search/booksannovector` -- books list. List of found books (vector search).
   * `/rnd/genresindex/` -- simple list. List of genres groups. Links to `/rnd/genresindex/<sub>`
   * `/rnd/genresindex/<sub>` -- simple list. List of genres. Links to `/genre/<gen_id>`
   * `/rnd/genre/<gen_id>` -- books list. List of randob books in current genre from library.
   * `/time` -- paginated books list. List of all books in library sorted by time. Next page links to `/time/<page>`
   * `/time/<page>` -- paginated books list. List of all books in library sorted by time, non-default page. Next page links to `/time/<page>`
+  * `/cover/<sub1>/<sub2>/<book_id>.jpg` -- simple static files with `/cover/default.jpg` content if file not exists
 
 # OPDS views spec
 
@@ -80,7 +83,7 @@ $TITLE == title of page, text
 ```xml
 	<updated>%UPDATED</updated>
 ```
-$UPDATED == timestamp of page in "2025-06-20T19:07:03+00:00" form
+$UPDATED == timestamp of page in "2025-06-20T19:07:03+00:00" form or in "2001-01-01" form (mostly for old records)
 
 ```xml
 	<icon>/favicon.ico</icon>
@@ -171,7 +174,7 @@ opds example for `/opds/` url:
 		<id>tag:root:random:genres</id>
 		<title>Случайные книги в жанре</title>
 		<content type="text">Случайные книги в жанре</content>
-		<link href="/books/opds/rnd-genresindex/" type="application/atom+xml;profile=opds-catalog"></link>
+		<link href="/books/opds/rnd/genresindex/" type="application/atom+xml;profile=opds-catalog"></link>
 	</entry>
 </feed>
 ```
