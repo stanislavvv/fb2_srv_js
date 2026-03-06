@@ -29,7 +29,7 @@ books_pass_size_hint = 104857600
 ; local ollama url
 openai_url = http://127.0.0.1:11434/v1
 ; example openai model, in ollama use something like "embeddinggemma"
-opeai_model = text-embedding-3-small
+openai_model = text-embedding-3-small
 ; does not need for ollama
 ;openai_key = ...
 

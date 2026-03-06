@@ -35,7 +35,7 @@ def pubinfo_anno(pubinfo):
     if pubinfo["isbn"] is not None and pubinfo["isbn"] != 'None':
         ret = ret + LANG["pubinfo_isbn"] % pubinfo["isbn"]
     if pubinfo["year"] is not None and pubinfo["year"] != 'None':
-        ret = ret + LANG["pubinfo_isbn"] % pubinfo["year"]
+        ret = ret + LANG["pubinfo_year"] % pubinfo["year"]
     if pubinfo["publisher"] is not None and pubinfo["year"] != 'None':
         ret = ret + LANG["pubinfo_publisher"] % pubinfo["publisher"]
     return ret

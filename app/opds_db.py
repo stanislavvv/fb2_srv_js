@@ -115,10 +115,10 @@ def opds_books_db(params):
                 "zipfile": b.zipfile,
                 "filename": b.filename,
                 "genres": b.genres,
-                "authors": b.authors,  # fixme
+                "authors": b.authors,
                 "sequences": b.sequences,
                 "book_id": b.book_id,
-                "book_title": b.book_id,  # fixme
+                "book_title": b.book_id,  # обрабатывается далее
                 "lang": b.lang,
                 "date_time": str(b.date) + "_00:00",  # fixme to datetime as 2010-03-27_00:00
                 "size": str(b.size),

@@ -144,13 +144,15 @@ class VectorsData(Base):
 def dbconnect():
     """connect to db and return engine"""
     # dbpath = "postgresql+psycopg2://%s:%s@%s:5432/%s" % (
-    dbpath = "postgresql://%s:%s@%s:5432/%s" % (
+    # dbpath = "postgresql://%s:%s@%s:5432/%s" % (
+    dbpath = "postgresql://%s@%s:5432/%s" % (
         CONFIG['PG_USER'],
-        CONFIG['PG_PASS'],
+        # CONFIG['PG_PASS'],
         CONFIG['PG_HOST'],
         CONFIG['PG_BASE']
     )
-    engine = create_engine(dbpath)
+    # engine = create_engine(dbpath)
+    engine = create_engine(dbpath, connect_args={'password': CONFIG['PG_PASS']})
     return engine
 
 
