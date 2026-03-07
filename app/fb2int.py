@@ -340,6 +340,104 @@ def get_fb2data(fb2_fd, zip_file, filename):
     return fb2data
 
 
+def get_book_cover(info, z_file, zip_file, filename):
+    cover = None
+    if "coverpage" in info and info["coverpage"] is not None:
+        coverpage = info["coverpage"]
+        if "image" in coverpage and coverpage["image"] is not None:
+            fb2_full = z_file.open(filename)
+            fb2data_full = get_fb2data(fb2_full, zip_file, filename)
+            covermeta = coverpage["image"]
+            covername = None
+            if "@l:href" in covermeta:
+                covername = covermeta["@l:href"].lstrip('#')
+            elif "@xlink:href" in covermeta:
+                covername = covermeta["@xlink:href"].lstrip('#')
+            else:
+                logging.debug(  # debug strange cover info
+                    "strange coverpage data in '%s/%s': %s",
+                    zip_file,
+                    filename,
+                    coverpage
+                )
+            if "binary" in fb2data_full:
+                binary = fb2data_full["binary"]  # mostly images here
+                cover = get_image(
+                    covername,
+                    binary,
+                    context="%s/%s" % (zip_file, filename)
+                )  # get corresponding image
+    return cover
+
+
+def get_pubinfo(descr):
+    """return pubinfo struct or None"""
+    pubinfo = None
+    try:
+        pubinfo = get_struct_by_key('publish-info', descr)  # descr['publish-info']
+    except Exception as ex:  # pylint: disable=W0703
+        # get_struct_by_key must return None without stacktrace
+        if len(str(ex)) > 0:  # flake8...
+            logging.debug("No publish info in %s/%s", zip_file, filename)
+    if isinstance(pubinfo, list):
+        pubinfo = pubinfo[0]
+    return pubinfo
+
+
+def make_book_record(zip_file, filename, book_id, date_time, size, info, bs_anno, cover, pub_info, inpx_data, replace_data):
+    if isinstance(info, list):
+        # see f.fb2-513034-516388.zip/513892.fb2
+        info = info[0]
+    if inpx_data is not None and filename in inpx_data:
+        info = replace_book(filename, info, inpx_data)
+    if replace_data is not None and filename in replace_data:
+        info = replace_book(filename, info, replace_data)
+
+    if "deleted" in info:
+        if info["deleted"] != 0:
+            logging.debug("%s/%s in deleted status", zip_file, filename)
+    else:
+        info["deleted"] = 0
+
+    if "date_time" in info and info["date_time"] is not None:
+        date_time = str(info["date_time"])
+    if 'genre' in info and info['genre'] is not None:
+        genre = get_genre(info['genre'])
+    else:
+        genre = ""
+    author = [{"name": '--- unknown ---', "id": make_id('--- unknown ---')}]
+    if 'author' in info and info['author'] is not None:
+        author = get_author_struct(info['author'])
+    sequence = None
+    if 'sequence' in info and info['sequence'] is not None:
+        sequence = get_sequence(info['sequence'], zip_file, filename)
+    book_title = ''
+    if 'book-title' in info and info['book-title'] is not None:
+        book_title = get_title(info['book-title'])
+    lang = ''
+    if 'lang' in info and info['lang'] is not None:
+        lang = get_lang(info['lang'])
+    annotext = ''
+    if 'annotation' in info and info['annotation'] is not None:
+        annotext = bs_anno
+    out = {
+        "zipfile": zip_file,
+        "filename": filename,
+        "genres": genre,
+        "authors": author,
+        "sequences": sequence,
+        "book_title": str(book_title),
+        "cover": cover,
+        "book_id": book_id,
+        "lang": str(lang),
+        "date_time": date_time,
+        "size": str(size),
+        "annotation": str(annotext.replace('\n', " ").replace('|', " ")),
+        "pub_info": pub_info,
+        "deleted": info["deleted"]
+    }
+    return out
+
 def fb2parse(z_file, filename, replace_data, inpx_data):  # pylint: disable=R0912,R0914,R0915
     """get filename in opened zip (assume filename format as fb2), return book struct"""
 
@@ -376,78 +474,9 @@ def fb2parse(z_file, filename, replace_data, inpx_data):  # pylint: disable=R091
     descr = get_struct_by_key('description', fb2data)  # fb2data['description']
     info = get_struct_by_key('title-info', descr)  # descr['title-info']
 
-    cover = None
-    if "coverpage" in info and info["coverpage"] is not None:
-        coverpage = info["coverpage"]
-        if "image" in coverpage and coverpage["image"] is not None:
-            fb2_full = z_file.open(filename)
-            fb2data_full = get_fb2data(fb2_full, zip_file, filename)
-            covermeta = coverpage["image"]
-            covername = None
-            if "@l:href" in covermeta:
-                covername = covermeta["@l:href"].lstrip('#')
-            elif "@xlink:href" in covermeta:
-                covername = covermeta["@xlink:href"].lstrip('#')
-            else:
-                logging.debug(  # debug strange cover info
-                    "strange coverpage data in '%s/%s': %s",
-                    zip_file,
-                    filename,
-                    coverpage
-                )
-            if "binary" in fb2data_full:
-                binary = fb2data_full["binary"]  # mostly images here
-                cover = get_image(
-                    covername,
-                    binary,
-                    context="%s/%s" % (zip_file, filename)
-                )  # get corresponding image
-    pubinfo = None
-    try:
-        pubinfo = get_struct_by_key('publish-info', descr)  # descr['publish-info']
-    except Exception as ex:  # pylint: disable=W0703
-        # get_struct_by_key must return None without stacktrace
-        if len(str(ex)) > 0:  # flake8...
-            logging.debug("No publish info in %s/%s", zip_file, filename)
-    if isinstance(pubinfo, list):
-        pubinfo = pubinfo[0]
-    if isinstance(info, list):
-        # see f.fb2-513034-516388.zip/513892.fb2
-        info = info[0]
-    if inpx_data is not None and filename in inpx_data:
-        info = replace_book(filename, info, inpx_data)
-    if replace_data is not None and filename in replace_data:
-        info = replace_book(filename, info, replace_data)
+    cover = get_book_cover(info, z_file, zip_file, filename)
 
-    if "deleted" in info:
-        if info["deleted"] != 0:
-            logging.debug("%s/%s in deleted status", zip_file, filename)
-    else:
-        info["deleted"] = 0
-
-    if "date_time" in info and info["date_time"] is not None:
-        date_time = str(info["date_time"])
-    if 'genre' in info and info['genre'] is not None:
-        genre = get_genre(info['genre'])
-    else:
-        genre = ""
-    author = [{"name": '--- unknown ---', "id": make_id('--- unknown ---')}]
-    if 'author' in info and info['author'] is not None:
-        author = get_author_struct(info['author'])
-    sequence = None
-    if 'sequence' in info and info['sequence'] is not None:
-        sequence = get_sequence(info['sequence'], zip_file, filename)
-    book_title = ''
-    if 'book-title' in info and info['book-title'] is not None:
-        book_title = get_title(info['book-title'])
-    lang = ''
-    if 'lang' in info and info['lang'] is not None:
-        lang = get_lang(info['lang'])
-    annotext = ''
-    if 'annotation' in info and info['annotation'] is not None:
-        annotext = bs_anno
-
-    isbn, pub_year, publisher = get_pub_info(pubinfo)
+    isbn, pub_year, publisher = get_pub_info(get_pubinfo(descr))
     pub_info = {
         "isbn": isbn,
         "year": pub_year,
@@ -456,20 +485,5 @@ def fb2parse(z_file, filename, replace_data, inpx_data):  # pylint: disable=R091
     }
     book_path = str(os.path.basename(z_file.filename)) + "/" + filename
     book_id = make_id(book_path)
-    out = {
-        "zipfile": zip_file,
-        "filename": filename,
-        "genres": genre,
-        "authors": author,
-        "sequences": sequence,
-        "book_title": str(book_title),
-        "cover": cover,
-        "book_id": book_id,
-        "lang": str(lang),
-        "date_time": date_time,
-        "size": str(size),
-        "annotation": str(annotext.replace('\n', " ").replace('|', " ")),
-        "pub_info": pub_info,
-        "deleted": info["deleted"]
-    }
+    out = make_book_record(zip_file, filename, book_id, date_time, size, info, bs_anno, cover, pub_info, inpx_data, replace_data)
     return book_id, out
