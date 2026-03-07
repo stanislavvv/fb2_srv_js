@@ -130,27 +130,42 @@ def check_ids_vectors(session, book_ids, type):
     return [id for id in book_ids if id not in existing_ids_set]
 
 
+def process_books_vectors(session, lines, hide_deleted):
+    book_ids = []
+    for line in lines:
+        book = json.loads(line)
+        if book is None:
+            continue
+        if hide_deleted == "yes" and "deleted" in book and book["deleted"] == 1:
+            continue
+        book_id = book["book_id"]
+        book_ids.append(book_id)
+    ids = check_ids_vectors(session, book_ids, VectorType.BOOK_ANNO)
+    data, real_vect = make_anno_vectors(session, ids)
+    dbwrite(data)
+    logging.debug("  - processed: %s, in pass: %s", len(ids), len(book_ids))
+
+
 def make_vectors():
-    """use pre-filled db data for make vectors"""
+    """make vectors for books vector search"""
 
     # for genre names
     genres_to_meta_init()
-
+    hide_deleted = CONFIG['HIDE_DELETED']
+    zipdir = CONFIG['ZIPS']
     if CONFIG["VECTOR_SEARCH"] not in (True, 'yes', 'YES', 'Yes'):
         logging.error("Vector search is not enabled")
         return
-    limit = int(CONFIG["MAX_PASS_LENGTH"])
-    offset = 0
     session = dbsession()
-    book_cnt = get_count(session, BookDescription)
-    logging.info("Making annotations vectors, total: %s, batch limit: %s", str(book_cnt), str(limit))
-    book_ids = get_book_ids(session, limit, offset)
-    while len(book_ids) > 0:
-        ids = check_ids_vectors(session, book_ids, VectorType.BOOK_ANNO)
-        data, real_vect = make_anno_vectors(session, ids)
-        dbwrite(data)
-
-        logging.debug("  offset: %s, processed: %s, vectors: %s", offset, len(ids), real_vect)
-        offset = offset + limit
-        book_ids = get_book_ids(session, limit, offset)
+    logging.info("Making annotations vectors...")
+    i = 0
+    for booklist in sorted(glob.glob(zipdir + '/*.zip.list') + glob.glob(zipdir + '/*.zip.list.gz')):
+        logging.info("[%s] %s", str(i), booklist)
+        i = i + 1
+        with open_booklist(booklist) as lst:
+            count = 0
+            lines = lst.readlines(int(CONFIG["PASS_SIZE_HINT"]))
+            while len(lines) > 0:
+                process_books_vectors(session, lines, hide_deleted)
+                lines = lst.readlines(int(CONFIG["PASS_SIZE_HINT"]))
     logging.info("end")
