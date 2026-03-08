@@ -108,6 +108,7 @@ LANG = {
     "title_rnd_genre": "Случайные книги в жанре",
 
     "book_dl": "Скачать",
+    "book_fb2": "Читать fb2",
     "book_read": "Читать онлайн",
     "books_num": "%s книг(и)",
     "books_author_alphabet": "Книги автора '%s' по алфавиту",

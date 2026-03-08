@@ -206,8 +206,8 @@ def fb2_plain(zip_file=None, filename=None):
 
         fb2prepared = add_xsl_line(fb2data, xsl_line)
 
-        # resp = Response(fb2data, content_type='application/x-fb2+xml')
-        resp = Response(fb2prepared, content_type='text/xhtml')
+        resp = Response(fb2data, content_type='application/x-fb2+xml')
+        # resp = Response(fb2prepared, content_type='text/xhtml')
         resp.headers['Cache-Control'] = cachectl
         return resp
     return Response("Book not found", status=404)
