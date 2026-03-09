@@ -72,7 +72,7 @@ def get_book_link(approot: str, zipfile: str, filename: str, ctype: str):
         rel = "http://opds-spec.org/acquisition/open-access"
         href = approot + URL["plain"] + zipfile + "/" + url_str(filename)
     if ctype == 'read_iface':
-        title = LANG["book_fb2"]
+        title = LANG["book_read"]
         book_ctype = "text/html"
         rel = "http://opds-spec.org/acquisition/open-access"
         href = approot + URL["read"] + zipfile + "/" + url_str(filename) + '.html'
@@ -145,8 +145,8 @@ def make_book_entry(book, ts, authref, seqref, seq_id=None):
                     if seq_num is None:
                         seq_num = "0"
     links.append(get_book_link(approot, zipfile, filename, 'dl'))
-    links.append(get_book_link(approot, zipfile, filename, 'read_iface'))  # in-browser xsl processing
-    links.append(get_book_link(approot, zipfile, filename, 'read'))  # old server xsl processing
+    links.append(get_book_link(approot, zipfile, filename, 'read_iface'))  # plain html for read in interface
+    # links.append(get_book_link(approot, zipfile, filename, 'read'))  # plain html, old variant
 
     # book cover
     for rel in (
