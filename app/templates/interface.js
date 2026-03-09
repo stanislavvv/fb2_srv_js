@@ -8,6 +8,7 @@ const linkTexts = {
 };
 
 const prefix = '{{ data["opds_prefix"] }}';
+const approot = '{{ data["approot"] }}';
 const genre_prfx = '{{ data["genre_prefix"] }}';
 const lang_authors = '{{ data["lang_authors"] }}';
 const lang_links = '{{ data["lang_links"] }}';
@@ -171,12 +172,20 @@ function renderBook(entry) {
         } else if ( rel == 'http://opds-spec.org/acquisition/open-access' || rel == 'alternate') {
             let href = link.getAttribute("href");
             let title = link.getAttribute("title");
+            let type = link.getAttribute("type");
             let a = document.createElement("a");
-            a.href = href;
             a.textContent = title;
-            a.onclick = function () {
-                window.open(href, '_blank'); return false;
-            };
+            if (type == 'application/x-fb2+xml') {
+                a.href = '#' + href;
+                a.onclick = function () {
+                    window.open('#' + href, '_blank'); return false;
+                };
+            } else {
+                a.href = href;
+                a.onclick = function () {
+                    window.open(href, '_blank'); return false;
+                };
+            }
             if (links.firstChild) {
                 links.appendChild(document.createTextNode(" "));
             }
@@ -229,6 +238,103 @@ function renderBook(entry) {
 
     hr = document.createElement("hr");
     contentSection.appendChild(hr)
+}
+
+// XSLT transformation function for FB2 files
+function transformFB2ToHTML(fb2Xml) {
+    return new Promise((resolve, reject) => {
+        try {
+            const xsltProcessor = new XSLTProcessor();
+            const xsltRequest = new XMLHttpRequest();
+
+            xsltRequest.open("GET", `${approot}/fb2.xsl`, false);
+            xsltRequest.send(null);
+
+            if (xsltRequest.status === 200) {
+                const xsltDoc = xsltRequest.responseXML;
+                xsltProcessor.importStylesheet(xsltDoc);
+
+                const resultFragment = xsltProcessor.transformToFragment(fb2Xml, document);
+                resolve(resultFragment);
+            } else {
+                reject(new Error(`Failed to load XSLT: ${xsltRequest.status}`));
+            }
+        } catch (e) {
+            reject(e);
+        }
+    });
+}
+
+function renderFB2Book(href, bookTitle) {
+    let contentSection = document.getElementById('content');
+
+    // Show loading
+    contentSection.innerHTML = '<div class="loading-spinner" style="display: block; margin: 2em auto;"></div>';
+
+    // Load FB2 XML
+    const xmlHttp = new XMLHttpRequest();
+    xmlHttp.open("GET", `${approot}${href}`, true);
+
+    xmlHttp.onload = async function() {
+        if (xmlHttp.status === 200) {
+            const fb2Xml = xmlHttp.responseXML;
+            try {
+                const resultFragment = await transformFB2ToHTML(fb2Xml);
+
+                // Clear content and append result
+                contentSection.innerHTML = '';
+                contentSection.appendChild(resultFragment);
+
+                // Set title from book
+                document.querySelectorAll("#title").forEach(elem => {
+                    elem.textContent = bookTitle;
+                });
+
+                // Show only HOME and RELOAD in navigation
+                let navigationSection = document.getElementById('navigation-section');
+                navigationSection.innerHTML = '';
+
+                // HOME link - redirect to approot
+                let homeLink = document.createElement("a");
+                homeLink.href = `${approot}/`;
+                homeLink.textContent = linkTexts['start'];
+                if (navigationSection.firstChild) {
+                    navigationSection.appendChild(document.createTextNode(" "));
+                }
+                navigationSection.appendChild(homeLink);
+
+                // RELOAD link
+                let reloadLink = document.createElement("a");
+                reloadLink.href = '#';
+                reloadLink.textContent = linkTexts['self'];
+                reloadLink.onclick = function() {
+                    fetchFB2Content(href, bookTitle); return false;
+                };
+                if (navigationSection.firstChild) {
+                    navigationSection.appendChild(document.createTextNode(" "));
+                }
+                navigationSection.appendChild(reloadLink);
+
+                // Hide search section
+                document.getElementById('search-section').style.display = 'none';
+
+            } catch (e) {
+                showError(`Ошибка преобразования: ${e.message}`);
+            }
+        } else {
+            showError(`Ошибка загрузки FB2: HTTP ${xmlHttp.status}`);
+        }
+    };
+
+    xmlHttp.onerror = function() {
+        showError('Ошибка сети при загрузке FB2-файла.');
+    };
+
+    xmlHttp.send();
+}
+
+function fetchFB2Content(href, bookTitle) {
+    renderFB2Book(href, bookTitle);
 }
 
 function renderBookList(xmlDoc) {  // placeholder
@@ -294,7 +400,7 @@ function parseAndRenderXML(xmlDoc, path) {
     let navigationSection = document.getElementById('navigation-section');
     navigationSection.innerHTML = '';
     Array.from(xmlDoc.getElementsByTagName("link")).forEach(link => {
-        if ((link.parentNode.tagName !== "entry") && 
+        if ((link.parentNode.tagName !== "entry") &&
             (link.getAttribute('rel') !== "search")) {
             let a = document.createElement("a");
             a.href = '#' + link.getAttribute('href');
@@ -325,6 +431,15 @@ function parseAndRenderXML(xmlDoc, path) {
     subpath = path.replace(prefix, '').replace(/^(\/*)/g, '');
     pathElems = subpath.split('/')
     pathLength = pathElems.length;
+
+    // Check if this is an FB2 file (url ends with .fb2)
+    if (subpath.endsWith('.fb2')) {
+        // Extract book title from OPDS entry
+        let bookTitle = xmlDoc.getElementsByTagName("title")[0]?.textContent || 'Book';
+        renderFB2Book(subpath, bookTitle);
+        return;
+    }
+
     switch(pathElems[0]) {
         case 'author':
             if (pathLength === 4) {
@@ -405,7 +520,7 @@ function initDarkMode() {
     const savedTheme = localStorage.getItem('darkMode');
     const body = document.body;
     const themeBtn = document.getElementById('theme-btn');
-    
+
     // Default to light theme if no saved preference
     if (savedTheme === 'dark') {
         body.classList.add('dark-mode');
@@ -420,7 +535,7 @@ function initDarkMode() {
 function toggleTheme() {
     const body = document.body;
     const themeBtn = document.getElementById('theme-btn');
-    
+
     if (body.classList.contains('dark-mode')) {
         body.classList.remove('dark-mode');
         localStorage.setItem('darkMode', 'light');
