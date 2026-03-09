@@ -270,6 +270,15 @@ function renderHTMLBook(htmlUrl, bookTitle) {
             // Clear content and append result
             contentSection.innerHTML = contentToInsert;
 
+            // Add 'paragraph' class to all <p> elements for scroll position tracking
+            const paragraphs = contentSection.querySelectorAll('p');
+            paragraphs.forEach((p, index) => {
+                if (!p.classList.contains('paragraph')) {
+                    p.classList.add('paragraph');
+                    p.dataset.paragraphIndex = index;
+                }
+            });
+
             // Set title from book
             const newTitle = doc.querySelector('title')?.textContent || bookTitle;
             document.querySelectorAll("#title").forEach(elem => {
@@ -303,6 +312,9 @@ function renderHTMLBook(htmlUrl, bookTitle) {
 
             // Hide search section
             document.getElementById('search-section').style.display = 'none';
+
+            // Restore scroll position
+            restoreScrollPosition(htmlUrl);
 
         } else {
             showError(`Ошибка загрузки HTML: HTTP ${xmlHttp.status}`);
@@ -470,6 +482,41 @@ function parseAndRenderXML(xmlDoc, path) {
     }
 }
 
+// Position tracking functions for book content
+function getScrollPosition() {
+    return window.pageYOffset || document.documentElement.scrollTop;
+}
+
+function saveScrollPosition(htmlUrl) {
+    const position = getScrollPosition();
+    sessionStorage.setItem(`scrollPosition_${encodeURIComponent(htmlUrl)}`, position.toString());
+}
+
+// Scroll handler with debounce (1 second for testing)
+let scrollTimeout = null;
+window.addEventListener('scroll', function() {
+    if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+    }
+    scrollTimeout = setTimeout(function() {
+        const hashPath = window.location.hash.substring(1);
+        if (hashPath.endsWith('.html')) {
+            const htmlUrl = hashPath.startsWith('/') ? hashPath : '/' + hashPath;
+            saveScrollPosition(htmlUrl);
+        }
+    }, 1000);
+});
+
+function restoreScrollPosition(htmlUrl) {
+    const storedPosition = sessionStorage.getItem(`scrollPosition_${encodeURIComponent(htmlUrl)}`);
+    if (storedPosition !== null) {
+        const position = parseInt(storedPosition, 10);
+        if (!isNaN(position)) {
+            window.scrollTo({ top: position, left: 0, behavior: 'auto' });
+        }
+    }
+}
+
 function performSearch() {
     let searchTerm = document.getElementById('search-input').value;
     if (searchTerm.trim()) {
@@ -491,6 +538,8 @@ window.onload = function() {
             // Get title from current page or default
             let bookTitle = document.querySelector('#title')?.textContent || 'Book';
             renderHTMLBook(htmlUrl, bookTitle);
+            // Restore scroll position after render (with delay for content to load)
+            setTimeout(() => restoreScrollPosition(htmlUrl), 500);
         } else {
             fetchOPDSData(hashPath);
         }
@@ -509,6 +558,8 @@ window.onpopstate = function(event) {
             // Get title from current page or default
             let bookTitle = document.querySelector('#title')?.textContent || 'Book';
             renderHTMLBook(htmlUrl, bookTitle);
+            // Restore scroll position after render (with delay for content to load)
+            setTimeout(() => restoreScrollPosition(htmlUrl), 500);
         } else {
             fetchOPDSData(hashPath);
         }
@@ -516,6 +567,15 @@ window.onpopstate = function(event) {
         fetchOPDSData(`/${prefix}/`);  // Default fallback if no hash is present
     }
 };
+
+// Save scroll position before page unload
+window.addEventListener('beforeunload', function() {
+    const hashPath = window.location.hash.substring(1);
+    if (hashPath.endsWith('.html')) {
+        const htmlUrl = hashPath.startsWith('/') ? hashPath : '/' + hashPath;
+        saveScrollPosition(htmlUrl);
+    }
+});
 
 // Dark mode initialization (default: light)
 function initDarkMode() {
