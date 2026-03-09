@@ -389,6 +389,12 @@ function renderAuthorMain(xmlDoc, url) {
 }
 
 function parseAndRenderXML(xmlDoc, path) {
+    // Remove book-content class if present (for books width limit)
+    const contentSection = document.getElementById('content');
+    if (contentSection) {
+        contentSection.classList.remove('book-content');
+    }
+
     // title from opds
     let titleElement = xmlDoc.getElementsByTagName("title")[0];
     let titleText = titleElement.textContent;
