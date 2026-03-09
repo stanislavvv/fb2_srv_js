@@ -244,6 +244,9 @@ function renderBook(entry) {
 function renderHTMLBook(htmlUrl, bookTitle) {
     let contentSection = document.getElementById('content');
 
+    // Add book-content class for width limiting
+    contentSection.classList.add('book-content');
+
     // Show loading
     contentSection.innerHTML = '<div class="loading-spinner" style="display: block; margin: 2em auto;"></div>';
 
