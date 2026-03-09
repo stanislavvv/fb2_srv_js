@@ -14,8 +14,11 @@ all theese urls are from root of library
 
   * `/` -- library entry point (some info + links to interfaces)
   * `/fb2/<zip_file>/<filename>` -- download `file.fb2.zip`. `<filename>` may be `file.fb2` or `file.fb2.zip` (some bookreaders need this)
-  * `/read/<zip_file>/<filename>` -- read `<filename>` in browser (process it via xslt and take html).
+  * `/plain/<zip_file>/<filename>` -- download plain `.fb2` file. `<filename>` may be `file.fb2`
+  * `/read/<zip_file>/<filename>` -- read `<filename>` in browser (process it via xslt and take html). `<filename>` may be `file.fb2` or `file.fb2.html`
   * `/cover/<sub1>/<sub2>/<book_id>.jpg` -- simple static files with `/cover/default.jpg` content if file not exists
+  * `/interface.js` -- JavaScript interface file
+  * `/favicon.ico` -- favicon file
 
 ## Interface-depended urls
 
@@ -253,8 +256,8 @@ book entry fields:
     * `name` -- author name
   * `link` -- links to:
     * rel="related" -- author's library page
-    * rel="http://opds-spec.org/acquisition/open-access" -- download
-    * rel="alternate" -- read online
+    * rel="http://opds-spec.org/acquisition/open-access" -- download (plain fb2, zipped fb2 or converted to html)
+    * rel="alternate" -- read online (if exist)
     * rel contain "http://opds-spec.org/image" or "x-stanza-cover-image" or "http://opds-spec.org/thumbnail" or "x-stanza-cover-image-thumbnail" -- cover image, all urls must exists (for different book readers)
   * `category` -- for every genre name/id
   * `dc:language` -- 2-letter language code. 'en' for example
