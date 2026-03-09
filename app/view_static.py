@@ -219,6 +219,8 @@ def fb2_read(zip_file=None, filename=None):
     """translate fb2 to html for read request"""
     if filename.endswith('.zip'):  # will accept any of .fb2 or .fb2.zip with right filename in .zip
         filename = filename[:-4]
+    elif filename.endswith('.html'):  # accept .fb2.html
+        filename = filename[:-5]
     if not zip_file.endswith('.zip'):
         zip_file = zip_file + '.zip'
     zip_file = validate_zip(zip_file)
