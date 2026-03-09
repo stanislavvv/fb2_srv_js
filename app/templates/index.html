@@ -32,6 +32,10 @@
             body.dark-mode {
                 --bg: #1a1a1a;
                 --color: #e0e0e0;
+                --link-color: #64b5f6;
+                --link-hover-color: #42a5f5;
+                --h-bg: #2d2d2d;
+                --hr-color: #616161;
             }
             body.dark-mode .topheader {
                 background-color: #2d2d2d;
@@ -50,6 +54,18 @@
                 background-color: #424242;
                 color: #e0e0e0;
                 border-color: #616161;
+            }
+            /* Override link colors in loaded content (for FB2 HTML books)
+             * Use !important to override fb2.xsl styles (A { color: ... })
+             * Also override hover/active states
+             */
+            #content a,
+            #content a:visited,
+            #content a:active {
+                color: var(--link-color, #0002CC) !important;
+            }
+            #content a:hover {
+                color: var(--link-hover-color, #BF0000) !important;
             }
             .topheader {
                 display: flex;

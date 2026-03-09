@@ -175,7 +175,7 @@ function renderBook(entry) {
             let type = link.getAttribute("type");
             let a = document.createElement("a");
             a.textContent = title;
-            if (type == 'application/x-fb2+xml') {
+            if (type == 'application/x-fb2+xml' || type == 'text/html') {
                 a.href = '#' + href;
                 a.onclick = function () {
                     window.open('#' + href, '_blank'); return false;
@@ -240,101 +240,86 @@ function renderBook(entry) {
     contentSection.appendChild(hr)
 }
 
-// XSLT transformation function for FB2 files
-function transformFB2ToHTML(fb2Xml) {
-    return new Promise((resolve, reject) => {
-        try {
-            const xsltProcessor = new XSLTProcessor();
-            const xsltRequest = new XMLHttpRequest();
-
-            xsltRequest.open("GET", `${approot}/fb2.xsl`, false);
-            xsltRequest.send(null);
-
-            if (xsltRequest.status === 200) {
-                const xsltDoc = xsltRequest.responseXML;
-                xsltProcessor.importStylesheet(xsltDoc);
-
-                const resultFragment = xsltProcessor.transformToFragment(fb2Xml, document);
-                resolve(resultFragment);
-            } else {
-                reject(new Error(`Failed to load XSLT: ${xsltRequest.status}`));
-            }
-        } catch (e) {
-            reject(e);
-        }
-    });
-}
-
-function renderFB2Book(href, bookTitle) {
+// HTML rendering function for FB2 books (pre-rendered HTML from server)
+function renderHTMLBook(htmlUrl, bookTitle) {
     let contentSection = document.getElementById('content');
 
     // Show loading
     contentSection.innerHTML = '<div class="loading-spinner" style="display: block; margin: 2em auto;"></div>';
 
-    // Load FB2 XML
+    // Load pre-rendered HTML
     const xmlHttp = new XMLHttpRequest();
-    xmlHttp.open("GET", `${approot}${href}`, true);
+    xmlHttp.open("GET", htmlUrl, true);
 
-    xmlHttp.onload = async function() {
+    xmlHttp.onload = function() {
         if (xmlHttp.status === 200) {
-            const fb2Xml = xmlHttp.responseXML;
-            try {
-                const resultFragment = await transformFB2ToHTML(fb2Xml);
+            // Parse HTML response
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(xmlHttp.responseText, 'text/html');
 
-                // Clear content and append result
-                contentSection.innerHTML = '';
-                contentSection.appendChild(resultFragment);
-
-                // Set title from book
-                document.querySelectorAll("#title").forEach(elem => {
-                    elem.textContent = bookTitle;
-                });
-
-                // Show only HOME and RELOAD in navigation
-                let navigationSection = document.getElementById('navigation-section');
-                navigationSection.innerHTML = '';
-
-                // HOME link - redirect to approot
-                let homeLink = document.createElement("a");
-                homeLink.href = `${approot}/`;
-                homeLink.textContent = linkTexts['start'];
-                if (navigationSection.firstChild) {
-                    navigationSection.appendChild(document.createTextNode(" "));
-                }
-                navigationSection.appendChild(homeLink);
-
-                // RELOAD link
-                let reloadLink = document.createElement("a");
-                reloadLink.href = '#';
-                reloadLink.textContent = linkTexts['self'];
-                reloadLink.onclick = function() {
-                    fetchFB2Content(href, bookTitle); return false;
-                };
-                if (navigationSection.firstChild) {
-                    navigationSection.appendChild(document.createTextNode(" "));
-                }
-                navigationSection.appendChild(reloadLink);
-
-                // Hide search section
-                document.getElementById('search-section').style.display = 'none';
-
-            } catch (e) {
-                showError(`Ошибка преобразования: ${e.message}`);
+            // Extract content from the book-content div (if exists) or use full body
+            let contentToInsert;
+            const bookContent = doc.getElementById('book-content');
+            if (bookContent) {
+                contentToInsert = bookContent.innerHTML;
+            } else {
+                // If no specific container, clone the body content
+                contentToInsert = doc.body ? doc.body.innerHTML : doc.documentElement.innerHTML;
             }
+
+            // Clear content and append result
+            contentSection.innerHTML = contentToInsert;
+
+            // Set title from book
+            const newTitle = doc.querySelector('title')?.textContent || bookTitle;
+            document.querySelectorAll("#title").forEach(elem => {
+                elem.textContent = newTitle;
+            });
+
+            // Show only HOME and RELOAD in navigation
+            let navigationSection = document.getElementById('navigation-section');
+            navigationSection.innerHTML = '';
+
+            // HOME link - redirect to approot
+            let homeLink = document.createElement("a");
+            homeLink.href = `${approot}/`;
+            homeLink.textContent = linkTexts['start'];
+            if (navigationSection.firstChild) {
+                navigationSection.appendChild(document.createTextNode(" "));
+            }
+            navigationSection.appendChild(homeLink);
+
+            // RELOAD link
+            let reloadLink = document.createElement("a");
+            reloadLink.href = '#';
+            reloadLink.textContent = linkTexts['self'];
+            reloadLink.onclick = function() {
+                renderHTMLBook(htmlUrl, bookTitle); return false;
+            };
+            if (navigationSection.firstChild) {
+                navigationSection.appendChild(document.createTextNode(" "));
+            }
+            navigationSection.appendChild(reloadLink);
+
+            // Hide search section
+            document.getElementById('search-section').style.display = 'none';
+
         } else {
-            showError(`Ошибка загрузки FB2: HTTP ${xmlHttp.status}`);
+            showError(`Ошибка загрузки HTML: HTTP ${xmlHttp.status}`);
         }
     };
 
     xmlHttp.onerror = function() {
-        showError('Ошибка сети при загрузке FB2-файла.');
+        showError('Ошибка сети при загрузке HTML-файла.');
     };
 
     xmlHttp.send();
 }
 
 function fetchFB2Content(href, bookTitle) {
-    renderFB2Book(href, bookTitle);
+    // Convert .fb2 URL to .html URL by replacing extension
+    const htmlUrl = href.replace(/\.fb2(\.zip)?$/, '.html');
+    renderHTMLBook(htmlUrl, bookTitle);
 }
 
 function renderBookList(xmlDoc) {  // placeholder
@@ -432,11 +417,11 @@ function parseAndRenderXML(xmlDoc, path) {
     pathElems = subpath.split('/')
     pathLength = pathElems.length;
 
-    // Check if this is an FB2 file (url ends with .fb2)
-    if (subpath.endsWith('.fb2')) {
+    // Check if this is an HTML book file (url ends with .html)
+    if (subpath.endsWith('.html')) {
         // Extract book title from OPDS entry
         let bookTitle = xmlDoc.getElementsByTagName("title")[0]?.textContent || 'Book';
-        renderFB2Book(subpath, bookTitle);
+        fetchFB2Content(subpath, bookTitle);
         return;
     }
 
@@ -499,8 +484,16 @@ window.onload = function() {
 
     let hashPath = window.location.hash.substring(1);  // Remove the leading '#'
     if (hashPath) {
-        fetchOPDSData(hashPath);
         updateNavigationPath(hashPath);
+        // If it's an HTML book file, render it directly
+        if (hashPath.endsWith('.html')) {
+            let htmlUrl = hashPath.startsWith('/') ? hashPath : '/' + hashPath;
+            // Get title from current page or default
+            let bookTitle = document.querySelector('#title')?.textContent || 'Book';
+            renderHTMLBook(htmlUrl, bookTitle);
+        } else {
+            fetchOPDSData(hashPath);
+        }
     } else {
         fetchOPDSData(`/${prefix}/`);  // Default fallback if no hash is present
     }
@@ -509,7 +502,16 @@ window.onload = function() {
 window.onpopstate = function(event) {
     let hashPath = window.location.hash.substring(1);  // Remove the leading '#'
     if (hashPath) {
-        fetchOPDSData(hashPath);
+        updateNavigationPath(hashPath);
+        // If it's an HTML book file, render it directly
+        if (hashPath.endsWith('.html')) {
+            let htmlUrl = hashPath.startsWith('/') ? hashPath : '/' + hashPath;
+            // Get title from current page or default
+            let bookTitle = document.querySelector('#title')?.textContent || 'Book';
+            renderHTMLBook(htmlUrl, bookTitle);
+        } else {
+            fetchOPDSData(hashPath);
+        }
     } else {
         fetchOPDSData(`/${prefix}/`);  // Default fallback if no hash is present
     }

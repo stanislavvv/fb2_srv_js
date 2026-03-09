@@ -1,5 +1,5 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:fb="http://www.gribuser.ru/xml/fictionbook/2.0">
-    <xsl:output method="xml" encoding="UTF-8"/>
+    <xsl:output method="html" encoding="UTF-8"/>
     <xsl:key name="note-link" match="fb:section" use="@id"/>
     <xsl:template match="/*">
         <html>
