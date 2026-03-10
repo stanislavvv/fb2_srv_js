@@ -161,6 +161,11 @@
                 margin-left: auto;
                 margin-right: auto;
             }
+            /* Image scaling within book content - scale by width only, preserve aspect ratio */
+            .book-content img {
+                max-width: 100%;
+                height: auto;
+            }
 
             @media (min-width: 1201px) and (max-width: 1920px) {
                 .book-content {
