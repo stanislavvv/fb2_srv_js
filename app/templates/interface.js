@@ -597,14 +597,14 @@ function initDarkMode() {
         body.classList.add('dark-mode');
         if (themeBtn) {
             const img = themeBtn.querySelector('img');
-            if (img) img.src = '{{ data["approot"] }}/static/sun.svg';
+            if (img) img.src = '{{ data["approot"] }}/sun.svg';
             if (img) img.alt = '☀️';
         }
     } else {
         body.classList.remove('dark-mode');
         if (themeBtn) {
             const img = themeBtn.querySelector('img');
-            if (img) img.src = '{{ data["approot"] }}/static/moon.svg';
+            if (img) img.src = '{{ data["approot"] }}/moon.svg';
             if (img) img.alt = '🌙';
         }
     }
@@ -620,7 +620,7 @@ function toggleTheme() {
         localStorage.setItem('darkMode', 'light');
         if (themeBtn) {
             const img = themeBtn.querySelector('img');
-            if (img) img.src = '{{ data["approot"] }}/static/moon.svg';
+            if (img) img.src = '{{ data["approot"] }}/moon.svg';
             if (img) img.alt = '🌙';
         }
     } else {
@@ -628,7 +628,7 @@ function toggleTheme() {
         localStorage.setItem('darkMode', 'dark');
         if (themeBtn) {
             const img = themeBtn.querySelector('img');
-            if (img) img.src = '{{ data["approot"] }}/static/sun.svg';
+            if (img) img.src = '{{ data["approot"] }}/sun.svg';
             if (img) img.alt = '☀️';
         }
     }
