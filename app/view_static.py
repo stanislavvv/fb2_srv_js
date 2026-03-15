@@ -272,6 +272,11 @@ def favicon():
     return current_app.send_static_file("favicon.ico")
 
 
-@static.route("/fb2.xsl")
-def fb2_xsl():
-    return current_app.send_static_file("fb2.xsl")
+@static.route("/moon.svg")
+def moonicon():
+    return current_app.send_static_file("moon.svg")
+
+
+@static.route("/sun.svg")
+def sunicon():
+    return current_app.send_static_file("sun.svg")

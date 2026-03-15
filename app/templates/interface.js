@@ -595,10 +595,18 @@ function initDarkMode() {
     // Default to light theme if no saved preference
     if (savedTheme === 'dark') {
         body.classList.add('dark-mode');
-        if (themeBtn) themeBtn.textContent = '☀️';
+        if (themeBtn) {
+            const img = themeBtn.querySelector('img');
+            if (img) img.src = '{{ data["approot"] }}/static/sun.svg';
+            if (img) img.alt = '☀️';
+        }
     } else {
         body.classList.remove('dark-mode');
-        if (themeBtn) themeBtn.textContent = '🌙';
+        if (themeBtn) {
+            const img = themeBtn.querySelector('img');
+            if (img) img.src = '{{ data["approot"] }}/static/moon.svg';
+            if (img) img.alt = '🌙';
+        }
     }
 }
 
@@ -610,11 +618,19 @@ function toggleTheme() {
     if (body.classList.contains('dark-mode')) {
         body.classList.remove('dark-mode');
         localStorage.setItem('darkMode', 'light');
-        if (themeBtn) themeBtn.textContent = '🌙';
+        if (themeBtn) {
+            const img = themeBtn.querySelector('img');
+            if (img) img.src = '{{ data["approot"] }}/static/moon.svg';
+            if (img) img.alt = '🌙';
+        }
     } else {
         body.classList.add('dark-mode');
         localStorage.setItem('darkMode', 'dark');
-        if (themeBtn) themeBtn.textContent = '☀️';
+        if (themeBtn) {
+            const img = themeBtn.querySelector('img');
+            if (img) img.src = '{{ data["approot"] }}/static/sun.svg';
+            if (img) img.alt = '☀️';
+        }
     }
 }
 

@@ -203,6 +203,28 @@
                 font-size: 1em;
                 cursor: pointer;
             }
+            /* Theme toggle button styling */
+            .theme-toggle button {
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                padding: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .theme-toggle button img {
+                width: 20px;
+                height: 20px;
+                vertical-align: middle;
+            }
+            /* Dark mode button styling */
+            body.dark-mode .theme-toggle button {
+                background: transparent;
+            }
+            body.dark-mode .theme-toggle button img {
+                filter: brightness(1.2);
+            }
         </style>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     </head>
@@ -218,7 +240,9 @@
                     <button onclick="performSearch()">Поиск</button>
                 </div>
                 <div class="theme-toggle">
-                    <button id="theme-btn" title="Переключить тему (🌙/☀️)">🌙</button>
+                    <button id="theme-btn" title="Переключить тему" aria-label="Переключить тему">
+                        <img src="{{ data["approot"] }}/static/moon.svg" alt="🌙" id="theme-icon" style="width: 20px; height: 20px; vertical-align: middle;">
+                    </button>
                 </div>
             </div>
         </div>
