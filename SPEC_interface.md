@@ -3,10 +3,20 @@
 some commons in url params:
 
   * `<id>` -- string, alphanumeric (md5 result at this implementation)
-  * `<sub1>` -- `<id[:2]>` two chars part of id
-  * `<sub2>` -- `<id[2:2]>` two chars part of id
+  * `<sub1>` -- first two chars of hex-encoded id (position 1-2)
+  * `<sub2>` -- next two chars of hex-encoded id (position 3-4)
   * `<sub>` -- other string param
-  * `<page>` -- page number, int >=0. If ==0 may be omitted with omitted `/` at end
+  * `<page>` -- page number, int >=0. If ==0 may be omitted with omitted `/` at end. Negative page values are invalid (404).
+
+## Genre identifiers
+
+  * `<meta_id>` -- string identifier for genre group, `[0-9a-z_]+`
+  * `<gen_id>` -- text genre identifier, `[0-9a-z_]+`. The set of genres is broader than in the original FB2 format.
+
+## Search parameters
+
+  * `searchTerm` -- string, max 128 characters, URL encoding supported. Empty query (`searchTerm=`) is valid and returns all entries.
+  * `{searchTerms}` -- placeholder in OPDS URL link definitions, replaced with URL-encoded search query value
 
 ## Interface-independed urls
 
@@ -16,7 +26,7 @@ all theese urls are from root of library
   * `/fb2/<zip_file>/<filename>` -- download `file.fb2.zip`. `<filename>` may be `file.fb2` or `file.fb2.zip` (some bookreaders need this)
   * `/plain/<zip_file>/<filename>` -- download plain `.fb2` file. `<filename>` may be `file.fb2`
   * `/read/<zip_file>/<filename>` -- read `<filename>` in browser (process it via xslt and take html). `<filename>` may be `file.fb2` or `file.fb2.html`
-  * `/cover/<sub1>/<sub2>/<book_id>.jpg` -- simple static files with `/cover/default.jpg` content if file not exists
+  * `/books/<sub1>/<sub2>/<book_id>.jpg` -- simple static files with `/books/default.jpg` content if file not exists
   * `/interface.js` -- JavaScript interface file
   * `/favicon.ico` -- favicon file
 
@@ -25,20 +35,18 @@ all theese urls are from root of library
 all urls are in interface base url (`/opds` for example and `/` is equal `/opds/`)
 
   * `/` -- simple list. Links to library root views
-  * `/authorsindex/` -- simple list. First letters of authors names view. Links to `/authorsindex/<sub>`
-  * `/authorsindex/<sub>` -- simple list
-    * for current first letter `<sub>`: list of first three letters of authors names view. Links to `/authorsindex/<sub>`
-    * for current first three letter `<sub>`: list of authors names view. Links to `/author/<sub1>/<sub2>/<auth_id>`
+  * `/authorsindex/` -- simple list. First letters of authors names view. Links to `/authorsindex/<cut>`
+  * `/authorsindex/<cut>` -- simple list. List of first three letters for authors starting with first letter `<cut>` (1-3 uppercased symbols). Links to `/authorsindex/<cut1>/<cut2>`
+  * `/authorsindex/<cut1>/<cut2>` -- simple list. List of authors starting with cut1+cut2 (first + first 3 uppercased symbols). Links to `/author/<sub1>/<sub2>/<auth_id>`
   * `/author/<sub1>/<sub2>/<auth_id>` -- author view. Links to subviews of author
   * `/author/<sub1>/<sub2>/<auth_id>/sequences` -- simple list. List of author's books sequences. Links to `/author/<sub1>/<sub2>/<auth_id>/<seq_id>`
   * `/author/<sub1>/<sub2>/<auth_id>/<seq_id>` -- books list. List of author's books in current sequence
   * `/author/<sub1>/<sub2>/<auth_id>/sequenceless` -- books list. List of author's books not in any sequence
   * `/author/<sub1>/<sub2>/<auth_id>/alphabet` -- books list. List of all author's books sorted by book title
   * `/author/<sub1>/<sub2>/<auth_id>/time` -- books list. List of all author's books sorted by time
-  * `/sequencesindex/` -- simple list. First letters of sequences names view. Links to `/sequencesindex/<sub>`
-  * `/sequencesindex/<sub>` -- simple list
-    * for current first letter `<sub>`: list of first three letters of sequences names view. Links to`/sequencesindex/<sub>`
-    * for current first three letter `<sub>`: list of sequences names view. Links to `/sequence/<sub1>/<sub2>/<seq_id>`
+  * `/sequencesindex/` -- simple list. First letters of sequences names view. Links to `/sequencesindex/<cut>`
+  * `/sequencesindex/<cut>` -- simple list. List of first three letters for sequences starting with first letter `<cut>` (1-3 uppercased symbols). Links to `/sequencesindex/<cut1>/<cut2>`
+  * `/sequencesindex/<cut1>/<cut2>` -- simple list. List of sequences starting with cut1+cut2 (first + first 3 uppercased symbols). Links to `/sequence/<sub1>/<sub2>/<seq_id>`
   * `/sequence/<sub1>/<sub2>/<seq_id>` -- books list. List of all books in sequence.
   * `/genresindex/` -- simple list. List of genres groups. Links to `/genresindex/<sub>`
   * `/genresindex/<sub>` -- simple list. List of genres. Links to `/genre/<gen_id>`
@@ -57,7 +65,6 @@ all urls are in interface base url (`/opds` for example and `/` is equal `/opds/
   * `/rnd/genre/<gen_id>` -- books list. List of randob books in current genre from library.
   * `/time` -- paginated books list. List of all books in library sorted by time. Next page links to `/time/<page>`
   * `/time/<page>` -- paginated books list. List of all books in library sorted by time, non-default page. Next page links to `/time/<page>`
-  * `/cover/<sub1>/<sub2>/<book_id>.jpg` -- simple static files with `/cover/default.jpg` content if file not exists
 
 # OPDS views spec
 
@@ -104,9 +111,10 @@ link to main search page with url-param for search terms
 common navigation links. `rel` may contain:
   * `start` -- link to start of interface
   * `self` -- link to current page
-  * `up` -- link to parent page
-  * `next` -- link to next page of current list
-  * `prev` -- link to previous page of current list
+  * `up` -- link to parent page or higher-level page in hierarchy if parent page is not determinable on the backend side
+  * `next` -- link to next page of current list (present only if next page exists)
+  * `prev` -- link to previous page of current list (present only if previous page exists)
+  * `search` -- link to search with {searchTerms} placeholder (search link uses exactly `searchTerm={searchTerms}`)
 
 ## Simple list
 
@@ -291,10 +299,10 @@ example of `/opds/random-book`:
 		<link href="/books/opds/author/b4/c3/b4c32760971eb1ed25a4f4c9eb53c33c" rel="related" title="Кувшинов В" type="application/atom+xml"></link>
 		<link href="/books/fb2/f.fb2-183654-185837/185743.fb2.zip" rel="http://opds-spec.org/acquisition/open-access" title="Скачать" type="application/fb2+zip"></link>
 		<link href="/books/read/f.fb2-183654-185837/185743.fb2" rel="alternate" title="Читать онлайн" type="text/html"></link>
-		<link href="/books/cover/a719e2d4695b93f1062834f5c76f0cbe/jpg" rel="http://opds-spec.org/image" type="image/jpeg"></link>
-		<link href="/books/cover/a719e2d4695b93f1062834f5c76f0cbe/jpg" rel="x-stanza-cover-image" type="image/jpeg"></link>
-		<link href="/books/cover/a719e2d4695b93f1062834f5c76f0cbe/jpg" rel="http://opds-spec.org/thumbnail" type="image/jpeg"></link>
-		<link href="/books/cover/a719e2d4695b93f1062834f5c76f0cbe/jpg" rel="x-stanza-cover-image-thumbnail" type="image/jpeg"></link>
+		<link href="/books/books/a719e2d4695b93f1062834f5c76f0cbe/jpg" rel="http://opds-spec.org/image" type="image/jpeg"></link>
+		<link href="/books/books/a719e2d4695b93f1062834f5c76f0cbe/jpg" rel="x-stanza-cover-image" type="image/jpeg"></link>
+		<link href="/books/books/a719e2d4695b93f1062834f5c76f0cbe/jpg" rel="http://opds-spec.org/thumbnail" type="image/jpeg"></link>
+		<link href="/books/books/a719e2d4695b93f1062834f5c76f0cbe/jpg" rel="x-stanza-cover-image-thumbnail" type="image/jpeg"></link>
 		<category label="Публицистика" term="nonf_publicism"></category>
 		<dc:language>ru</dc:language>
 		<dc:format>fb2</dc:format>
@@ -319,10 +327,10 @@ example of `/opds/random-book`:
 		<link href="/books/opds/sequence/e1/f6/e1f63f0997da77cfbcbaee19c2079661" rel="related" title="Серия 'Белгариада'" type="application/atom+xml"></link>
 		<link href="/books/fb2/f.fb2-203581-214697/207059.fb2.zip" rel="http://opds-spec.org/acquisition/open-access" title="Скачать" type="application/fb2+zip"></link>
 		<link href="/books/read/f.fb2-203581-214697/207059.fb2" rel="alternate" title="Читать онлайн" type="text/html"></link>
-		<link href="/books/cover/171526116ab92c3f68f9c7d0ca1da933/jpg" rel="http://opds-spec.org/image" type="image/jpeg"></link>
-		<link href="/books/cover/171526116ab92c3f68f9c7d0ca1da933/jpg" rel="x-stanza-cover-image" type="image/jpeg"></link>
-		<link href="/books/cover/171526116ab92c3f68f9c7d0ca1da933/jpg" rel="http://opds-spec.org/thumbnail" type="image/jpeg"></link>
-		<link href="/books/cover/171526116ab92c3f68f9c7d0ca1da933/jpg" rel="x-stanza-cover-image-thumbnail" type="image/jpeg"></link>
+		<link href="/books/books/171526116ab92c3f68f9c7d0ca1da933/jpg" rel="http://opds-spec.org/image" type="image/jpeg"></link>
+		<link href="/books/books/171526116ab92c3f68f9c7d0ca1da933/jpg" rel="x-stanza-cover-image" type="image/jpeg"></link>
+		<link href="/books/books/171526116ab92c3f68f9c7d0ca1da933/jpg" rel="http://opds-spec.org/thumbnail" type="image/jpeg"></link>
+		<link href="/books/books/171526116ab92c3f68f9c7d0ca1da933/jpg" rel="x-stanza-cover-image-thumbnail" type="image/jpeg"></link>
 		<category label="Фэнтези" term="sf_fantasy"></category>
 		<dc:language>bg</dc:language>
 		<dc:format>fb2</dc:format>
@@ -344,5 +352,9 @@ example of `/opds/random-book`:
 ### Paginated books list
 
 as book list, but with additional links:
-  * to next page -- mandatory on every page
-  * to previous page -- mandatory only for non-default page
+  * to next page -- present only if next page exists (may point to non-existing page if backend cannot determine existence)
+  * to previous page -- present only if previous page exists
+
+**Last Page Handling**:
+- If the current page is the last page (no more books available), may no `rel="next"` link is provided
+- A request for `page = last_page + 1` returns an empty OPDS feed (with header but no entries) with `rel="prev"` link pointing to the last page

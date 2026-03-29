@@ -4,9 +4,15 @@
 
 OPDS (Open Publication Distribution System) is a specification for distributing electronic books via RSS/Atom feeds. This service provides an OPDS interface for accessing an FB2 book library.
 
-The root URL `/` provides the HTML interface that converts OPDS feeds into a browser-friendly HTML representation. This is the main entry point for users accessing the library through a web browser.
+The OPDS interface provides XML feeds for book data, available at `/opds/` (relative to APPLICATION_ROOT). The root URL `/` provides an HTML interface that converts OPDS feeds into a browser-friendly HTML representation. This is the main entry point for users accessing the library through a web browser.
 
-All OPDS interface URLs are relative to the interface base URL (typically `/opds/`), where `/` is equivalent to `/opds/`.
+All OPDS XML interface URLs are relative to the interface base URL `/opds/`, which is appended to `APPLICATION_ROOT`. For example:
+- `APPLICATION_ROOT = '/'` → `/opds/`
+- `APPLICATION_ROOT = '/books'` → `/books/opds/`
+
+URLs outside the OPDS interface (e.g., `/read/`, `/fb2/`, `/books/`) are also relative to `APPLICATION_ROOT`.
+
+Any url part in square brackets is optional and can be omitted with defaults values.
 
 ## Protocol
 
@@ -16,6 +22,10 @@ All OPDS interface URLs are relative to the interface base URL (typically `/opds
 - **Content-Type**: `text/xml; charset=utf-8`
 
 ## URL Structure
+
+All OPDS interface URLs are relative to `APPLICATION_ROOT` + `/opds/`. The `APPLICATION_ROOT` configuration value may be `'/'`, `'/books'`, or any other path. Examples in this document show both cases.
+
+For URL examples in this section, `APPLICATION_ROOT = '/'` is assumed unless otherwise noted.
 
 ### Root Element
 
@@ -34,7 +44,7 @@ GET /opds/
 GET /opds/time[/<page>]
 ```
 **Description**: All books sorted by date (newest to oldest).
-**Pagination**: `page=0, 1, 2, ...` (default: 0)
+**Pagination**: `page=0, 1, 2, ...`, optional, default == 0. Negative page numbers are invalid and will result in a 404 response.
 
 ---
 
@@ -42,22 +52,27 @@ GET /opds/time[/<page>]
 
 ```
 GET /opds/authorsindex/                    # List of first letters for authors
-GET /opds/authorsindex/<prefix>            # List of authors starting with letter (A, Б, В, ...)
-GET /opds/authorsindex/<prefix1>/<prefix2> # List of authors by "letter+letter" (ABC, DEF, ...)
-GET /opds/author/<prefix1>/<prefix2>/<id>  # Author page
-GET /opds/author/<prefix1>/<prefix2>/<id>/sequences              # List of author's sequences
-GET /opds/author/<prefix1>/<prefix2>/<id>/sequenceless           # Author's books not in any sequence
-GET /opds/author/<prefix1>/<prefix2>/<id>/alphabet               # Author's books sorted by title alphabetically
-GET /opds/author/<prefix1>/<prefix2>/<id>/time                   # Author's books sorted by date added
-GET /opds/author/<prefix1>/<prefix2>/<id>/<seq_id>               # Author's books in a specific sequence
+GET /opds/authorsindex/<cut>               # List of authors first 3 characters starting with cut (first char), uppercased
+GET /opds/authorsindex/<cut1>/<cut2>       # List of authors by "letter+letter" (first + first 3 chars of uppercased name)
+GET /opds/author/<prefix1>/<prefix2>/<author_id>  # Author page
+GET /opds/author/<prefix1>/<prefix2>/<author_id>/sequences              # List of author's sequences
+GET /opds/author/<prefix1>/<prefix2>/<author_id>/sequenceless           # Author's books not in any sequence
+GET /opds/author/<prefix1>/<prefix2>/<author_id>/alphabet               # Author's books sorted by title alphabetically
+GET /opds/author/<prefix1>/<prefix2>/<author_id>/time                   # Author's books sorted by date added
+GET /opds/author/<prefix1>/<prefix2>/<author_id>/<seq_id>               # Author's books in a specific sequence
 ```
 
 **Validation**:
-- `<prefix>`: 2 characters (letters)
-- `<prefix1>`, `<prefix2>`: 2 characters (letters)
-- `<id>`, `<seq_id>`: id of author or sequence in hex format `[0-9a-f]+`
+- `<cut>`: string parameter (any symbols). For `authorsindex/<cut>` endpoint, this is the first 1-3 characters of the uppercased name (e.g., `С` for "Стругацкий").
+- `<cut1>`, `<cut2>`: first character and first 3 characters of the uppercased name (e.g., `С` and `СТР` for "Стругацкий").
+- `<prefix1>`, `<prefix2>`: for `author/<prefix1>/<prefix2>/<author_id>` endpoint, these are the first 2 and next 2 characters of the hex-encoded author ID (e.g., `05` and `ef` for ID `05ef7b17...`).
+- `<author_id>`: author id in hex format `[0-9a-f]+`
 
-**Note**: The `<prefix1>/<prefix2>` path segments use the first 2 and next 2 characters of the ID respectively (e.g., `1a/2b` for ID `1a2b3c...`).
+**Examples**:
+- Authors index by first 3 characters: `/opds/authorsindex/С/СТР/`
+- Author page by hex ID: `/opds/author/05/ef/05ef7b172bdd0a32fe7eda7df2a0e1c7`
+
+**Note**: Pagination is NOT used for author pages. All author subpages return all entries without pagination.
 
 ---
 
@@ -65,12 +80,20 @@ GET /opds/author/<prefix1>/<prefix2>/<id>/<seq_id>               # Author's book
 
 ```
 GET /opds/sequencesindex/                  # List of first letters for sequences
-GET /opds/sequencesindex/<prefix>          # List of sequences starting with letter
-GET /opds/sequencesindex/<prefix1>/<prefix2> # List of sequences by "letter+letter"
-GET /opds/sequence/<prefix1>/<prefix2>/<id>  # Books in a sequence
+GET /opds/sequencesindex/<cut>             # List of first 3 char sequences names starting with cut (first char), uppercased
+GET /opds/sequencesindex/<cut1>/<cut2>     # List of sequences by "letter+letter" (first + first 3 chars of uppercased name)
+GET /opds/sequence/<prefix1>/<prefix2>/<seq_id>  # Books in a sequence (hex-based path segments from seq_id)
 ```
 
-**Note**: The `<prefix1>/<prefix2>` path segments use the first 2 and next 2 characters of the ID respectively.
+**Validation**:
+- `<cut>`: string parameter (any symbols). For `sequencesindex/<cut>` endpoint, this is the first 1-3 characters of the uppercased name (e.g., `С` for "Стругацкий").
+- `<cut1>`, `<cut2>`: first character and first 3 characters of the uppercased name (e.g., `С` and `СТР` for "Стругацкий").
+- `<prefix1>`, `<prefix2>`: for `sequence/<prefix1>/<prefix2>/<seq_id>` endpoint, these are the first 2 and next 2 characters of the hex-encoded sequence ID (e.g., `05` and `ef` for ID `05ef7b17...`).
+- `<seq_id>`: sequence id in hex format `[0-9a-f]+`
+
+**Examples**:
+- Sequences index by first 3 characters: `/opds/sequencesindex/С/СТР/`
+- Sequence page by hex ID: `/opds/sequence/05/ef/05ef7b172bdd0a32fe7eda7df2a0e1c7`
 
 ---
 
@@ -83,8 +106,10 @@ GET /opds/genre/<gen_id>[/<page>]          # Books in a genre (paginated)
 ```
 
 **Validation**:
-- `<meta_id>`: MD5 hash in hex format
-- `<gen_id>`: `[0-9a-z_]+` — text genre id, mostly from fb2 format spec
+- `<meta_id>`: `[0-9a-z_]+` — string identifier for genre group (configured in application config, currently numeric but stored as string)
+- `<gen_id>`: `[0-9a-z_]+` — text genre identifier. The set of genres is broader than in the original FB2 format. The identifier must exist in the database. 
+
+**Note**: capital letters may only appear in text descriptions/labels, never in IDs.
 
 ---
 
@@ -97,6 +122,10 @@ GET /opds/rnd/genresindex/                 # Random genre groups
 GET /opds/rnd/genresindex/<meta_id>        # Random genres in a group
 GET /opds/rnd/genre/<gen_id>               # Random books in a genre
 ```
+
+All pages contain up to 50 entries, no pagination, no "next" link in navigation. Each request returns a new random set of entries.
+
+**Caching**: Client-side caching is controlled via HTTP `Cache-Control` headers. Random element pages are cached for 5 minutes (300 seconds) - see `Caching` in Protocol section.
 
 ---
 
@@ -113,7 +142,8 @@ GET /opds/search/booksannovector?searchTerm=<query> # Vector search in annotatio
 ```
 
 **Validation**:
-- `<query>`: max 128 characters, URL encoding supported
+- `<query>`: maximum 128 characters, URL encoding supported. Multiple words separated by spaces are allowed. Empty query (`searchTerm=`) is valid and returns all entries.
+- Note: The `{searchTerms}` placeholder in OPDS link definitions is replaced with the actual search query value. For example, a search for "foo bar" would be URL-encoded as `foo+bar` or `foo%20bar`.
 
 **Note**: Vector search is available only if enabled in configuration.
 
@@ -162,7 +192,7 @@ Cache-Control: max-age=<seconds>, must-revalidate
   <!--
     rel="start"   - link to the start of the interface (/opds/)
     rel="self"    - link to the current page
-    rel="up"      - link to the parent page
+    rel="up"      - link to the parent page or higher-level page in hierarchy if parent page is not determinable on the backend side
     rel="next"    - link to the next page of current list (mandatory for paginated lists)
     rel="prev"    - link to the previous page of current list (mandatory for non-default pages)
     rel="search"  - link to search with {searchTerms} placeholder
@@ -190,7 +220,7 @@ Cache-Control: max-age=<seconds>, must-revalidate
 
   <!-- Authors -->
   <author>
-    <uri>{author_uri}</uri>
+    <uri>absolute URL to author page, constructed using APPLICATION_ROOT (e.g., `/opds/author/b4/c3/b4c32760971eb1ed25a4f4c9eb53c33c`)</uri>
     <name>{author_name}</name>
   </author>
 
@@ -277,7 +307,7 @@ Biografy entry:
   <title>About author</title>
 
   <link href="/opds/author/{prefix1}/{prefix2}/{author_id}/sequences" rel="http://www.feedbooks.com/opds/facet" title="By sequences" type="application/atom+xml;profile=opds-catalog"></link>
-  <link "/opds/author/{prefix1}/{prefix2}/{author_id}/sequences" rel="http://www.feedbooks.com/opds/facet" title="Not in sequences" type="application/atom+xml;profile=opds-catalog"></link>
+  <link href="/opds/author/{prefix1}/{prefix2}/{author_id}/sequenceless" rel="http://www.feedbooks.com/opds/facet" title="Not in sequences" type="application/atom+xml;profile=opds-catalog"></link>
 
   <!-- Author biography content (HTML) -->
   <content type="text/html"><p><span style="font-weight:bold">Author Name</span></p></content>
@@ -298,7 +328,7 @@ Link entry example:
 
 ### Book Cover Links
 
-Book entries should include cover image links for different book readers. All URLs must exist:
+Book entries should include cover image links for different book readers. All URLs must exist (may be point to same image):
 
 ```xml
 <link rel="http://opds-spec.org/image"
@@ -318,7 +348,7 @@ Book entries should include cover image links for different book readers. All UR
       type="image/jpeg"/>
 ```
 
-Cover images are available at `/cover/<prefix1>/<prefix2>/<book_id>.jpg`
+Cover images are available at `<APPLICATION_ROOT>/books/<prefix1>/<prefix2>/<book_id>.jpg`
 
 ---
 
@@ -328,7 +358,7 @@ Cover images are available at `/cover/<prefix1>/<prefix2>/<book_id>.jpg`
 |------|-------------|
 | 200  | Successful response with OPDS XML |
 | 401  | Authentication required (if passwd file exists) |
-| 404  | Resource not found |
+| 404  | Resource not found (invalid ID, non-existent genre, missing author/sequence, etc.) |
 | 500  | Internal server error |
 
 ---
@@ -351,29 +381,36 @@ Book lists are paginated:
 - **URL**: `/<endpoint>/<page>` where `page = 0, 1, 2, ...`
 - **Navigation**: `rel="prev"`, `rel="next"` links for page navigation
 
+**Last Page Handling**:
+- If the current page is the last page (no more books available), no `rel="next"` link is provided
+- A request for `page = last_page + 1` returns an empty OPDS feed (with header but no entries) with `rel="prev"` link pointing to the last page
+
 ---
 
 ## Notes
 
-1. All OPDS URLs are relative to `APPLICATION_ROOT`
-2. Dates are in ISO 8601 format. For older records, the format `YYYY-MM-DD` may be used instead of `YYYY-MM-DDTHH:MM:SS+TZ`
-3. Cover images are available at `/cover/<prefix1>/<prefix2>/<book_id>.jpg`
-4. Direct book access (outside OPDS interface):
-   - `/read/<zipfile>/<filename>.html` — HTML reading interface
-   - `/fb2/<zipfile>/<filename>.zip` — Download FB2 zip
-   - `/plain/<zipfile>/<filename>` — XSL-based reading
+1. All OPDS URLs are relative to `APPLICATION_ROOT`. The `/opds/` prefix is used for all OPDS XML feeds (e.g., `/opds/`, `/opds/time/`, `/opds/authorsindex/`). The full URL is constructed as `<APPLICATION_ROOT>/opds/<endpoint>`.
 
-## URL Parameters
+2. Other URLs (e.g., `/read/`, `/fb2/`, `/plain/`, `/books/`) are also relative to `APPLICATION_ROOT`.
 
-  * `<id>` -- string, alphanumeric (MD5 result in this implementation)
-  * `<prefix1>` -- first two characters of `<id>`
-  * `<prefix2>` -- next two characters of `<id>`
-  * `<prefix>` -- other string parameter
-  * `<page>` -- page number, integer >= 0. If 0, may be omitted with the trailing `/`
+3. Examples:
+   - If `APPLICATION_ROOT = '/'`: `/opds/`, `/read/`, `/fb2/`
+   - If `APPLICATION_ROOT = '/books'`: `/books/opds/`, `/books/read/`, `/books/fb2/`
+
+4. Dates are in ISO 8601 format. For older records in unchangeable data, the format `YYYY-MM-DD` may be used instead of `YYYY-MM-DDTHH:MM:SS+TZ`. New records should use `YYYY-MM-DDTHH:MM:SS+TZ`.
+
+5. Cover images are available at `<APPLICATION_ROOT>/books/<prefix1>/<prefix2>/<book_id>.jpg`
+
+6. Direct book access (outside OPDS interface):
+   - `<APPLICATION_ROOT>/read/<zipfile>/<filename>.html` — HTML reading interface
+   - `<APPLICATION_ROOT>/fb2/<zipfile>/<filename>.zip` — Download FB2 zip
+   - `<APPLICATION_ROOT>/plain/<zipfile>/<filename>` — XSL-based reading
 
 ## XML Examples
 
 ### Example: Root Page (`/opds/`)
+
+approot = '/books'
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -381,7 +418,7 @@ Book lists are paginated:
 	<id>tag:root</id>
 	<title>Home opds directory</title>
 	<updated>2025-06-20T19:07:03+00:00</updated>
-	<icon>/favicon.ico</icon>
+	<icon>/books/favicon.ico</icon>
 	<link href="/books/opds/search?searchTerm={searchTerms}" rel="search" type="application/atom+xml"></link>
 	<link href="/books/opds/" rel="start" type="application/atom+xml;profile=opds-catalog"></link>
 	<link href="/books/opds/" rel="self" type="application/atom+xml;profile=opds-catalog"></link>
@@ -439,6 +476,8 @@ Book lists are paginated:
 
 ### Example: Author View
 
+approot = '/'
+
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/terms/" xmlns:os="http://a9.com/-/spec/opensearch/1.1/" xmlns:opds="http://opds-spec.org/2010/catalog">
@@ -487,6 +526,8 @@ Book lists are paginated:
 
 ### Example: Book Entry
 
+approot = '/'
+
 ```xml
 <entry>
   <updated>2025-06-20T19:19:45+00:00</updated>
@@ -504,20 +545,20 @@ Book lists are paginated:
         rel="http://opds-spec.org/acquisition/open-access" 
         title="Скачать" 
         type="application/fb2+zip"/>
-  <link href="/read/f.fb2-183654-185837/185743.fb2" 
-        rel="alternate" 
+  <link href="/read/f.fb2-183654-185837/185743.fb2.html" 
+        rel="http://opds-spec.org/acquisition/open-access" 
         title="Читать онлайн" 
         type="text/html"/>
-  <link href="/cover/a719e2d4695b93f1062834f5c76f0cbe/jpg" 
+  <link href="/books/a7/19/a719e2d4695b93f1062834f5c76f0cbe.jpg" 
         rel="http://opds-spec.org/image" 
         type="image/jpeg"/>
-  <link href="/cover/a719e2d4695b93f1062834f5c76f0cbe/jpg" 
+  <link href="/books/a7/19/a719e2d4695b93f1062834f5c76f0cbe.jpg" 
         rel="x-stanza-cover-image" 
         type="image/jpeg"/>
-  <link href="/cover/a719e2d4695b93f1062834f5c76f0cbe/jpg" 
+  <link href="/books/a7/19/a719e2d4695b93f1062834f5c76f0cbe.jpg" 
         rel="http://opds-spec.org/thumbnail" 
         type="image/jpeg"/>
-  <link href="/cover/a719e2d4695b93f1062834f5c76f0cbe/jpg" 
+  <link href="/books/a7/19/a719e2d4695b93f1062834f5c76f0cbe.jpg" 
         rel="x-stanza-cover-image-thumbnail" 
         type="image/jpeg"/>
   <category label="Публицистика" term="nonf_publicism"/>
@@ -534,6 +575,8 @@ Book lists are paginated:
 ```
 
 ### Example: Paginated Books List
+
+approot = '/'
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>

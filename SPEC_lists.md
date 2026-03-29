@@ -1,6 +1,12 @@
 # Spec for some data structures in files
 
-## JsonL fields in .zip.list:
+Only files structs spec. Not for database.
+
+## JsonL fields in .zip.list (pre-index data):
+
+Used as intermediate data for indexing.
+
+Referenced as jsonl_book.
 
 one structure in one file line per book:
 
@@ -15,13 +21,13 @@ one structure in one file line per book:
   "authors": [
     {
       "name": "string",  # '--- unknown ---' if not defined in book
-      "id": "string"  # md5(normalized(name))
+      "id": "string"  # md5(normalized(author name))
     }, ...
   ],
   "sequences": null || [
     {
       "name": "string",
-      "id": "string",  # md5(normalized(name))
+      "id": "string",  # md5(normalized(sequence name))
       "num": int  # optional, depends on name+id, 0 == unknown
     }, ...
   ],
@@ -30,7 +36,7 @@ one structure in one file line per book:
     "content-type": "image/jpeg",
     "data": "base64(image)"
   },
-  "book_id": "string",  # md5(normalized(book_title))
+  "book_id": "string",  # md5(zipfilename/bookfilename)
   "lang": "string[2]",
   "date_time": "datetime('+%F_%H:%M')",
   "size": "string(int(filename size in bytes))",
@@ -45,7 +51,7 @@ one structure in one file line per book:
 }
 ```
 
-## Json book object
+## Json book object (in index data)
 
 Will be referenced as book_info
 
@@ -60,18 +66,18 @@ Will be referenced as book_info
   "authors": [
     {
       "name": "string",  # '--- unknown ---' if not defined in book
-      "id": "string"  # md5(normalized(name))
+      "id": "string"  # md5(normalized(author name))
     }, ...
   ],
   "sequences": null || [
     {
       "name": "string",
-      "id": "string",  # md5(normalized(name))
+      "id": "string",  # md5(normalized(sequence name))
       "num": int  # optional, depends on name+id, 0 == unknown
     }, ...
   ],
   "book_title": "string",
-  "book_id": "string",  # md5(normalized(book_title))
+  "book_id": "string",  # md5(zipfilename/bookfilename)
   "lang": "string[2]",
   "date_time": "datetime('+%F_%H:%M')",
   "size": "string(int(filename size in bytes))",
@@ -86,7 +92,7 @@ Will be referenced as book_info
 }
 ```
 
-## Sequence data object
+## Sequence data object (in index data)
 
 Referenced as sequence_info
 
@@ -97,9 +103,21 @@ Referenced as sequence_info
 }
 ```
 
+or (optionally, currently in author's sequences)
+
+Referenced as sequence_info_cnt
+
+```json
+{
+    "name": "string",
+    "id": "string",  # md5(normalized(name))
+    "cnt": int  # books count
+}
+```
+
 ## Author data object
 
-Referenced as author_info
+Referenced as author_info (for current author info, not in lists)
 
 ```json
 {
@@ -108,11 +126,11 @@ Referenced as author_info
 }
 ```
 
-## Silly dict
+## Silly dict (in index data)
 
 Referenced as silly_dict
 
-Used for quick check for key existence.
+Used for quick check for key existence. Value is int (1 for simple existence check, or may be come object count). Key must be string.
 
 ```json
 {"key": 1, ...}
