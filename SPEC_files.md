@@ -12,7 +12,7 @@ Any linux fs should works fine.
 
 * all directories from current doc created in config.ini's `pages_path` 
 * group of genres will be named as genres meta
-* meta_id, meta_name data takes from external genres_meta.list (must hard fail in indexing/warn in interface if not exists or fallback to id from genres.list or to some default value), meta_id "[0-9a-z_-]".
+* meta_id, meta_name data takes from external genres_meta.list (must hard fail in indexing/warn in interface if not exists or fallback to id from genres.list or to some default value), meta_id "[0-9a-z_-]+".
 * genre_id, genre_name takes from external genres.list (must hard fail in indexing/warn in interface if not exists or fallback to genre_id (for genre_name too) from indexed books), genre_id currently string "[0-9a-z_-]+"
 * other (not genre_id or meta_id) *_id is string calculated from corresponding character sequence.
   * author_id -- string, calculated from author's name with normalization
@@ -42,7 +42,7 @@ Line format:
 
 `<meta_id>|<meta_name>`
 
-* `meta_id` -- string, id of genre group/meta genre. Current data use '[0-9]+
+* `meta_id` -- string, id of genre group/meta genre. Current data use '[0-9]+' (numeric string)
 
 * `meta_name` -- string in utf-8, name of genres group/meta genre
 
