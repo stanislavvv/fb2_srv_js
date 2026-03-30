@@ -8,8 +8,10 @@ All URLs and file paths are relative to `app_root`.
 
 ### Basic Requirements
 - Filesystem: Unix-like (255-char filename limit, case-sensitive, 2047-char path)
-- ID Length: 30+ chars (MD5 hex-encoded)
 
+### ID Generation
+IDs are generated as hash of normalized string. Current implementation uses MD5 
+(hex-encoded, 32 characters).
 
 ### Configuration Variables
 
@@ -53,7 +55,7 @@ Genre classification files (stored in app root, not data directory). Missing or 
 | `genres.list` | Individual genres | `<meta_id>|<genre_id>|<genre_name>` |
 | `genres_replace.list` | Genre replacements | `<wrong_id>|<genre_id>[,genre_id,...]` |
 
-Field types: `meta_id`, `genre_id` — string identifier; `meta_name`, `genre_name` — UTF-8 string.
+Field types: `meta_id`, `genre_id` -- string identifier; `meta_name`, `genre_name` -- UTF-8 string.
 
 ## Data Structures
 
@@ -66,7 +68,7 @@ Index data for database and static files. Same as `jsonl_book`, without `cover` 
 ```json
 {
   "name": "string",    // '--- unknown ---' if not defined in book
-  "id": "string",      // md5(normalized(author name))
+  "id": "string",      // hash(normalized author name)
   "info": "text"       // Author biography (default: '')
 }
 ```
@@ -88,7 +90,7 @@ Book-sequence binding data.
 ```json
 {
   "name": "string",
-  "id": "string",    // md5(normalized(sequence name))
+  "id": "string",    // hash(normalized sequence name)
   "num": int         // optional, volume/sequence number, 0 == unknown
 }
 ```
@@ -119,14 +121,16 @@ Intermediate data during indexing. One JSON structure per line.
   },
   "book_id": "string",            // required
   "lang": "string[2]",            // required (ISO 639-1)
-  "date_time": "YYYY-MM-DDTHH:MM:SS+TZ",  // ISO 8601 compatible date/time format
+  "date_time": "YYYY-MM-DD[T[HH:MM:SS[.SSS][(+|-)HH:MM]]]",  
+  // ISO 8601 compatible, time and timezone optional
+  // Examples: "2024-01-15", "2024-01-15T00:00:00", "2024-01-15T14:30:00+05:00"
   "size": "string(int(filename size in bytes))",  // required
   "annotation": "text/stripped html string",      // optional (may be null)
   "pub_info": {                   // optional (may be null)
     "isbn": null || "string",
     "year": null || "string[4]",  // str(year)
     "publisher": null || "string",
-    "publisher_id": "string"      // md5(normalized(publisher))
+    "publisher_id": "string"      // hash(normalized publisher)
   },
   "deleted": 0 || 1               // optional, default: 0
 }
@@ -141,20 +145,18 @@ URL Parameter Notation:
 - `<cut>` -- first uppercase letter from name
 - `<cut1>` -- first uppercase letter
 - `<cut2>` -- first 1-3 uppercase letters, left-padded to 3
-- `<page>` -- page number (int ≥ 0), omit if 0
+- `<page>` -- page number (int >= 0), omit if 0
 - ID Path Format: `<sub1>/<sub2>/<full_id>` (e.g., `05/ef/05ef7b17...`)
 
 ### Core URLs
 
-| URL | Description |
-|-----|-------------|
-| `/` | Library entry point |
-| `/fb2/<zip_file>/<filename>` | Download FB2 zip |
-| `/plain/<zip_file>/<filename>` | Download plain `.fb2` file |
-| `/read/<zip_file>/<filename>` | Read in browser (XSL→HTML) |
-| `/books/<sub1>/<sub2>/<book_id>.jpg` | Book cover image |
-| `/interface.js` | JavaScript interface file |
-| `/favicon.ico` | Favicon file |
+- `/` -- Library entry point
+- `/fb2/<zip_file>/<filename>` -- Download FB2 zip
+- `/plain/<zip_file>/<filename>` -- Download plain `.fb2` file
+- `/read/<zip_file>/<filename>` -- Read in browser (XSL->HTML)
+- `/books/<sub1>/<sub2>/<book_id>.jpg` -- Book cover image
+- `/interface.js` -- JavaScript interface file
+- `/favicon.ico` -- Favicon file
 
 ### OPDS URLs
 
@@ -162,82 +164,68 @@ All OPDS URLs begin from `/opds`:
 
 #### Root and Navigation
 
-| URL | Description |
-|-----|-------------|
-| `/opds/` | Main menu with primary sections |
+- `/opds/` -- Main menu with primary sections
 
 #### Books Lists
 
-| URL | Description |
-|-----|-------------|
-| `/opds/time` | All books by date (newest first) |
-| `/opds/time/<page>` | Paginated books by date |
+- `/opds/time` -- All books by date (newest first)
+- `/opds/time/<page>` -- Paginated books by date
 
 #### Authors
 
-| URL | Description |
-|-----|-------------|
-| `/opds/authorsindex/` | List of first letters for authors |
-| `/opds/authorsindex/<cut>` | Authors by first 1 uppercase chars |
-| `/opds/authorsindex/<cut1>/<cut2>` | Authors by 1 char + 3 char, uppercased |
-| `/opds/author/<sub1>/<sub2>/<author_id>` | Author page |
-| `/opds/author/<sub1>/<sub2>/<author_id>/sequences` | Author's sequences |
-| `/opds/author/<sub1>/<sub2>/<author_id>/sequenceless` | Books not in sequences |
-| `/opds/author/<sub1>/<sub2>/<author_id>/alphabet` | Books sorted alphabetically |
-| `/opds/author/<sub1>/<sub2>/<author_id>/time` | Books by date added |
-| `/opds/author/<sub1>/<sub2>/<author_id>/<seq_id>` | Books in specific sequence |
+- `/opds/authorsindex/` -- List of first letters for authors
+- `/opds/authorsindex/<cut>` -- Authors by first 1 uppercase chars
+- `/opds/authorsindex/<cut1>/<cut2>` -- Authors by 1 char + 3 char, uppercased
+- `/opds/author/<sub1>/<sub2>/<author_id>` -- Author page
+- `/opds/author/<sub1>/<sub2>/<author_id>/sequences` -- Author's sequences
+- `/opds/author/<sub1>/<sub2>/<author_id>/sequenceless` -- Books not in sequences
+- `/opds/author/<sub1>/<sub2>/<author_id>/alphabet` -- Books sorted alphabetically
+- `/opds/author/<sub1>/<sub2>/<author_id>/time` -- Books by date added
+- `/opds/author/<sub1>/<sub2>/<author_id>/<seq_id>` -- Books in specific sequence
 
 #### Sequences
 
-| URL | Description |
-|-----|-------------|
-| `/opds/sequencesindex/` | List of first letters for sequences |
-| `/opds/sequencesindex/<cut>` | Sequences by first 1 uppercase chars |
-| `/opds/sequencesindex/<cut1>/<cut2>` | Sequences by 1 char + 3 char, uppercased |
-| `/opds/sequence/<sub1>/<sub2>/<seq_id>` | Books in sequence |
+- `/opds/sequencesindex/` -- List of first letters for sequences
+- `/opds/sequencesindex/<cut>` -- Sequences by first 1 uppercase chars
+- `/opds/sequencesindex/<cut1>/<cut2>` -- Sequences by 1 char + 3 char, uppercased
+- `/opds/sequence/<sub1>/<sub2>/<seq_id>` -- Books in sequence
 
 #### Genres
 
-| URL | Description |
-|-----|-------------|
-| `/opds/genresindex/` | Genre groups (meta genres) |
-| `/opds/genresindex/<meta_id>` | Genres in group |
-| `/opds/genre/<gen_id>` | Books in genre |
-| `/opds/genre/<gen_id>/<page>` | Paginated books in genre |
+- `/opds/genresindex/` -- Genre groups (meta genres)
+- `/opds/genresindex/<meta_id>` -- Genres in group
+- `/opds/genre/<gen_id>` -- Books in genre
+- `/opds/genre/<gen_id>/<page>` -- Paginated books in genre
 
 #### Random Elements (no pagination, no "next" link)
 
-| URL | Description |
-|-----|-------------|
-| `/opds/random-books/` | Random books (up to `page_size`) |
-| `/opds/random-sequences/` | Random sequences (up to `page_size`) |
-| `/opds/rnd/genresindex/` | Random genre groups |
-| `/opds/rnd/genresindex/<meta_id>` | Random genres in group |
-| `/opds/rnd/genre/<gen_id>` | Random books in genre |
+- `/opds/random-books/` -- Random books (up to `page_size`)
+- `/opds/random-sequences/` -- Random sequences (up to `page_size`)
+- `/opds/rnd/genresindex/` -- Random genre groups
+- `/opds/rnd/genresindex/<meta_id>` -- Random genres in group
+- `/opds/rnd/genre/<gen_id>` -- Random books in genre
 
 #### Search
 
-| URL | Description |
-|-----|-------------|
-| `/opds/search?searchTerm=<query>` | Search root page |
-| `/opds/search/authors?searchTerm=<query>` | Search in author names |
-| `/opds/search/sequences?searchTerm=<query>` | Search in sequence names |
-| `/opds/search/books?searchTerm=<query>` | Search in book titles |
-| `/opds/search/booksanno?searchTerm=<query>` | Search in annotations |
-| `/opds/search/booksannovector?searchTerm=<query>` | Vector search in annotations (requires `vector_search` config enabled) |
+- `/opds/search?searchTerm=<query>` -- Search root page
+- `/opds/search/authors?searchTerm=<query>` -- Search in author names
+- `/opds/search/sequences?searchTerm=<query>` -- Search in sequence names
+- `/opds/search/books?searchTerm=<query>` -- Search in book titles
+- `/opds/search/booksanno?searchTerm=<query>` -- Search in annotations
+- `/opds/search/booksannovector?searchTerm=<query>` -- Vector search in annotations (requires `vector_search` config enabled)
 
 Search Parameters:
 - `searchTerm` -- string, max 128 characters, must be URL-encoded
 - `{searchTerms}` -- placeholder in OPDS link definitions, replaced with URL-encoded value
 - Empty query (`searchTerm=`) is valid and returns all entries
-- Example: Search for "foo bar" → `searchTerm=foo+bar` or `searchTerm=foo%20bar`
+- Example: Search for "foo bar" -> `searchTerm=foo+bar` or `searchTerm=foo%20bar`
 
 ### Pagination
 
 - Page numbers: `0, 1, 2, ...` (negative values return 404)
 - `page=0` may be omitted (no trailing `/`)
-- Last page: no `rel="next"` link
-- Request for `page > last_page` returns empty feed with `rel="prev"` to last page
+- Last page: no `rel="next"` link (if backend can determine last page)
+- Request for `page > last_page` returns 404 or empty feed with `rel="prev"` to last page
 
 ## OPDS Response Format
 
@@ -446,96 +434,80 @@ Intermediate JSONL format (`.zip.list` or `.zip.list.gz`). One `jsonl_book` per 
 ### books
 Primary book information.
 
-| Column | Type |
-|--------|------|
-| zipfile | String |
-| filename | String |
-| genres | ARRAY(String) |
-| authors | ARRAY(String) |
-| sequences | ARRAY(String) |
-| book_id | String(32) |
-| lang | String |
-| date | Date |
-| size | Integer |
-| deleted | Boolean |
+- `zipfile` -- String
+- `filename` -- String
+- `genres` -- ARRAY(String)
+- `authors` -- ARRAY(String)
+- `sequences` -- ARRAY(String)
+- `book_id` -- String(32)
+- `lang` -- String
+- `date` -- Date
+- `size` -- Integer
+- `deleted` -- Boolean
 
 ### book_descr
 Extended book description. Indexed: `books_descr_title` (GIN trgm), `books_descr_anno` (GIN trgm).
 
-| Column | Type |
-|--------|------|
-| book_id | String(32) |
-| book_title | String |
-| pub_isbn | String |
-| pub_year | String |
-| publisher | String |
-| publisher_id | String(32) |
-| annotation | TEXT |
+- `book_id` -- String(32)
+- `book_title` -- String
+- `pub_isbn` -- String
+- `pub_year` -- String
+- `publisher` -- String
+- `publisher_id` -- String(32)
+- `annotation` -- TEXT
 
 ### authors
 Author information. Indexed: `authors_names` (GIN trgm).
 
-| Column | Type |
-|--------|------|
-| id | String(32) |
-| name | String |
-| info | TEXT |
+- `id` -- String(32)
+- `name` -- String
+- `info` -- TEXT
 
 ### sequences
 Sequence/series information. Indexed: `seq_names` (GIN trgm).
 
-| Column | Type |
-|--------|------|
-| id | String(32) |
-| name | String |
-| info | TEXT |
+- `id` -- String(32)
+- `name` -- String
+- `info` -- TEXT
 
 ### genres_meta
 Genre groups (meta genres). PK: meta_id.
 
-| Column | Type |
-|--------|------|
-| meta_id | String(32) |
-| name | String |
-| description | TEXT |
+- `meta_id` -- String(32)
+- `name` -- String
+- `description` -- TEXT
 
 ### genres
 Individual genres. PK: id. FK: meta_id.
 
-| Column | Type |
-|--------|------|
-| id | String(32) |
-| meta_id | String(32) |
-| name | String |
-| description | TEXT |
+- `id` -- String(32)
+- `meta_id` -- String(32)
+- `name` -- String
+- `description` -- TEXT
 
 ### vectors
 Embedding vectors for semantic search. PK: id+type. Indexed: `sqlalchemy_orm_half_precision_index` (HNSW).
 
-| Column | Type |
-|--------|------|
-| id | String(32) |
-| type | Enum (0-3) |
-| is_bad | Boolean |
-| embedding | HALFVEC(256) |
+- `id` -- String(32)
+- `type` -- Enum (0-3)
+- `is_bad` -- Boolean
+- `embedding` -- HALFVEC(256)
 
 VectorType: BOOK_TITLE=0, BOOK_ANNO=1, SEQUENCE_NAME=2, AUTHOR_NAME=3.
 
 ## Processing Commands (datachew.py)
 
-| Command | Description |
-|---------|-------------|
-| `lists` | Recreates all `.zip.list` files from `.zip` archives |
-| `new_lists` | Creates `.zip.list` only for new/updated `.zip` files |
-| `tables` | Creates DB tables and extensions |
-| `cleandb` | Drops all DB tables |
-| `fillonly` | Fills DB from `.zip.list` files |
-| `books` | Creates static book data and resized covers |
-| `authors` | Creates author index structure |
-| `sequences` | Creates sequence index structure |
-| `genres` | Creates genre index with pagination |
-| `all` | Runs complete pipeline in order: new_lists → tables → fillonly → books → authors → sequences → genres |
-| `vectors` | Creates semantic search embeddings (requires VECTOR_SEARCH) |
+- `lists` -- Recreates all `.zip.list` files from `.zip` archives
+- `new_lists` -- Creates `.zip.list` only for new/updated `.zip` files
+- `tables` -- Creates DB tables and extensions
+- `cleandb` -- Drops all DB tables
+- `fillonly` -- Fills DB from `.zip.list` files
+- `books` -- Creates static book data and resized covers
+- `authors` -- Creates author index structure
+- `sequences` -- Creates sequence index structure
+- `genres` -- Creates genre index with pagination
+- `all` -- Runs complete pipeline in order: new_lists -> tables -> fillonly -> books -> authors -> sequences -> genres
+- `vectors` -- Creates semantic search embeddings (requires `vector_search` enabled)
 
 ## Static Data Structure
 
@@ -580,12 +552,10 @@ openai_key=-
 
 ## HTTP Status Codes and Error Handling
 
-| Code | Description |
-|------|-------------|
-| 200  | Successful response with OPDS XML |
-| 401  | Authentication required (if `passwd` file exists) |
-| 404  | Resource not found |
-| 500  | Internal server error |
+- `200` -- Successful response with OPDS XML
+- `401` -- Authentication required (if `passwd` file exists)
+- `404` -- Resource not found
+- `500` -- Internal server error
 
 Authentication (401):
 ```
