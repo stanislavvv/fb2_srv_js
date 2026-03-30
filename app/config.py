@@ -26,8 +26,8 @@ VARS = {
     "web_title": "TITLE",  # web interface title
     "inpx_file": "INPX",  # archive with .inp files, create empty .zip if not exists
     "zips_path": "ZIPS",  # filesystem full path to .zip's with .fb2 content
-    "max_pass_lenth": "MAX_PASS_LENGTH",  # memory limit param, default see below
-    "mas_genre_pass_length": "MAX_PASS_LENGTH_GEN",  # memory limit param, default see below
+    "max_pass_length": "MAX_PASS_LENGTH",  # memory limit param, default see below
+    "max_pass_length_gen": "MAX_PASS_LENGTH_GEN",  # memory limit param, default see below
     "books_pass_size_hint": "PASS_SIZE_HINT",  # memory limit param, default see below
     "default_cover_image": "DEFAULT_COVER",  # path to default cover
     "default_cover_source": "DEFAULT_COVER_SRC",  # master-copy of default cover
