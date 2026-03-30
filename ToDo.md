@@ -20,4 +20,3 @@ Nothing global ToDo
     * [bug] self URL in paginated views always shows page 0 URL (e.g. /opds/time instead of /opds/time/N)
   * docs:
     * nginx example for covers (`@try_files` and default cover)
-    * [maybe] spec to THIS library opds output -- by ai, need some editing
