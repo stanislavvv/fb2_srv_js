@@ -14,9 +14,6 @@ Nothing global ToDo
   * indexing:
     * [bug] make_id() duplicates uppercase conversion
     * per-zip/global author name replacement (mostly for joining nickname and real name)
-  * opds:
-    * [bug] pagination: "next" link always added, no check for last page
-    * [bug] page = last_page + 1 should return empty feed with rel="prev" link
-    * [bug] self URL in paginated views always shows page 0 URL (e.g. /opds/time instead of /opds/time/N)
+  * opds: -- no tasks
   * docs:
     * nginx example for covers (`@try_files` and default cover)

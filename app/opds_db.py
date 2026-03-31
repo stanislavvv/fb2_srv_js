@@ -42,7 +42,36 @@ def opds_books_db(params):
     else:
         page = 0
 
-    if page > 0 and layout == "time":
+    # Для layout="time" сначала вычисляем total_pages до вызова opds_header
+    total_pages = 0
+    if layout == "time":
+        try:
+            session = dbsession()
+            total_count = session.query(Book).count()
+            total_pages = int(total_count / pagelimit) if total_count > 0 else 0
+            if total_count % pagelimit > 0:
+                total_pages = total_pages + 1
+            session.close()
+        except Exception as ex:
+            logging.error(f"Database error on count: {ex}")
+
+    # Если запрашиваемая страница превышает последнюю, возвращаем пустой feed с rel="prev"
+    if layout == "time" and page > total_pages:
+        if page > 1:
+            params["prev"] = params["strong_baseref"] + f"/{page - 1}"
+        elif page == 1:
+            params["prev"] = params["strong_baseref"]
+        # Удаляем next если он был установлен в роуте
+        params.pop("next", None)
+        ret = opds_header(params)
+        ret["feed"]["entry"] = []
+        return ret
+
+    # Удаляем next из params - будем добавлять его только если есть следующая страница
+    params.pop("next", None)
+
+    # Обработка пагинации для layout="time" и других paginated layout
+    if page > 0 and layout in ("time", "paginated"):
         if page == 1:
             params["prev"] = params["strong_baseref"]
         else:
@@ -103,6 +132,10 @@ def opds_books_db(params):
             book_ids = get_ids_nearest(session, vector, type, maxres)
             books_data = session.query(Book).filter(Book.book_id.in_(book_ids)).all()
         else:
+            # Добавляем "next" только если есть следующая страница
+            if layout == "time" and page < total_pages:
+                params["next"] = params["strong_baseref"] + f"/{page + 1}"
+
             books_data = session.query(Book).order_by(Book.date.desc()).limit(pagelimit).offset(pagelimit * page).all()
         book_ids = []
         books = {}

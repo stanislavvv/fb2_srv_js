@@ -629,7 +629,23 @@ def opds_book_list(params):
         booksidx = index + f"/{page}.json"
         # Формируем prev/next на основе strong_baseref и id, а не self
         base_id = params.get("id", "")
-        params["next"] = params["strong_baseref"] + base_id + "/" + str(page + 1)
+
+        # Проверка: если файл не существует, возвращаем пустой feed с rel="prev"
+        if not os.path.isfile(pagesdir + "/" + booksidx):
+            if page > 0:
+                # Возвращаем пустой feed с rel="prev" ссылкой
+                params["prev"] = params["strong_baseref"] + base_id + "/" + str(page - 1)
+                ret = opds_header(params)
+                ret["feed"]["entry"] = []  # Пустой список записей
+                return ret
+            else:
+                return None  # Страница не найдена
+
+        # Проверяем существование следующей страницы для "next" ссылки
+        next_booksidx = index + f"/{page + 1}.json"
+        if os.path.isfile(pagesdir + "/" + next_booksidx):
+            params["next"] = params["strong_baseref"] + base_id + "/" + str(page + 1)
+
         if page == 1:
             params["prev"] = params["strong_baseref"] + base_id
         elif page > 1:
