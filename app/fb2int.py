@@ -370,7 +370,7 @@ def get_book_cover(info, z_file, zip_file, filename):
     return cover
 
 
-def get_pubinfo(descr):
+def get_pubinfo(descr, zip_file, filename):
     """return pubinfo struct or None"""
     pubinfo = None
     try:
@@ -476,7 +476,7 @@ def fb2parse(z_file, filename, replace_data, inpx_data):  # pylint: disable=R091
 
     cover = get_book_cover(info, z_file, zip_file, filename)
 
-    isbn, pub_year, publisher = get_pub_info(get_pubinfo(descr))
+    isbn, pub_year, publisher = get_pub_info(get_pubinfo(descr, zip_file, filename))
     pub_info = {
         "isbn": isbn,
         "year": pub_year,
