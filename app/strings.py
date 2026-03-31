@@ -98,7 +98,7 @@ def make_id(name) -> str:
         else:
             name_str = str(name, encoding='utf-8').strip("'").strip('"')
     norm_name = str_normalize(name_str)
-    return hashlib.md5(norm_name.encode('utf-8').upper()).hexdigest()
+    return hashlib.md5(norm_name.encode('utf-8')).hexdigest()
 
 
 def str_normalize(string: str) -> str:
