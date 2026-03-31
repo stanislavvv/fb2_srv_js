@@ -410,6 +410,8 @@ def opds_genre_books(gen_id, page=0):
     """paginated book list in genre"""
     id = validate_genre(gen_id)
     gen_name = get_genre_name(id)
+    # Формируем self URL с учётом страницы
+    self_url = URL["genre"] + id if page == 0 else URL["genre"] + id + "/" + str(page)
     params = {
         "index": URL["genre"].replace("/opds/", "", 1) + id,
         "id": gen_id,
@@ -422,7 +424,7 @@ def opds_genre_books(gen_id, page=0):
         "strong_baseref": URL["genre"],
         "authref": URL["author"],
         "seqref": URL["seq"],
-        "self": URL["genre"] + id,
+        "self": self_url,
         "start": URL["start"],
         "up": URL["genidx"]
     }
@@ -433,6 +435,8 @@ def opds_genre_books(gen_id, page=0):
 @opds.route(URL["time"] + "/<int:page>", methods=['GET'])
 def opds_time_books(page=0):
     """all books in library sort by date"""
+    # Формируем self URL с учётом страницы
+    self_url = URL["time"] if page == 0 else URL["time"] + "/" + str(page)
     params = {
         "tag": "tag:time:" + str(page),
         "subtag": "tag:time:" + str(page),
@@ -444,7 +448,7 @@ def opds_time_books(page=0):
         "authref": URL["author"],
         "seqref": URL["seq"],
         "next": URL["time"] + f"/{page+1}",
-        "self": URL["time"],
+        "self": self_url,
         "start": URL["start"],
         "up": URL["start"]
     }

@@ -627,11 +627,13 @@ def opds_book_list(params):
         booksidx = index + ".json"
     elif layout == "paginated":
         booksidx = index + f"/{page}.json"
-        params["next"] = params["self"] + "/" + str(page + 1)
+        # Формируем prev/next на основе strong_baseref и id, а не self
+        base_id = params.get("id", "")
+        params["next"] = params["strong_baseref"] + base_id + "/" + str(page + 1)
         if page == 1:
-            params["prev"] = params["self"]
+            params["prev"] = params["strong_baseref"] + base_id
         elif page > 1:
-            params["prev"] = params["self"] + "/" + str(page - 1)
+            params["prev"] = params["strong_baseref"] + base_id + "/" + str(page - 1)
 
     try:
         with open(pagesdir + "/" + booksidx, encoding="utf-8") as b:
