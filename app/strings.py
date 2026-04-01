@@ -4,7 +4,7 @@
 import logging
 import unicodedata as ud
 import hashlib
-import string
+import string as str_lib
 
 # Mapping for character replacements (umlauts, special characters)
 REPLACEMENT_MAP = {
@@ -155,7 +155,7 @@ def str_normalize(string: str) -> str:
         i -= 1
 
     # Remove all punctuation except parentheses from the string
-    punctuation_to_remove = set(string.punctuation) - {'(', ')'}
+    punctuation_to_remove = set(str_lib.punctuation) - {'(', ')'}
 
     result = []
     for char in ret:
