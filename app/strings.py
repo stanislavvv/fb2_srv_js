@@ -9,7 +9,7 @@ import string as str_lib
 # Mapping for character replacements (umlauts, special characters)
 REPLACEMENT_MAP = {
     # Cyrillic
-    'Ё': 'Е', 'Й': 'И', 'Ъ': 'Ь', 'Ы': 'И', 'Э': 'Е',
+    'Ё': 'Е', 'Й': 'И', 'Ъ': 'Ь',
     # German umlauts (uppercase)
     'Ä': 'AE', 'Ö': 'OE', 'Ü': 'UE', 'ß': 'SS',
     # Other common replacements (uppercase)
