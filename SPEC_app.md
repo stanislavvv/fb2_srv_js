@@ -10,8 +10,15 @@ All URLs and file paths are relative to `app_root`.
 - Filesystem: Unix-like (255-char filename limit, case-sensitive, 2047-char path)
 
 ### ID Generation
-IDs are generated as hash of normalized string. Current implementation uses MD5 
+IDs are generated as hash of normalized string. Current implementation uses MD5
 (hex-encoded, 32 characters).
+
+**String normalization rules:**
+- Strip leading/trailing whitespace; replace multiple spaces with single space
+- Convert to uppercase with Unicode normalization
+- Replace special characters with similar letters (e.g., Й->И, umlauts)
+- Remove all punctuation except ? and ! (only at end, 1-4 chars)
+- Preserve parentheses (significant characters)
 
 ### Configuration Variables
 
@@ -121,7 +128,7 @@ Intermediate data during indexing. One JSON structure per line.
   },
   "book_id": "string",            // required
   "lang": "string[2]",            // required (ISO 639-1)
-  "date_time": "YYYY-MM-DD[T[HH:MM:SS[.SSS][(+|-)HH:MM]]]",  
+  "date_time": "YYYY-MM-DD[T[HH:MM:SS[.SSS][(+|-)HH:MM]]]",
   // ISO 8601 compatible, time and timezone optional
   // Examples: "2024-01-15", "2024-01-15T00:00:00", "2024-01-15T14:30:00+05:00"
   "size": "string(int(filename size in bytes))",  // required
@@ -256,7 +263,7 @@ Cache-Control: max-age=<seconds>, must-revalidate
   <title>$TITLE</title>
   <updated>%UPDATED%</updated>
   <icon>/favicon.ico</icon>
-  
+
   <link href="/opds/search?searchTerm={searchTerms}" rel="search" type="application/atom+xml"/>
   <link href="/opds/" rel="start" type="application/atom+xml;profile=opds-catalog"/>
   <link href="/opds/..." rel="self" type="application/atom+xml;profile=opds-catalog"/>
@@ -285,12 +292,12 @@ Link Relation Meanings:
   <id>tag:book:{book_id}</id>
   <title>{book_title}</title>
   <updated>{date_time}</updated>
-  
+
   <author>
     <uri>{author_url}</uri>
     <name>{author_name}</name>
   </author>
-  
+
   <link rel="http://opds-spec.org/acquisition/open-access"
         href="{download_url}"
         type="application/fb2+zip"
@@ -299,7 +306,7 @@ Link Relation Meanings:
         href="{read_url}"
         type="text/html"
         title="Read online"/>
-  
+
   <!-- Cover image links (4 variants for OPDS client compatibility) -->
   <link rel="http://opds-spec.org/image"
         href="{cover_url}"
@@ -313,7 +320,7 @@ Link Relation Meanings:
   <link rel="x-stanza-cover-image-thumbnail"
         href="{cover_url}"
         type="image/jpeg"></link>
-  
+
   <link rel="related"
         href="{author_url}"
         type="application/atom+xml"
@@ -322,12 +329,12 @@ Link Relation Meanings:
         href="{sequence_url}"
         type="application/atom+xml"
         title="{sequence_name}"></link>
-  
+
   <category term="{genre_id}" label="{genre_name}"/>
-  
+
   <dc:language>{lang_id}</dc:language>
   <dc:format>fb2</dc:format>
-  
+
   <content type="text/html">
     {annotation}
   </content>

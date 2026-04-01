@@ -4,6 +4,33 @@
 import logging
 import unicodedata as ud
 import hashlib
+import string
+
+# Mapping for character replacements (umlauts, special characters)
+REPLACEMENT_MAP = {
+    # Cyrillic
+    'Ё': 'Е', 'Й': 'И', 'Ъ': 'Ь', 'Ы': 'И', 'Э': 'Е',
+    # German umlauts (uppercase)
+    'Ä': 'AE', 'Ö': 'OE', 'Ü': 'UE', 'ß': 'SS',
+    # Other common replacements (uppercase)
+    'À': 'A', 'Á': 'A', 'Â': 'A', 'Ã': 'A', 'Å': 'A',
+    'È': 'E', 'É': 'E', 'Ê': 'E', 'Ë': 'E',
+    'Ì': 'I', 'Í': 'I', 'Î': 'I', 'Ï': 'I',
+    'Ñ': 'N',
+    'Ò': 'O', 'Ó': 'O', 'Ô': 'O', 'Õ': 'O',
+    'Ù': 'U', 'Ú': 'U', 'Û': 'U',
+    'Ý': 'Y',
+    'Ç': 'C',
+    'Þ': 'TH',
+    'Đ': 'D',
+    'Ł': 'L',
+    'Ń': 'N',
+    'Ǿ': 'O',
+    'Ŕ': 'R',
+    'Ś': 'S',
+    'Ź': 'Z',
+    'Ż': 'Z',
+}
 
 
 def strip_quotes(s: str) -> str:
@@ -30,9 +57,9 @@ def unicode_upper(string: str) -> str:
     """custom UPPER + normalize for sqlite and other"""
     ret = ud.normalize('NFKD', string)
     ret = ret.upper()
-    ret = ret.replace('Ё', 'Е')
-    ret = ret.replace('Й', 'И')
-    ret = ret.replace('Ъ', 'Ь')
+    # Apply replacements from map
+    for old, new in REPLACEMENT_MAP.items():
+        ret = ret.replace(old, new)
     return ret
 
 
@@ -102,6 +129,51 @@ def make_id(name) -> str:
 
 
 def str_normalize(string: str) -> str:
-    """will be normalize string for make_id and compare"""
-    ret = unicode_upper(string.strip())
+    """normalize string for make_id and compare"""
+    if not string:
+        return ""
+
+    # Strip leading/trailing whitespace
+    ret = string.strip()
+
+    # Replace multiple spaces with single space
+    while '  ' in ret:
+        ret = ret.replace('  ', ' ')
+
+    # Convert to upper case with unicode normalization
+    ret = unicode_upper(ret)
+
+    # Remove all punctuation except:
+    # - ? and ! (only at the end, 1-4 chars)
+    # - parentheses (significant characters)
+
+    # First, collect trailing ? and ! (1-4 chars) from the end
+    trailing_punct = ""
+    i = len(ret) - 1
+    while i >= 0 and len(trailing_punct) < 4 and ret[i] in '?!':
+        trailing_punct = ret[i] + trailing_punct
+        i -= 1
+
+    # Remove all punctuation except parentheses from the string
+    punctuation_to_remove = set(string.punctuation) - {'(', ')'}
+
+    result = []
+    for char in ret:
+        if char in punctuation_to_remove:
+            continue
+        result.append(char)
+
+    ret = ''.join(result)
+
+    # Strip multiple spaces again after punctuation removal
+    while '  ' in ret:
+        ret = ret.replace('  ', ' ')
+
+    # Strip again after removing punctuation
+    ret = ret.strip()
+
+    # Add back trailing punctuation if any
+    if trailing_punct:
+        ret = ret + trailing_punct
+
     return ret
