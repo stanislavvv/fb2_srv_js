@@ -484,6 +484,6 @@ def fb2parse(z_file, filename, replace_data, inpx_data):  # pylint: disable=R091
         "publisher_id": make_id(publisher)
     }
     book_path = str(os.path.basename(z_file.filename)) + "/" + filename
-    book_id = make_id(book_path)
+    book_id = make_id(book_path, name_as_is=True)
     out = make_book_record(zip_file, filename, book_id, date_time, size, info, bs_anno, cover, pub_info, inpx_data, replace_data)
     return book_id, out

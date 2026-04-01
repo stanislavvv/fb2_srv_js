@@ -116,7 +116,7 @@ def string2filename(data: str) -> str:
     return data
 
 
-def make_id(name) -> str:
+def make_id(name, name_as_is: bool = False) -> str:
     """get name, strip quotes from begin/end, return md5"""
     name_str = "--- unknown ---"
     if name is not None and name != "":
@@ -124,7 +124,7 @@ def make_id(name) -> str:
             name_str = str(name).strip("'").strip('"')
         else:
             name_str = str(name, encoding='utf-8').strip("'").strip('"')
-    norm_name = str_normalize(name_str)
+    norm_name = name_str if name_as_is else str_normalize(name_str)
     return hashlib.md5(norm_name.encode('utf-8')).hexdigest()
 
 
