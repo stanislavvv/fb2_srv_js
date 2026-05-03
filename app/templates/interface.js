@@ -319,6 +319,39 @@ function renderHTMLBook(htmlUrl, bookTitle) {
             // Restore scroll position
             restoreScrollPosition(htmlUrl);
 
+            // Intercept links in book content to handle properly
+            contentSection.addEventListener('click', function(e) {
+                const anchor = e.target.closest('a');
+                if (anchor) {
+                    const href = anchor.getAttribute('href');
+                    if (href) {
+                        // Case 1: Internal anchor link (#anchor but not #/ navigation)
+                        if (href.startsWith('#') && !href.startsWith('#/')) {
+                            e.preventDefault();
+                            const anchorName = href.substring(1);
+                            const target = document.getElementById(anchorName)
+                                || document.querySelector(`[name="${anchorName}"]`);
+                            if (target) {
+                                // Save current scroll position to stack before anchor navigation
+                                pushAnchorPosition(htmlUrl);
+                                // Add entry to browser history so "Back" works
+                                history.pushState({ anchor: true }, '', window.location.hash);
+                                target.scrollIntoView({ behavior: 'smooth' });
+                            }
+                            return false;
+                        }
+                        // Case 2: External HTTP(S) link — open in new tab
+                        if (href.startsWith('http://') || href.startsWith('https://')) {
+                            e.preventDefault();
+                            window.open(href, '_blank');
+                            return false;
+                        }
+                        // Case 3: Navigation links starting with #/ or absolute paths
+                        // Let them pass through to normal navigation
+                    }
+                }
+            });
+
         } else {
             showError(`Ошибка загрузки HTML: HTTP ${xmlHttp.status}`);
         }
@@ -501,6 +534,39 @@ function saveScrollPosition(htmlUrl) {
     sessionStorage.setItem(`scrollPosition_${encodeURIComponent(htmlUrl)}`, position.toString());
 }
 
+// Stack-based position tracking for anchor navigation within a book
+let anchorBackStack = [];  // "Назад" stack
+let anchorForwardStack = []; // "Вперёд" stack
+let currentBookHtmlUrl = null;
+
+function pushAnchorPosition(htmlUrl) {
+    if (currentBookHtmlUrl !== htmlUrl) {
+        // New book — reset stacks
+        currentBookHtmlUrl = htmlUrl;
+        anchorBackStack = [];
+        anchorForwardStack = [];
+    }
+    anchorBackStack.push(getScrollPosition());
+}
+
+function popAnchorPosition() {
+    const position = anchorBackStack.pop();
+    if (position !== undefined) {
+        anchorForwardStack.push(getScrollPosition()); // save "after" for forward nav
+        return position;
+    }
+    return null;
+}
+
+function popAnchorForwardPosition() {
+    const position = anchorForwardStack.pop();
+    if (position !== undefined) {
+        anchorBackStack.push(getScrollPosition()); // save "before" for back nav
+        return position;
+    }
+    return null;
+}
+
 // Scroll handler with debounce (1 second for testing)
 let scrollTimeout = null;
 window.addEventListener('scroll', function() {
@@ -564,16 +630,45 @@ window.onpopstate = function(event) {
         // If it's an HTML book file, render it directly
         if (hashPath.endsWith('.html')) {
             let htmlUrl = hashPath.startsWith('/') ? hashPath : '/' + hashPath;
-            // Get title from current page or default
+            const contentSection = document.getElementById('content');
+            // Check if this is a "Back/Forward" from anchor navigation (book already loaded)
+            if (contentSection && contentSection.classList.contains('book-content')) {
+                // Book is already in DOM — this is anchor navigation
+                // Check if we have a back entry
+                if (anchorBackStack.length > 0) {
+                    // "Назад" — restore position from back stack
+                    const prevPosition = popAnchorPosition();
+                    if (prevPosition !== null) {
+                        window.scrollTo({ top: prevPosition, left: 0, behavior: 'auto' });
+                        return;
+                    }
+                } else if (anchorForwardStack.length > 0) {
+                    // "Вперёд" — restore position from forward stack
+                    const fwdPosition = popAnchorForwardPosition();
+                    if (fwdPosition !== null) {
+                        window.scrollTo({ top: fwdPosition, left: 0, behavior: 'auto' });
+                        return;
+                    }
+                }
+            }
+            // First time opening the book — render it
             let bookTitle = document.querySelector('#title')?.textContent || 'Book';
             renderHTMLBook(htmlUrl, bookTitle);
             // Restore scroll position after render (with delay for content to load)
             setTimeout(() => restoreScrollPosition(htmlUrl), 500);
         } else {
+            // Navigated away from the book — reset anchor stacks
+            currentBookHtmlUrl = null;
+            anchorBackStack = [];
+            anchorForwardStack = [];
             fetchOPDSData(hashPath);
         }
     } else {
-        fetchOPDSData(`/${prefix}/`);  // Default fallback if no hash is present
+        // Navigated to root — reset anchor stacks
+        currentBookHtmlUrl = null;
+        anchorBackStack = [];
+        anchorForwardStack = [];
+        fetchOPDSData(`/${prefix}/`);
     }
 };
 
