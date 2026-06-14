@@ -17,7 +17,7 @@ from PIL import Image
 import xmltodict
 
 from .config import CONFIG
-from .strings import strlist, strip_quotes, num2int, make_id
+from .strings import strlist, num2int, make_id
 from .data import decode_b64
 
 FB2_HEADER_LIMIT = 20000  # nearly 20kB for metadata text
@@ -98,7 +98,7 @@ def get_sequence(seq, zip_file: str, filename: str):
         name = None
         num = None
         if '@name' in seq:
-            name = strip_quotes(seq['@name'].strip('|').replace('«', '"').replace('»', '"'))
+            name = seq['@name'].strip('|')
             name = name.strip()
             seq_id = make_id(name)
             if name == "":
@@ -121,9 +121,7 @@ def get_sequence(seq, zip_file: str, filename: str):
             name = None
             num = None
             if '@name' in single_seq:
-                name = strip_quotes(
-                    single_seq['@name'].strip('|').replace('«', '"').replace('»', '"')
-                )
+                name = single_seq['@name'].strip('|')
                 name = name.strip()
                 seq_id = make_id(name)
             if '@number' in single_seq:
@@ -165,7 +163,7 @@ def get_author_struct(author):
                     else:
                         a_tmp.append(strlist(i['nickname']))
                 a_tmp2 = " ".join(a_tmp)
-                a_tmp2 = strip_quotes(a_tmp2).strip('|')
+                a_tmp2 = a_tmp2.strip('|')
                 a_tmp2 = a_tmp2.strip()
                 if len(a_tmp2) > 0:
                     aret.append({"name": a_tmp2, "id": make_id(a_tmp2.ljust(4))})
@@ -186,7 +184,7 @@ def get_author_struct(author):
                 else:
                     a_tmp.append(strlist(author['nickname']))
         aret = " ".join(a_tmp)
-        aret = strip_quotes(aret).strip('|')
+        aret = aret.strip('|')
         aret = aret.strip()
         if len(aret) > 0:
             ret = [{"name": aret, "id": make_id(aret.ljust(4))}]
@@ -194,15 +192,15 @@ def get_author_struct(author):
 
 
 def get_title(title) -> str:
-    """get stripped title from struct"""
+    """get title from struct"""
     if isinstance(title, str):
-        return title.replace('«', '"').replace('»', '"')
+        return title
     if isinstance(title, dict):
         if '#text' in title:
-            return str(title["#text"]).replace('«', '"').replace('»', '"')
+            return str(title["#text"])
         if 'p' in title:
-            return str(title['p']).replace('«', '"').replace('»', '"')
-    return str(title).replace('«', '"').replace('»', '"')
+            return str(title['p'])
+    return str(title)
 
 
 # FixMe: must return array of strings, but it will be HUGE incompartibility

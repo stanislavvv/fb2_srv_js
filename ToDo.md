@@ -12,8 +12,8 @@ Nothing global ToDo
   * common:
     * [bug][minor] date_time format in output: "YYYY-MM-DD HH:MM:SS_00:00" instead of ISO 8601
   * indexing:
-    * [bug] too aggressive quota marks removal ('"word" word' -> 'word" word'): some names stored wrong
-    * [bug] make_id() duplicates uppercase conversion
+    * [bug] too aggressive quota marks removal ('"word" word' -> 'word" word'): some names stored wrong -- testing
+    * [bug] make_id() duplicates uppercase conversion -- testing
     * [feature] per-zip/global author name replacement (mostly for joining nickname and real name)
   * opds: -- no tasks
   * docs:

@@ -35,22 +35,21 @@ REPLACEMENT_MAP = {
 
 def strip_quotes(s: str) -> str:
     """
+    Safe quote stripping: only removes quotes if they are symmetric
+    (same type on both ends). Leaves internal/single-sided quotes alone.
+
     '"word word"' -> 'word word'
-    '"word" word' -> '"word" word'
-    '"word" "word"' -> '"word" "word"'
+    '"word" word' -> '"word" word'  (no change, last char is not quote)
+    '"word" "word"' -> '"word" "word"'  (internal quotes present)
+    "'word'" -> 'word'
     """
     if s is None:
         return None
     s = s.strip()
-
-    internal_quotes = False
-    if len(s) >= 2 and s[0] == '"' and s[-1] == '"':
-        inner_part = s[1:-1].strip()
-        if '"' in inner_part:
-            internal_quotes = True
-    if internal_quotes:
-        return s
-    return s.strip('"')
+    if len(s) >= 2:
+        if (s[0] == '"' and s[-1] == '"') or (s[0] == "'" and s[-1] == "'"):
+            return s[1:-1]
+    return s
 
 
 def unicode_upper(string: str) -> str:
@@ -117,13 +116,13 @@ def string2filename(data: str) -> str:
 
 
 def make_id(name, name_as_is: bool = False) -> str:
-    """get name, strip quotes from begin/end, return md5"""
+    """get name, return md5 of normalized string"""
     name_str = "--- unknown ---"
     if name is not None and name != "":
         if isinstance(name, str):
-            name_str = str(name).strip("'").strip('"')
+            name_str = str(name)
         else:
-            name_str = str(name, encoding='utf-8').strip("'").strip('"')
+            name_str = str(name, encoding='utf-8')
     norm_name = name_str if name_as_is else str_normalize(name_str)
     return hashlib.md5(norm_name.encode('utf-8')).hexdigest()
 
@@ -140,10 +139,22 @@ def str_normalize(string: str) -> str:
     while '  ' in ret:
         ret = ret.replace('  ', ' ')
 
+    # Normalize all quote types to one canonical form (double quotes)
+    # This ensures that 'name', "name", and «name» produce the same ID
+    ret = ret.replace('«', '"')
+    ret = ret.replace('»', '"')
+    ret = ret.replace("'", '"')
+
     # Convert to upper case with unicode normalization
     ret = unicode_upper(ret)
 
+    # Normalize quotes again after uppercasing (in case NFKD changed them)
+    ret = ret.replace('«', '"')
+    ret = ret.replace('»', '"')
+    ret = ret.replace("'", '"')
+
     # Remove all punctuation except:
+    # - " (double quotes are kept as canonical quote marker)
     # - ? and ! (only at the end, 1-4 chars)
     # - parentheses (significant characters)
 
@@ -154,8 +165,8 @@ def str_normalize(string: str) -> str:
         trailing_punct = ret[i] + trailing_punct
         i -= 1
 
-    # Remove all punctuation except parentheses from the string
-    punctuation_to_remove = set(str_lib.punctuation) - {'(', ')'}
+    # Remove all punctuation except parentheses and double quotes from the string
+    punctuation_to_remove = set(str_lib.punctuation) - {'(', ')', '"'}
 
     result = []
     for char in ret:
