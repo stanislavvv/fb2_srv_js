@@ -15,6 +15,7 @@ Nothing global ToDo
     * [bug] too aggressive quota marks removal ('"word" word' -> 'word" word'): some names stored wrong -- testing
     * [bug] make_id() duplicates uppercase conversion -- testing
     * [feature] per-zip/global author name replacement (mostly for joining nickname and real name)
-  * opds: -- no tasks
+  * opds:
+    * add golang variant for webapp -- python eat too much ram in idle
   * docs:
     * nginx example for covers (`@try_files` and default cover)
