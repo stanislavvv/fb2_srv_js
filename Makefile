@@ -32,3 +32,18 @@ venv:
 	mkdir -p venv
 	$(PYTHON) -m venv venv
 	venv/bin/pip3 install -r requirements.txt
+
+# Go targets
+setup:
+	ln -sfn ../../app/static app_go/static
+
+tplgo: setup
+	$(PYTHON) convert_templates.py
+
+appgo: tplgo
+	cd app_go && go build -o ../opds_go .
+
+cleango:
+	rm -rf app_go/templates/*.html app_go/templates/*.js
+	rm -f app_go/static
+	rm -f opds_go

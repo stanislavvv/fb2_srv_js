@@ -68,93 +68,93 @@ app_go/
 ## Фаза 1: Базовая инфраструктура
 
 ### 1.1 Инициализация проекта
-- [ ] 1.1.1 `go mod init fb2srv_go`
-- [ ] 1.1.2 Добавить зависимости: chi, lib/pq, gopkg.in/ini.v1, sxml, openai
-- [ ] 1.1.3 Создать структуру директорий
+- [x] 1.1.1 `go mod init fb2srv_go`
+- [x] 1.1.2 Добавить зависимости: chi, lib/pq, gopkg.in/ini.v1, sxml, openai
+- [x] 1.1.3 Создать структуру директорий
 
 ### 1.2 Конфигурация
-- [ ] 1.2.1 `config/config.go` — Config struct со всеми полями из Python CONFIG
-- [ ] 1.2.2 Парсинг config.ini (секции common + app_env)
-- [ ] 1.2.3 Mapping vars из config.ini в Go-поля (как VARS в Python)
-- [ ] 1.2.4 Значения по умолчанию (как CONFIG default в Python)
-- [ ] 1.2.5 URL константы (URL map → struct)
-- [ ] 1.2.6 LANG константы (все строки из Python LANG)
+- [x] 1.2.1 `config/config.go` — Config struct со всеми полями из Python CONFIG
+- [x] 1.2.2 Парсинг config.ini (секции common + app_env)
+- [x] 1.2.3 Mapping vars из config.ini в Go-поля (как VARS в Python)
+- [x] 1.2.4 Значения по умолчанию (как CONFIG default в Python)
+- [x] 1.2.5 URL константы (URL map → struct)
+- [x] 1.2.6 LANG константы (все строки из Python LANG)
 
 ### 1.3 Утилиты строк
-- [ ] 1.3.1 `util/strings.go` — unicode_upper (NFKD normalize + REPLACEMENT_MAP)
-- [ ] 1.3.2 `util/strings.go` — str_normalize (strip, spaces, quotes, punctuation)
-- [ ] 1.3.3 `util/strings.go` — make_id (MD5 hex)
-- [ ] 1.3.4 `util/strings.go` — id2path, id2pathonly
-- [ ] 1.3.5 `util/strings.go` — url_str (URL encode)
-- [ ] 1.3.6 `util/strings.go` — strip_quotes
+- [x] 1.3.1 `util/strings.go` — unicode_upper (NFKD normalize + REPLACEMENT_MAP)
+- [x] 1.3.2 `util/strings.go` — str_normalize (strip, spaces, quotes, punctuation)
+- [x] 1.3.3 `util/strings.go` — make_id (MD5 hex)
+- [x] 1.3.4 `util/strings.go` — id2path, id2pathonly
+- [x] 1.3.5 `util/strings.go` — url_str (URL encode)
+- [x] 1.3.6 `util/strings.go` — strip_quotes
 
 ### 1.4 Валидация
-- [ ] 1.4.1 `util/validate.go` — validate_id (regex: [0-9a-f]+)
-- [ ] 1.4.2 `util/validate.go` — validate_zip (regex)
-- [ ] 1.4.3 `util/validate.go` — validate_fb2 (regex)
-- [ ] 1.4.4 `util/validate.go` — validate_genre (regex)
-- [ ] 1.4.5 `util/validate.go` — validate_search (unurl, replace ;, max 128)
-- [ ] 1.4.6 `util/validate.go` — validate_prefix (safe_path, 1-10 chars)
-- [ ] 1.4.7 `util/validate.go` — safe_path (os.RelPath)
+- [x] 1.4.1 `util/validate.go` — validate_id (regex: [0-9a-f]+)
+- [x] 1.4.2 `util/validate.go` — validate_zip (regex)
+- [x] 1.4.3 `util/validate.go` — validate_fb2 (regex)
+- [x] 1.4.4 `util/validate.go` — validate_genre (regex)
+- [x] 1.4.5 `util/validate.go` — validate_search (unurl, replace ;, max 128)
+- [x] 1.4.6 `util/validate.go` — validate_prefix (safe_path, 1-10 chars)
+- [x] 1.4.7 `util/validate.go` — safe_path (os.RelPath)
 
 ### 1.5 Сортировка
-- [ ] 1.5.1 `util/sort.go` — alphabet_1, alphabet_2 (русский + латинский)
-- [ ] 1.5.2 `util/sort.go` — customCharCmp
-- [ ] 1.5.3 `util/sort.go` — customAlphabetCmp (string compare)
-- [ ] 1.5.4 `util/sort.go` — customAlphabetBookTitleCmp
-- [ ] 1.5.5 `util/sort.go` — customAlphabetNameCmp
+- [x] 1.5.1 `util/sort.go` — alphabet_1, alphabet_2 (русский + латинский)
+- [x] 1.5.2 `util/sort.go` — customCharCmp
+- [x] 1.5.3 `util/sort.go` — customAlphabetCmp (string compare)
+- [x] 1.5.4 `util/sort.go` — customAlphabetBookTitleCmp
+- [x] 1.5.5 `util/sort.go` — customAlphabetNameCmp
 
 ### 1.6 Мелкие утилиты
-- [ ] 1.6.1 `util/filesize.go` — sizeof_fmt (123456 -> 123KiB)
-- [ ] 1.6.2 `util/auth.go` — is_auth (parse passwd file)
-- [ ] 1.6.3 `util/xml.go` — XMLEscape
-- [ ] 1.6.4 `util/xml.go` — html_refine (упрощённый вариант)
+- [x] 1.6.1 `util/filesize.go` — sizeof_fmt (123456 -> 123KiB)
+- [x] 1.6.2 `util/auth.go` — is_auth (parse passwd file)
+- [x] 1.6.3 `util/xml.go` — XMLEscape
+- [x] 1.6.4 `util/xml.go` — html_refine (упрощённый вариант)
 
 ---
 
 ## Фаза 2: Модели и БД
 
 ### 2.1 Модели данных
-- [ ] 2.1.1 `model/book.go` — Book struct (zipfile, filename, genres[], authors[], sequences[], book_id, lang, date, size, annotation, pub_info, date_time, deleted)
-- [ ] 2.1.2 `model/book.go` — Author struct (name, id, info)
-- [ ] 2.1.3 `model/book.go` — SequenceRef struct (name, id, num)
-- [ ] 2.1.4 `model/book.go` — PubInfo struct (isbn, year, publisher, publisher_id)
-- [ ] 2.1.5 `model/opds.go` — OPDSFeed struct (xml namespaces, id, title, updated, icon, links[], entries[])
-- [ ] 2.1.6 `model/opds.go` — OPDSEntry struct (id, title, updated, author[], link[], category[], content, dc:language, dc:format)
-- [ ] 2.1.7 `model/opds.go` — OPDSLink struct (href, rel, type, title)
-- [ ] 2.1.8 `model/opds.go` — OPDSAuthor struct (uri, name)
-- [ ] 2.1.9 `model/opds.go` — OPDSCategory struct (term, label)
+- [x] 2.1.1 `model/book.go` — Book struct (zipfile, filename, genres[], authors[], sequences[], book_id, lang, date, size, annotation, pub_info, date_time, deleted)
+- [x] 2.1.2 `model/book.go` — Author struct (name, id, info)
+- [x] 2.1.3 `model/book.go` — SequenceRef struct (name, id, num)
+- [x] 2.1.4 `model/book.go` — PubInfo struct (isbn, year, publisher, publisher_id)
+- [x] 2.1.5 `model/opds.go` — OPDSFeed struct (xml namespaces, id, title, updated, icon, links[], entries[])
+- [x] 2.1.6 `model/opds.go` — OPDSEntry struct (id, title, updated, author[], link[], category[], content, dc:language, dc:format)
+- [x] 2.1.7 `model/opds.go` — OPDSLink struct (href, rel, type, title)
+- [x] 2.1.8 `model/opds.go` — OPDSAuthor struct (uri, name)
+- [x] 2.1.9 `model/opds.go` — OPDSCategory struct (term, label)
 
 ### 2.2 Подключение к БД
-- [ ] 2.2.1 `db/db.go` — DB struct (sql.DB)
-- [ ] 2.2.2 `db/db.go` — NewDB (подключение postgres, connection pool)
-- [ ] 2.2.3 `db/db.go` — CloseDB
+- [x] 2.2.1 `db/db.go` — DB struct (sql.DB)
+- [x] 2.2.2 `db/db.go` — NewDB (подключение postgres, connection pool)
+- [x] 2.2.3 `db/db.go` — CloseDB
 
 ### 2.3 Запросы для книг
-- [ ] 2.3.1 `db/books.go` — GetBooksByDate (ORDER BY date DESC, LIMIT/OFFSET)
-- [ ] 2.3.2 `db/books.go` — GetBooksCount (COUNT для пагинации time)
-- [ ] 2.3.3 `db/books.go` — GetRandomBooks (ORDER BY random())
-- [ ] 2.3.4 `db/books.go` — GetRandomBooksByGenre (WHERE genres ARRAY OVERLAP)
-- [ ] 2.3.5 `db/books.go` — SearchBooksByTitle (ILIKE с trgm)
-- [ ] 2.3.6 `db/books.go` — SearchBooksByAnnotation (ILIKE с trgm)
-- [ ] 2.3.7 `db/books.go` — GetBooksWithDetails (JOIN book_descr, gather authors/sequences)
+- [x] 2.3.1 `db/books.go` — GetBooksByDate (ORDER BY date DESC, LIMIT/OFFSET)
+- [x] 2.3.2 `db/books.go` — GetBooksCount (COUNT для пагинации time)
+- [x] 2.3.3 `db/books.go` — GetRandomBooks (ORDER BY random())
+- [x] 2.3.4 `db/books.go` — GetRandomBooksByGenre (WHERE genres ARRAY OVERLAP)
+- [x] 2.3.5 `db/books.go` — SearchBooksByTitle (ILIKE с trgm)
+- [x] 2.3.6 `db/books.go` — SearchBooksByAnnotation (ILIKE с trgm)
+- [x] 2.3.7 `db/books.go` — GetBooksWithDetails (JOIN book_descr, gather authors/sequences)
 
 ### 2.4 Запросы для авторов
-- [ ] 2.4.1 `db/authors.go` — GetAuthorsByID (batch)
-- [ ] 2.4.2 `db/authors.go` — SearchAuthors (ILIKE)
-- [ ] 2.4.3 `db/authors.go` — GetRandomAuthors (ORDER BY random())
+- [x] 2.4.1 `db/authors.go` — GetAuthorsByID (batch)
+- [x] 2.4.2 `db/authors.go` — SearchAuthors (ILIKE)
+- [x] 2.4.3 `db/authors.go` — GetRandomAuthors (ORDER BY random())
 
 ### 2.5 Запросы для серий
-- [ ] 2.5.1 `db/sequences.go` — GetSequencesByID (batch)
-- [ ] 2.5.2 `db/sequences.go` — SearchSequences (ILIKE)
+- [x] 2.5.1 `db/sequences.go` — GetSequencesByID (batch)
+- [x] 2.5.2 `db/sequences.go` — SearchSequences (ILIKE)
 
 ### 2.6 Запросы для жанров
-- [ ] 2.6.1 `db/genres.go` — GetGenresMeta (all meta genres)
-- [ ] 2.6.2 `db/genres.go` — GetGenresByMetaID
+- [x] 2.6.1 `db/genres.go` — GetGenresMeta (all meta genres)
+- [x] 2.6.2 `db/genres.go` — GetGenresByMetaID
 
 ### 2.7 Векторный поиск
-- [ ] 2.7.1 `db/vector.go` — GetNearestIDs (l2_distance ORDER BY)
-- [ ] 2.7.2 `util/embedding.go` — GetVector (OpenAI-compatible REST call)
+- [x] 2.7.1 `db/vector.go` — GetNearestIDs (l2_distance ORDER BY)
+- [x] 2.7.2 `util/embedding.go` — GetVector (OpenAI-compatible REST call)
 
 ---
 
@@ -290,10 +290,10 @@ app_go/
 - [ ] 6.1.6 Graceful shutdown (signal handling)
 
 ### 6.2 Сборка и инфраструктура
-- [ ] 6.2.1 Создание симлинка `app_go/static -> ../../app/static`
-- [ ] 6.2.2 Скрипт-конвертер `convert_templates.py` (Jinja2 → Go templates)
-- [ ] 6.2.3 `Makefile` — команды: `setup` (симлинки), `tplgo` (конвертация), `appgo` (сборка, зависит от tplgo), `clean` (очистка)
-- [ ] 6.2.4 Бинарник: `opds_go` (аналог `opds.py`)
+- [x] 6.2.1 Создание симлинка `app_go/static -> ../../app/static`
+- [x] 6.2.2 Скрипт-конвертер `convert_templates.py` (Jinja2 → Go templates)
+- [x] 6.2.3 `Makefile` — команды: `setup` (симлинки), `tplgo` (конвертация), `appgo` (сборка, зависит от tplgo), `clean` (очистка)
+- [x] 6.2.4 Бинарник: `opds_go` (аналог `opds.py`)
 - [ ] 6.2.5 Скрипт тестирования `test_opds.sh` (ручной запуск)
 
 ### 6.3 Тестирование
