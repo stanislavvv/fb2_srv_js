@@ -35,7 +35,7 @@ venv:
 
 # Go targets
 setup:
-	ln -sfn ../../app/static app_go/static
+	ln -sfn ../app/static app_go/static
 
 tplgo: setup
 	$(PYTHON) convert_templates.py

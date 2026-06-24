@@ -254,28 +254,27 @@ app_go/
 ## Фаза 5: Статические маршруты
 
 ### 5.1 Обложки
-- [ ] 5.1.1 GET `/books/{sub1}/{sub2}/{book_id}.jpg` → coverHandler
-- [ ] 5.1.2 Fallback на default cover
+- [x] 5.1.1 GET `/books/{sub1}/{sub2}/{book_id}.jpg` → coverHandler
+- [x] 5.1.2 Fallback на default cover
 
 ### 5.2 Загрузка книг
-- [ ] 5.2.1 GET `/fb2/{zip_file}/{filename}` → downloadHandler (ZIP с FB2)
-- [ ] 5.2.2 Формирование ZIP on-the-fly
+- [x] 5.2.1 GET `/fb2/{zip_file}/{filename}` → downloadHandler (ZIP с FB2)
+- [x] 5.2.2 Формирование ZIP on-the-fly
 
 ### 5.3 Чтение
-- [ ] 5.3.1 GET `/read/{zip_file}/{filename}` → readHandler (XSLT→HTML)
-- [ ] 5.3.2 GET `/read/{zip_file}/{filename}.html` → readHandler
-- [ ] 5.3.3 XSLT-трансформация FB2→HTML
+- [x] 5.3.1 GET `/read/{zip_file}/{filename}` → readHandler (XSLT→HTML)
+- [x] 5.3.2 GET `/read/{zip_file}/{filename}.html` → readHandler
+- [x] 5.3.3 XSLT-трансформация FB2→HTML
 
 ### 5.4 Plain FB2
-- [ ] 5.4.1 GET `/plain/{zip_file}/{filename}` → plainHandler (FB2 с XSL-line)
+- [x] 5.4.1 GET `/plain/{zip_file}/{filename}` → plainHandler (FB2 с XSL-line)
 
 ### 5.5 Web-интерфейс
-- [ ] 5.5.1 GET `/` → webroot (render index.html template)
-- [ ] 5.5.2 GET `/interface.js` → interfaceJS (render interface.js template)
-- [ ] 5.5.3 GET `/favicon.ico` → faviconHandler
-- [ ] 5.5.4 GET `/moon.svg` → moonIconHandler
-- [ ] 5.5.5 GET `/sun.svg` → sunIconHandler
-- [ ] 5.5.6 GET `/fb2.xsl` → xslHandler (сервер xslt файла)
+- [x] 5.5.1 GET `/` → webroot (render index.html template)
+- [x] 5.5.2 GET `/interface.js` → interfaceJS (render interface.js template)
+- [x] 5.5.3 GET `/favicon.ico` → faviconHandler
+- [x] 5.5.4 GET `/moon.svg` → moonIconHandler
+- [x] 5.5.5 GET `/sun.svg` → sunIconHandler
 
 ---
 
@@ -321,7 +320,6 @@ app_go/
 ## Заметки
 
 - JSON-файлы в `pages_path` читаются как есть (те же пути, тот же формат)
-- Для XSLT используем библиотеку `github.com/xmlverv/xslt` или `sxml`
 - Для vector search — прямой HTTP-запрос к OpenAI-compatible API
 - Авторизация: проверка файла `{zips_path}/passwd` на каждый запрос (как в Python)
 - Кэширование: заголовки Cache-Control (никакого server-side кэша)

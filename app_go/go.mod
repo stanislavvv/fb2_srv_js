@@ -8,4 +8,7 @@ require (
 	gopkg.in/ini.v1 v1.67.3
 )
 
-require github.com/go-chi/chi v1.5.5 // indirect
+require (
+	github.com/go-chi/chi v1.5.5 // indirect
+	github.com/wamuir/go-xslt v0.1.5 // indirect
+)

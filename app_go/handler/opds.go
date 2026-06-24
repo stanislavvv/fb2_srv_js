@@ -25,16 +25,18 @@ type Server struct {
 	LANG     *config.LANG
 	Database *db.DB
 	Router   *chi.Mux
+	XSLT     *util.XSLTTransform
 }
 
 // NewServer creates a new Server with chi router and all routes registered.
-func NewServer(cfg *config.Config, database *db.DB) *Server {
+func NewServer(cfg *config.Config, database *db.DB, xslt *util.XSLTTransform) *Server {
 	s := &Server{
 		CFG:      cfg,
 		URLs:     config.GetURLs(),
 		LANG:     config.GetLANGs(),
 		Database: database,
 		Router:   chi.NewRouter(),
+		XSLT:     xslt,
 	}
 
 	// Middleware
@@ -267,6 +269,31 @@ func (s *Server) registerRoutes() {
 	r.Get(s.URLs.SrchBook, s.searchBooksHandler)
 	r.Get(s.URLs.SrchBookAnno, s.searchBooksAnnoHandler)
 	r.Get(s.URLs.SrchBookAnnoVector, s.searchBooksAnnoVectorHandler)
+
+	// === Static routes: Covers ===
+	coverBase := strings.TrimRight(s.URLs.Cover, "/")
+	r.Get(coverBase+"/{sub1}/{sub2}/{book_id}.jpg", s.coverHandler)
+
+	// === Static routes: Web Interface ===
+	r.Get("/", s.webrootHandler)
+	r.Get("/interface.js", s.interfaceJSHandler)
+	r.Get("/favicon.ico", s.faviconHandler)
+	r.Get("/moon.svg", s.moonIconHandler)
+	r.Get("/sun.svg", s.sunIconHandler)
+	r.Get(s.URLs.XslRead, s.xslHandler)
+
+	// === Static routes: Download ===
+	dlBase := strings.TrimRight(s.URLs.Dl, "/")
+	r.Get(dlBase+"/{zip_file}/{filename}", s.downloadHandler)
+
+	// === Static routes: Read ===
+	readBase := strings.TrimRight(s.URLs.Read, "/")
+	r.Get(readBase+"/{zip_file}/{filename}", s.readHandler)
+	r.Get(readBase+"/{zip_file}/{filename}.html", s.readHandler)
+
+	// === Static routes: Plain FB2 ===
+	plainBase := strings.TrimRight(s.URLs.Plain, "/")
+	r.Get(plainBase+"/{zip_file}/{filename}", s.plainHandler)
 }
 
 // --- Helper to get path params ---

@@ -24,8 +24,8 @@ func getBookLink(appRoot, zipfile, filename, ctype string, urls *config.URL) mod
 		bookCtype = "application/fb2+zip"
 		rel = "http://opds-spec.org/acquisition/open-access"
 		zf := zipfile
-		if strings.HasSuffix(zipfile, "zip") {
-			zf = zipfile[:len(zipfile)-3]
+		if strings.HasSuffix(zipfile, ".zip") {
+			zf = zipfile[:len(zipfile)-4]
 		}
 		href = appRoot + urls.Dl + zf + "/" + util.URLStr(filename) + ".zip"
 	} else if ctype == "plain" {
@@ -33,8 +33,8 @@ func getBookLink(appRoot, zipfile, filename, ctype string, urls *config.URL) mod
 		bookCtype = "application/x-fb2+xml"
 		rel = "http://opds-spec.org/acquisition/open-access"
 		zf := zipfile
-		if strings.HasSuffix(zipfile, "zip") {
-			zf = zipfile[:len(zipfile)-3]
+		if strings.HasSuffix(zipfile, ".zip") {
+			zf = zipfile[:len(zipfile)-4]
 		}
 		href = appRoot + urls.Plain + zf + "/" + util.URLStr(filename)
 	} else if ctype == "read_iface" {
@@ -42,8 +42,8 @@ func getBookLink(appRoot, zipfile, filename, ctype string, urls *config.URL) mod
 		bookCtype = "text/html"
 		rel = "http://opds-spec.org/acquisition/open-access"
 		zf := zipfile
-		if strings.HasSuffix(zipfile, "zip") {
-			zf = zipfile[:len(zipfile)-3]
+		if strings.HasSuffix(zipfile, ".zip") {
+			zf = zipfile[:len(zipfile)-4]
 		}
 		href = appRoot + urls.Read + zf + "/" + util.URLStr(filename) + ".html"
 	} else {
@@ -52,8 +52,8 @@ func getBookLink(appRoot, zipfile, filename, ctype string, urls *config.URL) mod
 		bookCtype = "text/html"
 		rel = "alternate"
 		zf := zipfile
-		if strings.HasSuffix(zipfile, "zip") {
-			zf = zipfile[:len(zipfile)-3]
+		if strings.HasSuffix(zipfile, ".zip") {
+			zf = zipfile[:len(zipfile)-4]
 		}
 		href = appRoot + urls.Read + zf + "/" + util.URLStr(filename)
 	}

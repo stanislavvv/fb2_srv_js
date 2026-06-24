@@ -66,6 +66,14 @@ def convert_template(src_path, dst_path):
         # If already starts with . or is a function call, leave it
         if expr.startswith('.') or '(' in expr or '|' in expr:
             return m.group(0)
+        
+        # Handle data["key"] -> {{index .Data "key"}}
+        # Go templates require 'index' for map/dict access with string keys
+        data_key_match = re.match(r'^data\s*\[\s*["\'](.+?)["\']\s*\]\s*$', expr)
+        if data_key_match:
+            key = data_key_match.group(1)
+            return '{{index .Data "' + key + '"}}'
+        
         # Capitalize first letter
         result = expr[0].upper() + expr[1:]
         return "{{." + result + "}}"

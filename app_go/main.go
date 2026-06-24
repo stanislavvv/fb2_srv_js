@@ -13,6 +13,7 @@ import (
 	"fb2srv_go/config"
 	"fb2srv_go/db"
 	"fb2srv_go/handler"
+	"fb2srv_go/util"
 )
 
 func main() {
@@ -46,8 +47,20 @@ func main() {
 		defer database.Close()
 	}
 
+	// Init XSLT for FB2->HTML transformation
+	xsltFile := cfg.Get("FB2_XSLT")
+	if xsltFile == "" {
+		xsltFile = "fb2_to_html.xsl"
+	}
+	var xslt *util.XSLTTransform
+	xslt, err = util.NewXSLTTransform(xsltFile)
+	if err != nil {
+		fmt.Printf("WARN: Could not load XSLT stylesheet: %v\n", err)
+		fmt.Println("XSLT-based reading will be disabled")
+	}
+
 	// Create server with all routes
-	srv := handler.NewServer(cfg, database)
+	srv := handler.NewServer(cfg, database, xslt)
 
 	// Setup HTTP server
 	addr := fmt.Sprintf("%s:%s", cfg.Get("LISTEN_HOST"), cfg.Get("LISTEN_PORT"))
