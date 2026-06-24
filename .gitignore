@@ -16,3 +16,4 @@ out.*
 pycallgraph.png
 config.ini
 opds_go
+app_go/static

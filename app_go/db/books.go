@@ -4,7 +4,6 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -33,7 +32,7 @@ func (db *DB) GetBooksCount() (int, error) {
 	return count, nil
 }
 
-// GetRandomBooks returns random books from the database.
+// GetRandomBooks returns random books from the database (NO pagination).
 func (db *DB) GetRandomBooks(limit int) ([]model.Book, error) {
 	var raw []BookRaw
 	var err error
@@ -44,7 +43,7 @@ func (db *DB) GetRandomBooks(limit int) ([]model.Book, error) {
 	return assembleBooks(db, raw)
 }
 
-// GetRandomBooksByGenre returns random books filtered by genre.
+// GetRandomBooksByGenre returns random books filtered by genre (NO pagination).
 func (db *DB) GetRandomBooksByGenre(genre string, limit int) ([]model.Book, error) {
 	query := `
 		SELECT zipfile, filename, genres, authors, sequences, book_id, lang, date, size, deleted
@@ -114,6 +113,11 @@ func (db *DB) GetBooksWithDetails(ids []string) ([]model.Book, error) {
 	return assembleBooks(db, raw)
 }
 
+// GetBooksByIDs returns full book data for given IDs (used by vector search).
+func (db *DB) GetBooksByIDs(ids []string) ([]model.Book, error) {
+	return db.GetBooksWithDetails(ids)
+}
+
 // fetchBooks is a generic book fetcher with ordering and pagination.
 func (db *DB) fetchBooks(orderBy string, limit, offset int) ([]BookRaw, error) {
 	query := fmt.Sprintf(`
@@ -170,39 +174,143 @@ func (db *DB) searchByID(column, query string, limit int) ([]string, error) {
 }
 
 // assembleBooks enriches raw book data with descriptions, authors and sequences.
-func assembleBooks(_ *DB, raw []BookRaw) ([]model.Book, error) {
+func assembleBooks(db *DB, raw []BookRaw) ([]model.Book, error) {
 	if len(raw) == 0 {
 		return []model.Book{}, nil
 	}
 
-	// TODO: This will be refactored to accept db pointer for lookups
-	// For now, return basic book data
+	// Collect all unique book IDs, author IDs, sequence IDs
+	bookIDSet := make(map[string]bool, len(raw))
+	var authorIDs []string
+	var seqIDs []string
+	authorIDSet := make(map[string]bool)
+	seqIDSet := make(map[string]bool)
 
+	for _, r := range raw {
+		bookIDSet[r.BookID] = true
+
+		// Parse author IDs from authors array
+		if len(r.AuthorsRaw) > 0 {
+			for _, aRaw := range r.AuthorsRaw {
+				for _, part := range strings.Split(aRaw, "|") {
+					aid := strings.TrimSpace(part)
+					if aid != "" && !authorIDSet[aid] {
+						authorIDSet[aid] = true
+						authorIDs = append(authorIDs, aid)
+					}
+				}
+			}
+		}
+
+		// Parse sequence IDs from sequences array
+		if len(r.SequencesRaw) > 0 {
+			for _, sRaw := range r.SequencesRaw {
+				for _, part := range strings.Split(sRaw, "|") {
+					sid := strings.TrimSpace(part)
+					if sid != "" && !seqIDSet[sid] {
+						seqIDSet[sid] = true
+						seqIDs = append(seqIDs, sid)
+					}
+				}
+			}
+		}
+	}
+
+	// Fetch descriptions, authors, sequences in batch
+	var bookIDs []string
+	for id := range bookIDSet {
+		bookIDs = append(bookIDs, id)
+	}
+
+	descrMap, err := db.getBooksDescr(bookIDs)
+	if err != nil {
+		return nil, fmt.Errorf("assembleBooks: getBooksDescr: %w", err)
+	}
+
+	authorMap, err := db.getAuthors(authorIDs)
+	if err != nil {
+		return nil, fmt.Errorf("assembleBooks: getAuthors: %w", err)
+	}
+
+	seqMap, err := db.getSequences(seqIDs)
+	if err != nil {
+		return nil, fmt.Errorf("assembleBooks: getSequences: %w", err)
+	}
+
+	// Assemble final result
 	result := make([]model.Book, len(raw))
 	for i, r := range raw {
 		var datePtr *time.Time
+		dateStr := ""
 		if r.Date.Valid {
 			datePtr = &r.Date.Time
+			dateStr = r.Date.Time.Format("2006-01-02") + "_00:00"
 		}
-		var deletedPtr *bool
+		var deletedPtr *model.IntOrBool
 		if r.Deleted.Valid {
-			deletedPtr = &r.Deleted.Bool
+			val := model.IntOrBool(r.Deleted.Bool)
+			deletedPtr = &val
 		}
+
+		// Description
+		d, _ := descrMap[r.BookID]
+
+		// Authors
+		authors := make([]model.Author, 0, len(r.AuthorsRaw))
+		for _, aRaw := range r.AuthorsRaw {
+			for _, part := range strings.Split(aRaw, "|") {
+				aid := strings.TrimSpace(part)
+				if aid != "" {
+					if a, ok := authorMap[aid]; ok {
+						authors = append(authors, a)
+					} else {
+						authors = append(authors, model.Author{ID: aid, Name: aid})
+					}
+				}
+			}
+		}
+
+		// Sequences
+		sequences := make([]model.SequenceRef, 0, len(r.SequencesRaw))
+		for _, sRaw := range r.SequencesRaw {
+			for _, part := range strings.Split(sRaw, "|") {
+				sid := strings.TrimSpace(part)
+				if sid != "" {
+					if s, ok := seqMap[sid]; ok {
+						sequences = append(sequences, s)
+					} else {
+						sequences = append(sequences, model.SequenceRef{ID: sid, Name: sid})
+					}
+				}
+			}
+		}
+
+		// Publication info
+		var pubInfo *model.PubInfo
+		if d.PubISBN != "" || d.PubYear != "" || d.Publisher != "" {
+			pubInfo = &model.PubInfo{
+				ISBN:        d.PubISBN,
+				Year:        d.PubYear,
+				Publisher:   d.Publisher,
+				PublisherID: d.PublisherID,
+			}
+		}
+
 		book := model.Book{
 			Zipfile:    r.Zipfile,
 			Filename:   r.Filename,
 			Genres:     r.Genres,
+			Authors:    authors,
+			Sequences:  sequences,
 			BookID:     r.BookID,
+			BookTitle:  d.BookTitle,
 			Lang:       r.Lang,
 			Date:       datePtr,
-			Size:       r.Size,
+			Size:       fmt.Sprintf("%d", r.Size),
+			Annotation: d.Annotation,
+			PubInfo:    pubInfo,
+			DateTime:   dateStr,
 			Deleted:    deletedPtr,
-			BookTitle:  r.BookID,
-			Annotation: "",
-		}
-
-		if book.Date != nil {
-			book.DateTime = book.Date.Format("2006-01-02") + "_00:00"
 		}
 
 		result[i] = book
@@ -220,9 +328,9 @@ type BookRaw struct {
 	SequencesRaw pq.StringArray
 	BookID       string
 	Lang         string
-	Date         *sql.NullTime
+	Date         sql.NullTime
 	Size         int
-	Deleted      *sql.NullBool
+	Deleted      sql.NullBool
 }
 
 // scanBookRows scans rows from books table into BookRaw structs.
@@ -230,11 +338,15 @@ func scanBookRows(rows *sql.Rows) ([]BookRaw, error) {
 	var books []BookRaw
 	for rows.Next() {
 		var b BookRaw
+		var dt sql.NullTime
+		var dl sql.NullBool
 		err := rows.Scan(
 			&b.Zipfile, &b.Filename, &b.Genres,
 			&b.AuthorsRaw, &b.SequencesRaw,
-			&b.BookID, &b.Lang, &b.Date, &b.Size, &b.Deleted,
+			&b.BookID, &b.Lang, &dt, &b.Size, &dl,
 		)
+		b.Date = dt
+		b.Deleted = dl
 		if err != nil {
 			return nil, fmt.Errorf("scanBookRows: %w", err)
 		}
@@ -367,6 +479,3 @@ func (db *DB) getSequences(seqIDs []string) (map[string]model.SequenceRef, error
 	}
 	return ret, nil
 }
-
-// ignore unused import warning
-var _ = strconv.Itoa

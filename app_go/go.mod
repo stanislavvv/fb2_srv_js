@@ -7,3 +7,5 @@ require (
 	golang.org/x/text v0.38.0
 	gopkg.in/ini.v1 v1.67.3
 )
+
+require github.com/go-chi/chi v1.5.5 // indirect

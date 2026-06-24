@@ -161,78 +161,78 @@ app_go/
 ## Фаза 3: Генерация OPDS-ответов
 
 ### 3.1 Базовые функции
-- [ ] 3.1.1 `handler/response.go` — getDTISO (current time ISO format)
-- [ ] 3.1.2 `handler/response.go` — opdsHeader (feed с links: search, start, self, up, prev, next)
-- [ ] 3.1.3 `handler/http.go` — createOPDSResponse (XML marshal + Cache-Control header)
+- [x] 3.1.1 `handler/http.go` — getDTISO (current time ISO format)
+- [x] 3.1.2 `handler/response.go` — opdsHeader (feed с links: search, start, self, up, prev, next)
+- [x] 3.1.3 `handler/http.go` — createOPDSResponse (XML marshal + Cache-Control header)
 
 ### 3.2 Сборка записей
-- [ ] 3.2.1 `handler/book_entry.go` — makeBookEntry (полная запись книги с links, categories, content)
-- [ ] 3.2.2 `handler/book_entry.go` — getBookLink (dl/read/plain links)
-- [ ] 3.2.3 `handler/book_entry.go` — getSeqLink (sequence related link)
-- [ ] 3.2.4 `handler/book_entry.go` — pubinfoAnno (ISBN/год/издательство HTML)
-- [ ] 3.2.5 `handler/book_entry.go` — coverLinks (4 OPDS variants)
+- [x] 3.2.1 `handler/book_entry.go` — makeBookEntry (полная запись книги с links, categories, content)
+- [x] 3.2.2 `handler/book_entry.go` — getBookLink (dl/read/plain links)
+- [x] 3.2.3 `handler/book_entry.go` — getSeqLink (sequence related link)
+- [x] 3.2.4 `handler/book_entry.go` — pubinfoAnno (ISBN/год/издательство HTML)
+- [x] 3.2.5 `handler/book_entry.go` — coverLinks (4 OPDS variants)
 
 ### 3.3 Главные страницы
-- [ ] 3.3.1 `handler/response.go` — opdsMain (root page: time, authors, sequences, genres, random)
-- [ ] 3.3.2 `handler/response.go` — opdsSearchMain (search root with links to sub-searches)
+- [x] 3.3.1 `handler/response.go` — opdsMain (root page: time, authors, sequences, genres, random)
+- [x] 3.3.2 `handler/response.go` — opdsSearchMain (search root with links to sub-searches)
 
 ### 3.4 Простые списки (из JSON-файлов)
-- [ ] 3.4.1 `handler/response.go` — opdsSimpleList (читает index.json, создаёт entries)
-- [ ] 3.4.2 `handler/response.go` — поддержка layout: subs, key_value, name_id_list
+- [x] 3.4.1 `handler/response.go` — opdsSimpleList (читает index.json, создаёт entries)
+- [x] 3.4.2 `handler/response.go` — поддержка layout: subs, key_value, name_id_list
 
 ### 3.5 Страница автора
-- [ ] 3.5.1 `handler/response.go` — opdsAuthorPage (bio entry, navigation links)
+- [x] 3.5.1 `handler/response.go` — opdsAuthorPage (bio entry, navigation links)
 
 ### 3.6 Списки книг (из JSON-файлов)
-- [ ] 3.6.1 `handler/response.go` — opdsBookList (layout: author_seq, author_alpha, author_time, author_nonseq, sequence, paginated)
-- [ ] 3.6.2 Сортировка по layout-у
+- [x] 3.6.1 `handler/response.go` — opdsBookList (layout: author_seq, author_alpha, author_time, author_nonseq, sequence, paginated)
+- [x] 3.6.2 Сортировка по layout-у
 
 ### 3.7 Списки из БД
-- [ ] 3.7.1 `handler/response.go` — opdsBooksDB (запросы к БД для time, random, search)
-- [ ] 3.7.2 `handler/response.go` — opdsSimpleListDB (авторы/серии из БД)
+- [x] 3.7.1 `handler/response.go` — opdsBooksDB (запросы к БД для time, random, search)
+- [x] 3.7.2 `handler/response.go` — opdsSimpleListDB (авторы/серии из БД)
 
 ### 3.8 XML-сериализация
-- [ ] 3.8.1 Настроить XML-теги во всех model structs
-- [ ] 3.8.2 Рекурсивная XML-сериализация с pretty-print
-- [ ] 3.8.3 Правильные namespace в output
+- [x] 3.8.1 Настроены XML-теги во всех model structs
+- [x] 3.8.2 Рекурсивная XML-сериализация с pretty-print
+- [x] 3.8.3 Правильные namespace в output
 
 ---
 
 ## Фаза 4: OPDS-маршруты (HTTP Handler)
 
 ### 4.1 Роутер и middleware
-- [ ] 4.1.1 Инициализация chi router
-- [ ] 4.1.2 Middleware: auth (проверка passwd)
-- [ ] 4.1.3 Middleware: logging
-- [ ] 4.1.4 ApplicationRoot prefix (strip/mount)
+- [x] 4.1.1 Инициализация chi router
+- [x] 4.1.2 Middleware: auth (проверка passwd)
+- [x] 4.1.3 Middleware: logging
+- [x] 4.1.4 ApplicationRoot prefix (strip/mount)
 
 ### 4.2 Root и навигация
-- [ ] 4.2.1 GET `/opds/` → opdsMain
-- [ ] 4.2.2 GET `/opds/time` → opdsTimeBooks (page=0)
-- [ ] 4.2.3 GET `/opds/time/{page}` → opdsTimeBooks
+- [x] 4.2.1 GET `/opds/` → opdsMain
+- [x] 4.2.2 GET `/opds/time` → opdsTimeBooks (page=0)
+- [x] 4.2.3 GET `/opds/time/{page}` → opdsTimeBooks
 
 ### 4.3 Авторы
-- [ ] 4.3.1 GET `/opds/authorsindex/` → authRoot
-- [ ] 4.3.2 GET `/opds/authorsindex/{sub}` → authSub
-- [ ] 4.3.3 GET `/opds/authorsindex/{sub1}/{sub2}` → authSub2
-- [ ] 4.3.4 GET `/opds/author/{sub1}/{sub2}/{id}` → authorMain
-- [ ] 4.3.5 GET `/opds/author/{sub1}/{sub2}/{id}/sequences` → authorSeqs
-- [ ] 4.3.6 GET `/opds/author/{sub1}/{sub2}/{id}/sequenceless` → authorNonSeq
-- [ ] 4.3.7 GET `/opds/author/{sub1}/{sub2}/{id}/alphabet` → authorAlphabet
-- [ ] 4.3.8 GET `/opds/author/{sub1}/{sub2}/{id}/time` → authorTime
-- [ ] 4.3.9 GET `/opds/author/{sub1}/{sub2}/{id}/{seq_id}` → authorSeqBooks
+- [x] 4.3.1 GET `/opds/authorsindex/` → authRoot
+- [x] 4.3.2 GET `/opds/authorsindex/{sub}` → authSub
+- [x] 4.3.3 GET `/opds/authorsindex/{sub1}/{sub2}` → authSub2
+- [x] 4.3.4 GET `/opds/author/{sub1}/{sub2}/{id}` → authorMain
+- [x] 4.3.5 GET `/opds/author/{sub1}/{sub2}/{id}/sequences` → authorSeqs
+- [x] 4.3.6 GET `/opds/author/{sub1}/{sub2}/{id}/sequenceless` → authorNonSeq
+- [x] 4.3.7 GET `/opds/author/{sub1}/{sub2}/{id}/alphabet` → authorAlphabet
+- [x] 4.3.8 GET `/opds/author/{sub1}/{sub2}/{id}/time` → authorTime
+- [x] 4.3.9 GET `/opds/author/{sub1}/{sub2}/{id}/{seq_id}` → authorSeqBooks
 
 ### 4.4 Серии
-- [ ] 4.4.1 GET `/opds/sequencesindex/` → seqRoot
-- [ ] 4.4.2 GET `/opds/sequencesindex/{sub}` → seqSub
-- [ ] 4.4.3 GET `/opds/sequencesindex/{sub1}/{sub2}` → seqSub2
-- [ ] 4.4.4 GET `/opds/sequence/{sub1}/{sub2}/{id}` → sequenceBooks
+- [x] 4.4.1 GET `/opds/sequencesindex/` → seqRoot
+- [x] 4.4.2 GET `/opds/sequencesindex/{sub}` → seqSub
+- [x] 4.4.3 GET `/opds/sequencesindex/{sub1}/{sub2}` → seqSub2
+- [x] 4.4.4 GET `/opds/sequence/{sub1}/{sub2}/{id}` → sequenceBooks
 
 ### 4.5 Жанры
-- [ ] 4.5.1 GET `/opds/genresindex/` → genresRoot
-- [ ] 4.5.2 GET `/opds/genresindex/{meta_id}` → genresList
-- [ ] 4.5.3 GET `/opds/genre/{gen_id}` → genreBooks (page=0)
-- [ ] 4.5.4 GET `/opds/genre/{gen_id}/{page}` → genreBooks
+- [x] 4.5.1 GET `/opds/genresindex/` → genresRoot
+- [x] 4.5.2 GET `/opds/genresindex/{meta_id}` → genresList
+- [x] 4.5.3 GET `/opds/genre/{gen_id}` → genreBooks (page=0)
+- [x] 4.5.4 GET `/opds/genre/{gen_id}/{page}` → genreBooks
 
 ### 4.6 Случайные элементы
 - [ ] 4.6.1 GET `/opds/random-books/` → rndBooks
@@ -282,19 +282,19 @@ app_go/
 ## Фаза 6: Запуск и деплой
 
 ### 6.1 Main
-- [ ] 6.1.1 `main.go` — загрузка конфига
-- [ ] 6.1.2 `main.go` — загрузка жанров (genres.list, genres_meta.list)
-- [ ] 6.1.3 `main.go` — инициализация БД
-- [ ] 6.1.4 `main.go` — регистрация всех роутов
-- [ ] 6.1.5 `main.go` — запуск HTTP-сервера (listen_host:listen_port)
-- [ ] 6.1.6 Graceful shutdown (signal handling)
+- [x] 6.1.1 `main.go` — загрузка конфига
+- [x] 6.1.2 `main.go` — загрузка жанров (genres.list, genres_meta.list)
+- [x] 6.1.3 `main.go` — инициализация БД
+- [x] 6.1.4 `main.go` — регистрация всех роутов
+- [x] 6.1.5 `main.go` — запуск HTTP-сервера (listen_host:listen_port)
+- [x] 6.1.6 Graceful shutdown (signal handling)
 
 ### 6.2 Сборка и инфраструктура
 - [x] 6.2.1 Создание симлинка `app_go/static -> ../../app/static`
 - [x] 6.2.2 Скрипт-конвертер `convert_templates.py` (Jinja2 → Go templates)
 - [x] 6.2.3 `Makefile` — команды: `setup` (симлинки), `tplgo` (конвертация), `appgo` (сборка, зависит от tplgo), `clean` (очистка)
 - [x] 6.2.4 Бинарник: `opds_go` (аналог `opds.py`)
-- [ ] 6.2.5 Скрипт тестирования `test_opds.sh` (ручной запуск)
+- [x] 6.2.5 Скрипт тестирования `test_opds.sh` (ручной запуск)
 
 ### 6.3 Тестирование
 - [ ] 6.3.1 Запустить `opds.py` и `opds_go` параллельно

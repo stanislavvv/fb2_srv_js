@@ -147,3 +147,9 @@ type NameEntry struct {
 func CustomAlphabetNameCmp(n1 NameEntry, n2 NameEntry) int {
 	return CustomAlphabetCmp(n1.Name, n2.Name)
 }
+
+// BookTitleCmp compares two strings directly by book title.
+// This is a convenience function used when you have model.Book structs.
+func BookTitleCmp(title1 string, title2 string) int {
+	return CustomAlphabetCmp(title1, title2)
+}
