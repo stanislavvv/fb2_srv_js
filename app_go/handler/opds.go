@@ -2,6 +2,7 @@
 package handler
 
 import (
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
@@ -63,36 +64,36 @@ func (s *Server) authMiddleware(next http.Handler) http.Handler {
 		// Require authentication
 		auth := r.Header.Get("Authorization")
 		if auth == "" {
-			w.Header().Set("WWW-Authenticate", `Basic realm="OPDS Library"`)
+			w.Header().Set("WWW-Authenticate", `Basic realm="Login Required"`)
 			http.Error(w, "401 Authorization Required", http.StatusUnauthorized)
 			return
 		}
 
 		// Parse Basic auth
 		if !strings.HasPrefix(auth, "Basic ") {
-			w.Header().Set("WWW-Authenticate", `Basic realm="OPDS Library"`)
+			w.Header().Set("WWW-Authenticate", `Basic realm="Login Required"`)
 			http.Error(w, "401 Authorization Required", http.StatusUnauthorized)
 			return
 		}
 
-		// Decode base64 - simple implementation
+		// Decode base64
 		cred := strings.TrimPrefix(auth, "Basic ")
 		decoded, err := decodeBase64Basic(cred)
 		if err != nil {
-			w.Header().Set("WWW-Authenticate", `Basic realm="OPDS Library"`)
+			w.Header().Set("WWW-Authenticate", `Basic realm="Login Required"`)
 			http.Error(w, "401 Authorization Required", http.StatusUnauthorized)
 			return
 		}
 
 		parts := strings.SplitN(decoded, ":", 2)
 		if len(parts) != 2 {
-			w.Header().Set("WWW-Authenticate", `Basic realm="OPDS Library"`)
+			w.Header().Set("WWW-Authenticate", `Basic realm="Login Required"`)
 			http.Error(w, "401 Authorization Required", http.StatusUnauthorized)
 			return
 		}
 
 		if !util.IsAuth(parts[0], parts[1], s.CFG.Get("ZIPS")) {
-			w.Header().Set("WWW-Authenticate", `Basic realm="OPDS Library"`)
+			w.Header().Set("WWW-Authenticate", `Basic realm="Login Required"`)
 			http.Error(w, "401 Authorization Required", http.StatusUnauthorized)
 			return
 		}
@@ -101,58 +102,19 @@ func (s *Server) authMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// decodeBase64Basic decodes a base64 string without importing encoding/base64
-// to keep the implementation simple. Uses standard library encoding/base64.
+// decodeBase64Basic decodes a base64 string using standard library.
 func decodeBase64Basic(encoded string) (string, error) {
-	// Use Go standard library for base64 decoding
-	imported, err := base64StdDecode(encoded)
-	return imported, err
-}
-
-// base64StdDecode uses encoding/base64 for decoding
-func base64StdDecode(s string) (string, error) {
-	// We need a simple base64 decoder for "user:password"
-	decodeMap := make([]byte, 128)
-	for i := 0; i < 64; i++ {
-		c := byte(0)
-		switch {
-		case i < 26:
-			c = byte('A' + i)
-		case i < 52:
-			c = byte('a' + (i - 26))
-		case i < 62:
-			c = byte('0' + (i - 52))
-		case i == 62:
-			c = '+'
-		case i == 63:
-			c = '/'
+	decoded, err := base64.StdEncoding.DecodeString(encoded)
+	if err != nil {
+		// Try with padding fix (some clients send base64 without proper padding)
+		padded := encoded
+		missing := len(encoded) % 4
+		if missing != 0 {
+			padded = encoded + strings.Repeat("=", 4-missing)
 		}
-		decodeMap[c] = byte(i)
+		decoded, err = base64.StdEncoding.DecodeString(padded)
 	}
-
-	in := []byte(s)
-	out := make([]byte, 0, len(in))
-	var val uint64
-	valLen := 0
-
-	for _, c := range in {
-		if c == '=' {
-			break
-		}
-		if c < 128 {
-			val = val<<6 | uint64(decodeMap[c])
-			valLen += 6
-		} else {
-			continue
-		}
-		if valLen >= 8 {
-			valLen -= 8
-			out = append(out, byte(val>>uint(valLen)))
-			val &= (1<<uint(valLen)) - 1
-		}
-	}
-
-	return string(out), nil
+	return string(decoded), err
 }
 
 func (sc *statusCapture) WriteHeader(status int) {
@@ -361,6 +323,7 @@ func (s *Server) opdsTimePageHandler(w http.ResponseWriter, r *http.Request) {
 			Up:      &s.URLs.Start,
 			Prev:    prevStr,
 			AppRoot: appRoot,
+			AppICO:  s.CFG.Get("APP_ICO"),
 			URLs:    s.URLs,
 		})
 		CreateOPDSResponseWithConfig(w, feed, s.CFG)
@@ -399,6 +362,7 @@ func (s *Server) opdsTimePageHandler(w http.ResponseWriter, r *http.Request) {
 		Prev:    prevStr,
 		Next:    nextPtr,
 		AppRoot: appRoot,
+		AppICO:  s.CFG.Get("APP_ICO"),
 		URLs:    s.URLs,
 	})
 
@@ -516,6 +480,9 @@ func (s *Server) authSub2Handler(w http.ResponseWriter, r *http.Request) {
 	self := s.URLs.AuthIdx + sub1Enc + "/" + sub2Enc
 	up := s.URLs.AuthIdx + sub1Enc
 
+	// When simple_links=False, Python uses strong_baseref + urllib.parse.quote(id2path(k)).
+	// Go must apply ID2Path to keys to match: useID2Path=true ensures StrongBaseRef entries
+	// get ID2Path applied (same as Python's id2path(k) in the simple_links=False branch).
 	params := SimpleListParams{
 		Index:         "authorsindex/" + sub1Valid + "/" + sub2Valid,
 		Self:          self,
@@ -524,6 +491,7 @@ func (s *Server) authSub2Handler(w http.ResponseWriter, r *http.Request) {
 		SubTag:        "tag:author:",
 		Subtitle:      "'%s'",
 		Title:         s.LANG.AuthRootSubtitle + sub2Valid,
+		UseID2Path:    boolPtr(true),
 		Up:            &up,
 		AppRoot:       appRoot,
 		URLs:          s.URLs,
@@ -1301,6 +1269,7 @@ func (s *Server) rndBooksHandler(w http.ResponseWriter, r *http.Request) {
 		Self:    s.URLs.RndBook,
 		Tag:     "tag:random:books",
 		AppRoot: appRoot,
+		AppICO:  s.CFG.Get("APP_ICO"),
 		URLs:    s.URLs,
 	})
 
@@ -1336,6 +1305,7 @@ func (s *Server) rndSeqsHandler(w http.ResponseWriter, r *http.Request) {
 		Self:    s.URLs.RndSeq,
 		Tag:     "tag:random:sequences",
 		AppRoot: appRoot,
+		AppICO:  s.CFG.Get("APP_ICO"),
 		URLs:    s.URLs,
 	})
 
@@ -1376,6 +1346,7 @@ func (s *Server) rndGenresRootHandler(w http.ResponseWriter, r *http.Request) {
 		Self:    s.URLs.RndGenIdx,
 		Tag:     "tag:rnd:genres_meta",
 		AppRoot: appRoot,
+		AppICO:  s.CFG.Get("APP_ICO"),
 		URLs:    s.URLs,
 	})
 
@@ -1423,6 +1394,7 @@ func (s *Server) rndGenresListHandler(w http.ResponseWriter, r *http.Request) {
 		Tag:     "tag:rnd:genres:meta:" + metaID,
 		Up:      &up,
 		AppRoot: appRoot,
+		AppICO:  s.CFG.Get("APP_ICO"),
 		URLs:    s.URLs,
 	})
 
@@ -1469,6 +1441,7 @@ func (s *Server) rndBooksByGenreHandler(w http.ResponseWriter, r *http.Request) 
 		Self:    s.URLs.RndGen + url.QueryEscape(genID),
 		Tag:     "tag:rnd:genre:" + genID,
 		AppRoot: appRoot,
+		AppICO:  s.CFG.Get("APP_ICO"),
 		URLs:    s.URLs,
 	})
 
@@ -1512,16 +1485,23 @@ func (s *Server) searchAuthorsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	encodedTerm := util.URLStr(searchTerm)
 	appRoot := s.CFG.Get("APPLICATION_ROOT")
 	ts := GetDTISO()
+
+	selfURL := s.URLs.SrchAuth + "?searchTerm=" + encodedTerm
+	upURL := s.URLs.Search + "?searchTerm=" + encodedTerm
+	upPtr := &upURL
 
 	feed := OpdsHeader(OpdsHeaderParams{
 		Title:   fmt.Sprintf(s.LANG.SearchAuthor, searchTerm),
 		Ts:      ts,
 		Start:   s.URLs.Start,
-		Self:    s.URLs.SrchAuth,
-		Tag:     "tag:search:authors:" + searchTerm,
+		Self:    selfURL,
+		Tag:     "tag:search:authors:" + encodedTerm,
+		Up:      upPtr,
 		AppRoot: appRoot,
+		AppICO:  s.CFG.Get("APP_ICO"),
 		URLs:    s.URLs,
 	})
 
@@ -1565,16 +1545,23 @@ func (s *Server) searchSequencesHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	encodedTerm := util.URLStr(searchTerm)
 	appRoot := s.CFG.Get("APPLICATION_ROOT")
 	ts := GetDTISO()
+
+	selfURL := s.URLs.SrchSeq + "?searchTerm=" + encodedTerm
+	upURL := s.URLs.Search + "?searchTerm=" + encodedTerm
+	upPtr := &upURL
 
 	feed := OpdsHeader(OpdsHeaderParams{
 		Title:   fmt.Sprintf(s.LANG.SearchSeq, searchTerm),
 		Ts:      ts,
 		Start:   s.URLs.Start,
-		Self:    s.URLs.SrchSeq,
-		Tag:     "tag:search:sequences:" + searchTerm,
+		Self:    selfURL,
+		Tag:     "tag:search:sequences:" + encodedTerm,
+		Up:      upPtr,
 		AppRoot: appRoot,
+		AppICO:  s.CFG.Get("APP_ICO"),
 		URLs:    s.URLs,
 	})
 
@@ -1618,20 +1605,27 @@ func (s *Server) searchBooksHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	encodedTerm := util.URLStr(searchTerm)
 	appRoot := s.CFG.Get("APPLICATION_ROOT")
 	ts := GetDTISO()
 
 	maxRes := 500
 	fmt.Sscanf(s.CFG.Get("MAX_SEARCH_RES"), "%d", &maxRes)
 
+	selfURL := s.URLs.SrchBook + "?searchTerm=" + encodedTerm
+	upURL := s.URLs.Search + "?searchTerm=" + encodedTerm
+	upPtr := &upURL
+
 	if s.Database == nil {
 		feed := OpdsHeader(OpdsHeaderParams{
 			Title:   fmt.Sprintf(s.LANG.SearchBook, searchTerm),
 			Ts:      ts,
 			Start:   s.URLs.Start,
-			Self:    s.URLs.SrchBook,
-			Tag:     "tag:search:books:" + searchTerm,
+			Self:    selfURL,
+			Tag:     "tag:search:books:" + encodedTerm,
+			Up:      upPtr,
 			AppRoot: appRoot,
+			AppICO:  s.CFG.Get("APP_ICO"),
 			URLs:    s.URLs,
 		})
 		CreateOPDSResponseWithConfig(w, feed, s.CFG)
@@ -1647,9 +1641,11 @@ func (s *Server) searchBooksHandler(w http.ResponseWriter, r *http.Request) {
 		Title:   fmt.Sprintf(s.LANG.SearchBook, searchTerm),
 		Ts:      ts,
 		Start:   s.URLs.Start,
-		Self:    s.URLs.SrchBook,
-		Tag:     "tag:search:books:" + searchTerm,
+		Self:    selfURL,
+		Tag:     "tag:search:books:" + encodedTerm,
+		Up:      upPtr,
 		AppRoot: appRoot,
+		AppICO:  s.CFG.Get("APP_ICO"),
 		URLs:    s.URLs,
 	})
 
@@ -1675,20 +1671,27 @@ func (s *Server) searchBooksAnnoHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	encodedTerm := util.URLStr(searchTerm)
 	appRoot := s.CFG.Get("APPLICATION_ROOT")
 	ts := GetDTISO()
 
 	maxRes := 500
 	fmt.Sscanf(s.CFG.Get("MAX_SEARCH_RES"), "%d", &maxRes)
 
+	selfURL := s.URLs.SrchBookAnno + "?searchTerm=" + encodedTerm
+	upURL := s.URLs.Search + "?searchTerm=" + encodedTerm
+	upPtr := &upURL
+
 	if s.Database == nil {
 		feed := OpdsHeader(OpdsHeaderParams{
 			Title:   fmt.Sprintf(s.LANG.SearchAnno, searchTerm),
 			Ts:      ts,
 			Start:   s.URLs.Start,
-			Self:    s.URLs.SrchBookAnno,
-			Tag:     "tag:search:booksanno:" + searchTerm,
+			Self:    selfURL,
+			Tag:     "tag:search:booksanno:" + encodedTerm,
+			Up:      upPtr,
 			AppRoot: appRoot,
+			AppICO:  s.CFG.Get("APP_ICO"),
 			URLs:    s.URLs,
 		})
 		CreateOPDSResponseWithConfig(w, feed, s.CFG)
@@ -1704,9 +1707,11 @@ func (s *Server) searchBooksAnnoHandler(w http.ResponseWriter, r *http.Request) 
 		Title:   fmt.Sprintf(s.LANG.SearchAnno, searchTerm),
 		Ts:      ts,
 		Start:   s.URLs.Start,
-		Self:    s.URLs.SrchBookAnno,
-		Tag:     "tag:search:booksanno:" + searchTerm,
+		Self:    selfURL,
+		Tag:     "tag:search:booksanno:" + encodedTerm,
+		Up:      upPtr,
 		AppRoot: appRoot,
+		AppICO:  s.CFG.Get("APP_ICO"),
 		URLs:    s.URLs,
 	})
 
@@ -1737,17 +1742,24 @@ func (s *Server) searchBooksAnnoVectorHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	encodedTerm := util.URLStr(searchTerm)
 	appRoot := s.CFG.Get("APPLICATION_ROOT")
 	ts := GetDTISO()
+
+	selfURL := s.URLs.SrchBookAnnoVector + "?searchTerm=" + encodedTerm
+	upURL := s.URLs.Search + "?searchTerm=" + encodedTerm
+	upPtr := &upURL
 
 	if s.Database == nil {
 		feed := OpdsHeader(OpdsHeaderParams{
 			Title:   fmt.Sprintf(s.LANG.SearchAnnoVector, searchTerm),
 			Ts:      ts,
 			Start:   s.URLs.Start,
-			Self:    s.URLs.SrchBookAnnoVector,
-			Tag:     "tag:search:booksannovector:" + searchTerm,
+			Self:    selfURL,
+			Tag:     "tag:search:booksannovector:" + encodedTerm,
+			Up:      upPtr,
 			AppRoot: appRoot,
+			AppICO:  s.CFG.Get("APP_ICO"),
 			URLs:    s.URLs,
 		})
 		CreateOPDSResponseWithConfig(w, feed, s.CFG)
@@ -1774,9 +1786,11 @@ func (s *Server) searchBooksAnnoVectorHandler(w http.ResponseWriter, r *http.Req
 		Title:   fmt.Sprintf(s.LANG.SearchAnnoVector, searchTerm),
 		Ts:      ts,
 		Start:   s.URLs.Start,
-		Self:    s.URLs.SrchBookAnnoVector,
-		Tag:     "tag:search:booksannovector:" + searchTerm,
+		Self:    selfURL,
+		Tag:     "tag:search:booksannovector:" + encodedTerm,
+		Up:      upPtr,
 		AppRoot: appRoot,
+		AppICO:  s.CFG.Get("APP_ICO"),
 		URLs:    s.URLs,
 	})
 

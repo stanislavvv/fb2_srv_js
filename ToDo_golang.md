@@ -320,7 +320,7 @@ app_go/
 ## Заметки
 
 - JSON-файлы в `pages_path` читаются как есть (те же пути, тот же формат)
-- Для vector search — прямой HTTP-запрос к OpenAI-compatible API
+- Для XSLT используем библиотеку `github.com/wamuir/go-xslt` (CGO, требует libxslt-dev, zlib1g-dev, liblzma-dev)
 - Авторизация: проверка файла `{zips_path}/passwd` на каждый запрос (как в Python)
 - Кэширование: заголовки Cache-Control (никакого server-side кэша)
 - **Бинарник:** `opds_go` (не `fb2srv_go`) — прямая замена `opds.py`

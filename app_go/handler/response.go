@@ -28,6 +28,7 @@ type OpdsHeaderParams struct {
 	Next     *string // optional
 	AppRoot  string
 	URLs     *config.URL
+	AppICO   string // icon path from CONFIG["APP_ICO"]
 }
 
 // SimpleListParams holds parameters for opdsSimpleList.
@@ -135,7 +136,7 @@ func OpdsHeader(params OpdsHeaderParams) model.OPDSFeed {
 		ID:          params.Tag,
 		Title:       params.Title,
 		Updated:     params.Ts,
-		Icon:        params.AppRoot + "/favicon.ico",
+		Icon:        params.AppRoot + params.AppICO,
 		Links: []model.OPDSLink{
 			{
 				HRef: params.AppRoot + params.URLs.Search + "?searchTerm={searchTerms}",
@@ -195,6 +196,7 @@ func OpdsMain(cfg *config.Config, urls *config.URL, lang *config.LANG) model.OPD
 		Self:    urls.Start,
 		Tag:     "tag:root",
 		AppRoot: appRoot,
+		AppICO:  cfg.Get("APP_ICO"),
 		URLs:    urls,
 	})
 
@@ -249,6 +251,7 @@ func OpdsSearchMain(cfg *config.Config, urls *config.URL, lang *config.LANG, sea
 		Self:    urls.Start,
 		Tag:     tag,
 		AppRoot: appRoot,
+		AppICO:  cfg.Get("APP_ICO"),
 		URLs:    urls,
 	})
 
@@ -380,6 +383,7 @@ func OpdsSimpleList(params SimpleListParams) (*model.OPDSFeed, error) {
 		Tag:     params.SubTag,
 		Up:      up,
 		AppRoot: params.AppRoot,
+		AppICO:  params.CFG.Get("APP_ICO"),
 		URLs:    params.URLs,
 	})
 
@@ -573,6 +577,7 @@ func OpdsAuthorPage(params AuthorPageParams) (*model.OPDSFeed, error) {
 		Tag:     params.SubTag,
 		Up:      params.Up,
 		AppRoot: params.AppRoot,
+		AppICO:  params.CFG.Get("APP_ICO"),
 		URLs:    params.URLs,
 	})
 
@@ -690,6 +695,7 @@ func OpdsBookList(params BookListParams) (*model.OPDSFeed, error) {
 				Tag:     params.SubTag,
 				Prev:    params.Prev,
 				AppRoot: params.AppRoot,
+				AppICO:  params.CFG.Get("APP_ICO"),
 				URLs:    params.URLs,
 			})
 			return &feed, nil
@@ -700,6 +706,14 @@ func OpdsBookList(params BookListParams) (*model.OPDSFeed, error) {
 	data, err := os.ReadFile(booksFile)
 	if err != nil {
 		return nil, fmt.Errorf("books file read error: %v", err)
+	}
+
+	// Determine seq_id based on layout
+	// For "author_seq": seq_id from params.SeqID (passed from handler)
+	// For "sequence": seq_id from JSON file (extracted below)
+	seqIDStr := ""
+	if params.Layout == "author_seq" && params.SeqID != nil {
+		seqIDStr = *params.SeqID
 	}
 
 	// Parse books
@@ -715,17 +729,14 @@ func OpdsBookList(params BookListParams) (*model.OPDSFeed, error) {
 		}
 		title = fmt.Sprintf(params.Title, seqInfo.Name)
 		booksData = seqInfo.Books
+		// Extract seq_id from JSON (same as Python: seq_id = data["id"])
+		seqIDStr = seqInfo.ID
 	} else {
 		if err := json.Unmarshal(data, &booksData); err != nil {
 			return nil, fmt.Errorf("books parse error: %v", err)
 		}
 	}
 
-	// Sort by layout
-	seqIDStr := ""
-	if params.SeqID != nil {
-		seqIDStr = *params.SeqID
-	}
 	sortedBooks := sortBooksByLayout(booksData, params.Layout, seqIDStr)
 
 	// Build feed
@@ -739,6 +750,7 @@ func OpdsBookList(params BookListParams) (*model.OPDSFeed, error) {
 		Prev:    params.Prev,
 		Next:    params.Next,
 		AppRoot: params.AppRoot,
+		AppICO:  params.CFG.Get("APP_ICO"),
 		URLs:    params.URLs,
 	})
 
@@ -804,12 +816,51 @@ func sortBooksByLayout(books []model.Book, layout string, seqID string) []model.
 		})
 		return books
 
-	case "author_alpha", "sequence":
+	case "author_alpha":
 		// Sort by title
 		sort.Slice(books, func(i, j int) bool {
 			return util.BookTitleCmp(books[i].BookTitle, books[j].BookTitle) < 0
 		})
 		return books
+
+	case "sequence":
+		// Same logic as Python: presort by title, filter by seq_id, sort by seq_num
+		if seqID == "" {
+			return books
+		}
+		// Presort by title
+		sort.Slice(books, func(i, j int) bool {
+			return util.BookTitleCmp(books[i].BookTitle, books[j].BookTitle) < 0
+		})
+		dataSeq := make([]model.Book, 0)
+		for i := range books {
+			if books[i].Sequences != nil {
+				for _, s := range books[i].Sequences {
+					if s.ID == seqID {
+						num := 0
+						if s.Num != nil {
+							num = *s.Num
+						}
+						books[i].Sequences[0].Num = &num
+						dataSeq = append(dataSeq, books[i])
+						break
+					}
+				}
+			}
+		}
+		// Sort by seq_num (numbered first, unnumbered after)
+		sort.Slice(dataSeq, func(i, j int) bool {
+			numI := -1
+			numJ := -1
+			if len(dataSeq[i].Sequences) > 0 && dataSeq[i].Sequences[0].Num != nil {
+				numI = *dataSeq[i].Sequences[0].Num
+			}
+			if len(dataSeq[j].Sequences) > 0 && dataSeq[j].Sequences[0].Num != nil {
+				numJ = *dataSeq[j].Sequences[0].Num
+			}
+			return numI < numJ
+		})
+		return dataSeq
 
 	default:
 		return books
@@ -837,6 +888,7 @@ func OpdsBooksDB(database *db.DB, params BooksDBParams) (*model.OPDSFeed, error)
 		Prev:    params.Prev,
 		Next:    params.Next,
 		AppRoot: params.AppRoot,
+		AppICO:  params.CFG.Get("APP_ICO"),
 		URLs:    params.URLs,
 	})
 
@@ -876,6 +928,7 @@ func OpdsBooksDBSearch(database *db.DB, params BooksDBParams, searchType, search
 		Tag:     params.Tag,
 		Up:      params.Up,
 		AppRoot: params.AppRoot,
+		AppICO:  params.CFG.Get("APP_ICO"),
 		URLs:    params.URLs,
 	})
 
@@ -900,6 +953,7 @@ func OpdsSimpleListDB(database *db.DB, params SimpleListDBParams) (*model.OPDSFe
 		Self:    params.Self,
 		Tag:     params.Tag,
 		AppRoot: params.AppRoot,
+		AppICO:  params.CFG.Get("APP_ICO"),
 		URLs:    params.URLs,
 	})
 

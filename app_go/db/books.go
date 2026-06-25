@@ -48,11 +48,11 @@ func (db *DB) GetRandomBooksByGenre(genre string, limit int) ([]model.Book, erro
 	query := `
 		SELECT zipfile, filename, genres, authors, sequences, book_id, lang, date, size, deleted
 		FROM books
-		WHERE genres && ARRAY[$1]::text[]
+		WHERE genres && $1
 		ORDER BY random()
 		LIMIT $2
 	`
-	rows, err := db.conn.Query(query, genre, limit)
+	rows, err := db.conn.Query(query, pq.StringArray{genre}, limit)
 	if err != nil {
 		return nil, fmt.Errorf("GetRandomBooksByGenre: %w", err)
 	}
