@@ -73,6 +73,20 @@ extract_genre_ids_from_href() {
     safe_grep -oP '/opds/genre/\K[a-zA-Z0-9_]+' "$file" | sort -u
 }
 
+# Извлечь sub2 (третий сегмент) из href индексов авторов/серий
+# Например: /opds/authorsindex/A/AFT -> AFT
+# sub2 — это префикс имени (любые символы кроме /), URL-кодированный
+extract_index_sub2() {
+    local file="$1"
+    local prefix="$2"  # e.g. "/opds/authorsindex/" or "/opds/sequencesindex/"
+    local sub1="$3"    # e.g. "A"
+    # Extract href values from XML, then get the third segment (sub2) from matching URLs
+    safe_grep -oP 'href="\K[^"]+' "$file" | \
+        grep -P "^${prefix}${sub1}/" | \
+        sed "s|^${prefix}${sub1}/||" | \
+        sort -u
+}
+
 # Проверка статуса и типа контента
 # $1 = status code (from fetch), $2 = suffix, $3 = expected_type
 check_result() {
@@ -246,9 +260,31 @@ if check_result "$status" "authorsindex" "xml"; then
         status=$(fetch "${BASE_URL}/opds/authorsindex/${FIRST_LETTER}" "authorsindex_cut")
         
         if check_result "$status" "authorsindex_cut" "xml"; then
-            # Extract author paths
-            AUTHOR_PATHS=$(extract_opds_paths "$TMPDIR/authorsindex_cut.xml" "author")
-            AUTHOR_PATH=$(echo "$AUTHOR_PATHS" | head -1)
+            # Extract sub2 for three-level index: /opds/authorsindex/{sub1}/{sub2}
+            AUTH_SUB2=$(extract_index_sub2 "$TMPDIR/authorsindex_cut.xml" "/opds/authorsindex/" "$FIRST_LETTER" | head -1)
+            
+            if [ -n "$AUTH_SUB2" ]; then
+                printf "  /opds/authorsindex/${FIRST_LETTER}/${AUTH_SUB2}  "
+                status=$(fetch "${BASE_URL}/opds/authorsindex/${FIRST_LETTER}/${AUTH_SUB2}" "authorsindex_sub2")
+                
+                if check_result "$status" "authorsindex_sub2" "xml"; then
+                    # Extract author paths from three-level index
+                    AUTHOR_PATHS=$(extract_opds_paths "$TMPDIR/authorsindex_sub2.xml" "author")
+                    AUTHOR_PATH=$(echo "$AUTHOR_PATHS" | head -1)
+                else
+                    AUTHOR_PATHS=""
+                    AUTHOR_PATH=""
+                fi
+            else
+                AUTHOR_PATHS=""
+                AUTHOR_PATH=""
+            fi
+            
+            if [ -z "$AUTHOR_PATH" ]; then
+                # Fallback: try extracting from two-level index
+                AUTHOR_PATHS=$(extract_opds_paths "$TMPDIR/authorsindex_cut.xml" "author")
+                AUTHOR_PATH=$(echo "$AUTHOR_PATHS" | head -1)
+            fi
             
             if [ -n "$AUTHOR_PATH" ]; then
                 # /opds/author/sub1/sub2/author_id
@@ -318,13 +354,28 @@ if check_result "$status" "seqindex" "xml"; then
     fi
     
     SEQ_PATH=""
+    SEQ_SUB2=""
     
     if [ -n "$SEQ_LETTER" ]; then
         printf "  /opds/sequencesindex/${SEQ_LETTER}                   "
         status=$(fetch "${BASE_URL}/opds/sequencesindex/${SEQ_LETTER}" "seqindex_cut")
         
         if check_result "$status" "seqindex_cut" "xml"; then
-            SEQ_PATH=$(extract_opds_paths "$TMPDIR/seqindex_cut.xml" "sequence" | head -1)
+            # Extract sub2 for three-level index: /opds/sequencesindex/{sub1}/{sub2}
+            SEQ_SUB2=$(extract_index_sub2 "$TMPDIR/seqindex_cut.xml" "/opds/sequencesindex/" "$SEQ_LETTER" | head -1)
+            
+            if [ -n "$SEQ_SUB2" ]; then
+                printf "  /opds/sequencesindex/${SEQ_LETTER}/${SEQ_SUB2}  "
+                status=$(fetch "${BASE_URL}/opds/sequencesindex/${SEQ_LETTER}/${SEQ_SUB2}" "seqindex_sub2")
+                
+                if check_result "$status" "seqindex_sub2" "xml"; then
+                    SEQ_PATH=$(extract_opds_paths "$TMPDIR/seqindex_sub2.xml" "sequence" | head -1)
+                fi
+            fi
+            
+            if [ -z "$SEQ_PATH" ]; then
+                SEQ_PATH=$(extract_opds_paths "$TMPDIR/seqindex_cut.xml" "sequence" | head -1)
+            fi
         fi
     fi
     
@@ -418,6 +469,68 @@ if check_result "$status" "rnd_genidx" "xml"; then
             fi
         fi
     fi
+fi
+
+# --------------------------------------------------------------------
+# 5a. Author from Random Books
+# --------------------------------------------------------------------
+echo ""
+echo "--- Author from Random Books ---"
+
+# Extract author URL from /opds/random-books/
+RND_AUTH_PATH=""
+if [ -f "$TMPDIR/rnd_books.xml" ]; then
+    RND_AUTH_PATH=$(extract_opds_paths "$TMPDIR/rnd_books.xml" "author" | head -1)
+fi
+
+if [ -n "$RND_AUTH_PATH" ]; then
+    printf "  ${RND_AUTH_PATH} (from rnd)                 "
+    status=$(fetch "${BASE_URL}${RND_AUTH_PATH}" "rnd_author_page")
+
+    if check_result "$status" "rnd_author_page" "xml"; then
+        # Author views
+        printf "  ${RND_AUTH_PATH}/sequences (from rnd)        "
+        status=$(fetch "${BASE_URL}${RND_AUTH_PATH}/sequences" "rnd_author_seq")
+        check_result "$status" "rnd_author_seq" "xml"
+
+        printf "  ${RND_AUTH_PATH}/sequenceless (from rnd)     "
+        status=$(fetch "${BASE_URL}${RND_AUTH_PATH}/sequenceless" "rnd_author_noseq")
+        check_result "$status" "rnd_author_noseq" "xml"
+
+        printf "  ${RND_AUTH_PATH}/alphabet (from rnd)         "
+        status=$(fetch "${BASE_URL}${RND_AUTH_PATH}/alphabet" "rnd_author_alpha")
+        check_result "$status" "rnd_author_alpha" "xml"
+
+        printf "  ${RND_AUTH_PATH}/time (from rnd)             "
+        status=$(fetch "${BASE_URL}${RND_AUTH_PATH}/time" "rnd_author_time")
+        check_result "$status" "rnd_author_time" "xml"
+    fi
+else
+    printf "  (no author URL from random-books)                "
+    echo "  SKIP (no data)"
+    SKIP=$((SKIP + 1))
+fi
+
+# --------------------------------------------------------------------
+# 5b. Sequence from Random Sequences
+# --------------------------------------------------------------------
+echo ""
+echo "--- Sequence from Random Sequences ---"
+
+# Extract sequence URL from /opds/random-sequences/
+RND_SEQ_PATH=""
+if [ -f "$TMPDIR/rnd_seq.xml" ]; then
+    RND_SEQ_PATH=$(extract_opds_paths "$TMPDIR/rnd_seq.xml" "sequence" | head -1)
+fi
+
+if [ -n "$RND_SEQ_PATH" ]; then
+    printf "  ${RND_SEQ_PATH} (from rnd)                    "
+    status=$(fetch "${BASE_URL}${RND_SEQ_PATH}" "rnd_seq_page")
+    check_result "$status" "rnd_seq_page" "xml"
+else
+    printf "  (no sequence URL from random-sequences)        "
+    echo "  SKIP (no data)"
+    SKIP=$((SKIP + 1))
 fi
 
 # --------------------------------------------------------------------
