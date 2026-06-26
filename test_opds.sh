@@ -13,6 +13,7 @@ TMPDIR="/tmp/opds_test_$$"
 PASS=0
 FAIL=0
 SKIP=0
+AUTH_ARGS=""
 
 mkdir -p "$TMPDIR"
 trap 'rm -rf "$TMPDIR"' EXIT
@@ -28,7 +29,7 @@ fetch() {
     local suffix="$2"
     local out="$TMPDIR/${suffix}.xml"
     local hdr="$TMPDIR/${suffix}.hdr"
-    curl -sS -D "$hdr" -o "$out" -w "%{http_code}" "$url" 2>/dev/null || echo "000"
+    curl -sS $AUTH_ARGS -D "$hdr" -o "$out" -w "%{http_code}" "$url" 2>/dev/null || echo "000"
 }
 
 # Безопасный grep: возвращает пустую строку вместо ошибки при отсутствии совпадений
@@ -92,8 +93,13 @@ check_result() {
     fi
 
     if [ "$status" = "401" ]; then
-        echo "  AUTH (401)"
-        SKIP=$((SKIP + 1))
+        if [ -n "$AUTH_ARGS" ]; then
+            echo "  FAIL (401 - auth failed)"
+            FAIL=$((FAIL + 1))
+        else
+            echo "  AUTH (401)"
+            SKIP=$((SKIP + 1))
+        fi
         return 1
     fi
 
@@ -152,6 +158,27 @@ check_result() {
 }
 
 # ============================================================================
+# Инициализация авторизации
+# ============================================================================
+
+if [ -f "config.ini" ]; then
+    ZIPS_PATH=$(grep -oP '^zips_path\s*=\s*\K.*' config.ini | tr -d ' \r')
+    if [ -n "$ZIPS_PATH" ] && [ -f "${ZIPS_PATH}/passwd" ]; then
+        while IFS= read -r line; do
+            line=$(echo "$line" | tr -d '\r' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
+            [ -z "$line" ] && continue
+            echo "$line" | grep -q '^#' && continue
+            if echo "$line" | grep -q ':'; then
+                AUTH_USER=$(echo "$line" | cut -d: -f1)
+                AUTH_PASS=$(echo "$line" | cut -d: -f2-)
+                AUTH_ARGS="-u ${AUTH_USER}:${AUTH_PASS}"
+                break
+            fi
+        done < "${ZIPS_PATH}/passwd"
+    fi
+fi
+
+# ============================================================================
 # Тестирование
 # ============================================================================
 
@@ -159,6 +186,11 @@ echo ""
 echo "================================================================"
 echo "  OPDS Endpoint Test — Hierarchical URL Traversal"
 echo "  Server: $BASE_URL"
+if [ -n "$AUTH_ARGS" ]; then
+    echo "  Auth: enabled (${AUTH_USER})"
+else
+    echo "  Auth: disabled"
+fi
 echo "================================================================"
 
 # --------------------------------------------------------------------
