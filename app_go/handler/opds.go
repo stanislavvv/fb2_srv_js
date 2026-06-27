@@ -147,7 +147,7 @@ func (s *Server) loggingMiddleware(next http.Handler) http.Handler {
 		}
 
 		// Write directly to stderr to avoid log.Printf adding its own timestamp
-		fmt.Fprintf(os.Stderr, "%s - - [%s] \"%s %s HTTP/%s\" %d %d \"-\" \"%s\" bd=\"-\" ut=%.3f\n",
+		fmt.Fprintf(os.Stderr, "%s - - [%s] \"%s %s %s\" %d %d \"-\" \"%s\" ut=%.3f\n",
 			ip, ts, r.Method, r.RequestURI, r.Proto, wr.status, wr.bytes, userAgent, duration)
 	})
 }
