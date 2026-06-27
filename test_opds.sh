@@ -264,7 +264,7 @@ if check_result "$status" "authorsindex" "xml"; then
             AUTH_SUB2=$(extract_index_sub2 "$TMPDIR/authorsindex_cut.xml" "/opds/authorsindex/" "$FIRST_LETTER" | head -1)
             
             if [ -n "$AUTH_SUB2" ]; then
-                printf "  /opds/authorsindex/${FIRST_LETTER}/${AUTH_SUB2}  "
+                printf '%s' "  /opds/authorsindex/${FIRST_LETTER}/${AUTH_SUB2}  "
                 status=$(fetch "${BASE_URL}/opds/authorsindex/${FIRST_LETTER}/${AUTH_SUB2}" "authorsindex_sub2")
                 
                 if check_result "$status" "authorsindex_sub2" "xml"; then
@@ -288,24 +288,24 @@ if check_result "$status" "authorsindex" "xml"; then
             
             if [ -n "$AUTHOR_PATH" ]; then
                 # /opds/author/sub1/sub2/author_id
-                printf "  ${AUTHOR_PATH}                             "
+                printf '%s' "  ${AUTHOR_PATH}                             "
                 status=$(fetch "${BASE_URL}${AUTHOR_PATH}" "author_page")
                 
                 if check_result "$status" "author_page" "xml"; then
                     # Author views
-                    printf "  ${AUTHOR_PATH}/sequences                     "
+                    printf '%s' "  ${AUTHOR_PATH}/sequences                     "
                     status=$(fetch "${BASE_URL}${AUTHOR_PATH}/sequences" "author_seq")
                     check_result "$status" "author_seq" "xml"
                     
-                    printf "  ${AUTHOR_PATH}/sequenceless                   "
+                    printf '%s' "  ${AUTHOR_PATH}/sequenceless                   "
                     status=$(fetch "${BASE_URL}${AUTHOR_PATH}/sequenceless" "author_noseq")
                     check_result "$status" "author_noseq" "xml"
                     
-                    printf "  ${AUTHOR_PATH}/alphabet                      "
+                    printf '%s' "  ${AUTHOR_PATH}/alphabet                      "
                     status=$(fetch "${BASE_URL}${AUTHOR_PATH}/alphabet" "author_alpha")
                     check_result "$status" "author_alpha" "xml"
                     
-                    printf "  ${AUTHOR_PATH}/time                          "
+                    printf '%s' "  ${AUTHOR_PATH}/time                          "
                     status=$(fetch "${BASE_URL}${AUTHOR_PATH}/time" "author_time")
                     check_result "$status" "author_time" "xml"
                     
@@ -365,7 +365,7 @@ if check_result "$status" "seqindex" "xml"; then
             SEQ_SUB2=$(extract_index_sub2 "$TMPDIR/seqindex_cut.xml" "/opds/sequencesindex/" "$SEQ_LETTER" | head -1)
             
             if [ -n "$SEQ_SUB2" ]; then
-                printf "  /opds/sequencesindex/${SEQ_LETTER}/${SEQ_SUB2}  "
+                printf '%s' "  /opds/sequencesindex/${SEQ_LETTER}/${SEQ_SUB2}  "
                 status=$(fetch "${BASE_URL}/opds/sequencesindex/${SEQ_LETTER}/${SEQ_SUB2}" "seqindex_sub2")
                 
                 if check_result "$status" "seqindex_sub2" "xml"; then
@@ -385,7 +385,7 @@ if check_result "$status" "seqindex" "xml"; then
     fi
     
     if [ -n "$SEQ_PATH" ]; then
-        printf "  ${SEQ_PATH}                             "
+        printf '%s' "  ${SEQ_PATH}                             "
         status=$(fetch "${BASE_URL}${SEQ_PATH}" "seq_page")
         check_result "$status" "seq_page" "xml"
         
@@ -484,24 +484,24 @@ if [ -f "$TMPDIR/rnd_books.xml" ]; then
 fi
 
 if [ -n "$RND_AUTH_PATH" ]; then
-    printf "  ${RND_AUTH_PATH} (from rnd)                 "
+    printf '%s' "  ${RND_AUTH_PATH} (from rnd)                 "
     status=$(fetch "${BASE_URL}${RND_AUTH_PATH}" "rnd_author_page")
 
     if check_result "$status" "rnd_author_page" "xml"; then
         # Author views
-        printf "  ${RND_AUTH_PATH}/sequences (from rnd)        "
+        printf '%s' "  ${RND_AUTH_PATH}/sequences (from rnd)        "
         status=$(fetch "${BASE_URL}${RND_AUTH_PATH}/sequences" "rnd_author_seq")
         check_result "$status" "rnd_author_seq" "xml"
 
-        printf "  ${RND_AUTH_PATH}/sequenceless (from rnd)     "
+        printf '%s' "  ${RND_AUTH_PATH}/sequenceless (from rnd)     "
         status=$(fetch "${BASE_URL}${RND_AUTH_PATH}/sequenceless" "rnd_author_noseq")
         check_result "$status" "rnd_author_noseq" "xml"
 
-        printf "  ${RND_AUTH_PATH}/alphabet (from rnd)         "
+        printf '%s' "  ${RND_AUTH_PATH}/alphabet (from rnd)         "
         status=$(fetch "${BASE_URL}${RND_AUTH_PATH}/alphabet" "rnd_author_alpha")
         check_result "$status" "rnd_author_alpha" "xml"
 
-        printf "  ${RND_AUTH_PATH}/time (from rnd)             "
+        printf '%s' "  ${RND_AUTH_PATH}/time (from rnd)             "
         status=$(fetch "${BASE_URL}${RND_AUTH_PATH}/time" "rnd_author_time")
         check_result "$status" "rnd_author_time" "xml"
     fi
@@ -524,7 +524,7 @@ if [ -f "$TMPDIR/rnd_seq.xml" ]; then
 fi
 
 if [ -n "$RND_SEQ_PATH" ]; then
-    printf "  ${RND_SEQ_PATH} (from rnd)                    "
+    printf '%s' "  ${RND_SEQ_PATH} (from rnd)                    "
     status=$(fetch "${BASE_URL}${RND_SEQ_PATH}" "rnd_seq_page")
     check_result "$status" "rnd_seq_page" "xml"
 else
@@ -604,7 +604,7 @@ if [ -n "$BOOK_URL" ]; then
     
     if [ -n "$ACTION" ] && [ -n "$ZIP_FILE" ] && [ -n "$FB2_FILE" ]; then
         # /fb2/<zip>/<file> - download
-        printf "  /fb2/${ZIP_FILE}/${FB2_FILE}                     "
+        printf '%s' "  /fb2/${ZIP_FILE}/${FB2_FILE}                     "
         status=$(fetch "${BASE_URL}/fb2/${ZIP_FILE}/${FB2_FILE}" "fb2_dl")
         if [ "$status" = "200" ]; then
             echo "  PASS (200, download)"
@@ -618,7 +618,7 @@ if [ -n "$BOOK_URL" ]; then
         fi
         
         # /read/<zip>/<file> - read online
-        printf "  /read/${ZIP_FILE}/${FB2_FILE}                    "
+        printf '%s' "  /read/${ZIP_FILE}/${FB2_FILE}                    "
         status=$(fetch "${BASE_URL}/read/${ZIP_FILE}/${FB2_FILE}" "read_book")
         if [ "$status" = "200" ]; then
             echo "  PASS (200)"
@@ -632,7 +632,7 @@ if [ -n "$BOOK_URL" ]; then
         fi
         
         # /plain/<zip>/<file> - plain download (may not be available)
-        printf "  /plain/${ZIP_FILE}/${FB2_FILE}                   "
+        printf '%s' "  /plain/${ZIP_FILE}/${FB2_FILE}                   "
         status=$(fetch "${BASE_URL}/plain/${ZIP_FILE}/${FB2_FILE}" "plain_dl")
         if [ "$status" = "200" ]; then
             echo "  PASS (200)"
@@ -654,7 +654,7 @@ fi
 # Cover image
 if [ -f "$TMPDIR/cover_url.txt" ]; then
     COVER_URL=$(cat "$TMPDIR/cover_url.txt")
-    printf "  ${COVER_URL}                    "
+    printf '%s' "  ${COVER_URL}                    "
     status=$(fetch "${BASE_URL}${COVER_URL}" "cover_img")
     if [ "$status" = "200" ]; then
         echo "  PASS (200, cover)"

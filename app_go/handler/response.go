@@ -479,7 +479,7 @@ func buildKeyValueEntries(ts string, params SimpleListParams, indexMap map[strin
 			keyForLink = util.ID2Path(item.key)
 		} else {
 			// Non-ID key may need escaping
-			keyForLink = url.QueryEscape(item.key)
+			keyForLink = util.URLPathEncode(item.key)
 		}
 		href := params.AppRoot + params.StrongBaseRef + keyForLink
 		entries = append(entries, model.OPDSEntry{
@@ -532,7 +532,7 @@ func buildSimpleMapEntries(ts string, params SimpleListParams, indexMap map[stri
 			keyForLink = util.ID2Path(item.key)
 		} else {
 			// Non-ID key may need escaping
-			keyForLink = url.QueryEscape(item.key)
+			keyForLink = util.URLPathEncode(item.key)
 		}
 		href := params.AppRoot + params.SimpleBaseRef + keyForLink
 		entries = append(entries, model.OPDSEntry{

@@ -4,11 +4,24 @@ package util
 import (
 	"crypto/md5"
 	"fmt"
+	"net/url"
 	"strings"
 	"unicode"
 
 	"golang.org/x/text/unicode/norm"
 )
+
+// URLPathEncode encodes a string for use in URL path segments.
+// Encodes + as %2B and space as %20 (matching Python urllib.parse.quote).
+func URLPathEncode(s string) string {
+	// First encode literal + as %2B (before QueryEscape)
+	// s = strings.ReplaceAll(s, "+", "%2B")
+	// QueryEscape encodes space as +, and other special chars
+	encoded := url.QueryEscape(s)
+	// Replace + (space) with %20
+	encoded = strings.ReplaceAll(encoded, "+", "%20")
+	return encoded
+}
 
 // REPLACEMENT_MAP maps special characters to their normalized string equivalents.
 var REPLACEMENT_MAP = map[rune]string{

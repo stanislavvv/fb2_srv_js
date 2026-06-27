@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -426,7 +425,7 @@ func (s *Server) authSubHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	appRoot := s.CFG.Get("APPLICATION_ROOT")
-	subEnc := url.QueryEscape(subValid)
+	subEnc := util.URLPathEncode(subValid)
 	self := s.URLs.AuthIdx + subEnc
 	up := s.URLs.AuthIdx
 
@@ -475,8 +474,8 @@ func (s *Server) authSub2Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	appRoot := s.CFG.Get("APPLICATION_ROOT")
-	sub1Enc := url.QueryEscape(sub1Valid)
-	sub2Enc := url.QueryEscape(sub2Valid)
+	sub1Enc := util.URLPathEncode(sub1Valid)
+	sub2Enc := util.URLPathEncode(sub2Valid)
 	self := s.URLs.AuthIdx + sub1Enc + "/" + sub2Enc
 	up := s.URLs.AuthIdx + sub1Enc
 
@@ -888,7 +887,7 @@ func (s *Server) seqSubHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	appRoot := s.CFG.Get("APPLICATION_ROOT")
-	subEnc := url.QueryEscape(subValid)
+	subEnc := util.URLPathEncode(subValid)
 	self := s.URLs.SeqIdx + subEnc
 	up := s.URLs.SeqIdx
 
@@ -939,8 +938,8 @@ func (s *Server) seqSub2Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	appRoot := s.CFG.Get("APPLICATION_ROOT")
-	sub1Enc := url.QueryEscape(sub1Valid)
-	sub2Enc := url.QueryEscape(sub2Valid)
+	sub1Enc := util.URLPathEncode(sub1Valid)
+	sub2Enc := util.URLPathEncode(sub2Valid)
 	self := s.URLs.SeqIdx + sub1Enc + "/" + sub2Enc
 	up := s.URLs.SeqIdx + sub1Enc
 
@@ -1356,7 +1355,7 @@ func (s *Server) rndGenresRootHandler(w http.ResponseWriter, r *http.Request) {
 			log.Printf("ERROR: rndGenresRootHandler DB: %v", err)
 		} else {
 			for _, mg := range metaGenres {
-				href := appRoot + s.URLs.RndGenIdx + url.QueryEscape(mg.MetaID)
+				href := appRoot + s.URLs.RndGenIdx + util.URLPathEncode(mg.MetaID)
 				feed.Entries = append(feed.Entries, model.OPDSEntry{
 					Updated: ts,
 					ID:      "tag:rnd:genres:meta:" + mg.MetaID,
@@ -1383,7 +1382,7 @@ func (s *Server) rndGenresListHandler(w http.ResponseWriter, r *http.Request) {
 
 	appRoot := s.CFG.Get("APPLICATION_ROOT")
 	ts := GetDTISO()
-	self := s.URLs.RndGenIdx + url.QueryEscape(metaID)
+	self := s.URLs.RndGenIdx + util.URLPathEncode(metaID)
 	up := s.URLs.RndGenIdx
 
 	feed := OpdsHeader(OpdsHeaderParams{
@@ -1404,7 +1403,7 @@ func (s *Server) rndGenresListHandler(w http.ResponseWriter, r *http.Request) {
 			log.Printf("ERROR: rndGenresListHandler DB: %v", err)
 		} else {
 			for _, g := range genres {
-				href := appRoot + s.URLs.RndGen + url.QueryEscape(g.ID)
+				href := appRoot + s.URLs.RndGen + util.URLPathEncode(g.ID)
 				feed.Entries = append(feed.Entries, model.OPDSEntry{
 					Updated: ts,
 					ID:      "tag:rnd:genre:" + g.ID,
@@ -1438,7 +1437,7 @@ func (s *Server) rndBooksByGenreHandler(w http.ResponseWriter, r *http.Request) 
 		Title:   fmt.Sprintf(s.LANG.RndGenreBooks, genreName),
 		Ts:      ts,
 		Start:   s.URLs.Start,
-		Self:    s.URLs.RndGen + url.QueryEscape(genID),
+		Self:    s.URLs.RndGen + util.URLPathEncode(genID),
 		Tag:     "tag:rnd:genre:" + genID,
 		AppRoot: appRoot,
 		AppICO:  s.CFG.Get("APP_ICO"),
