@@ -44,9 +44,12 @@ type OPDSLink struct {
 }
 
 // OPDSAuthor is the author element inside an entry.
+// XML structure: <author><uri>...</uri><name>...</name></author>
+// This matches Python xmltodict.unparse behavior where {"uri": ..., "name": ...}
+// produces nested <uri> and <name> elements inside <author>.
 type OPDSAuthor struct {
-	URI  string `xml:"uri,attr,omitempty"`
-	Name string `xml:",chardata"`
+	URI  string `xml:"uri"`
+	Name string `xml:"name"`
 }
 
 // OPDSCategory is a category (genre) element inside an entry.

@@ -747,6 +747,7 @@ func OpdsBookList(params BookListParams) (*model.OPDSFeed, error) {
 		Start:   params.Start,
 		Self:    self,
 		Tag:     params.SubTag,
+		Up:      params.Up,
 		Prev:    params.Prev,
 		Next:    params.Next,
 		AppRoot: params.AppRoot,

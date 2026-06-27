@@ -374,11 +374,17 @@ func (s *Server) opdsTimePageHandler(w http.ResponseWriter, r *http.Request) {
 		nextPtr = &nextStr
 	}
 
+	// Self URL: omit page suffix for page 0
+	selfURL := s.URLs.Time
+	if page > 0 {
+		selfURL = s.URLs.Time + "/" + strconv.Itoa(page)
+	}
+
 	feed := OpdsHeader(OpdsHeaderParams{
 		Title:   s.LANG.AllBooksByTime,
 		Ts:      ts,
 		Start:   s.URLs.Start,
-		Self:    s.URLs.Time + "/" + strconv.Itoa(page),
+		Self:    selfURL,
 		Tag:     fmt.Sprintf("tag:time:%d", page),
 		Up:      &s.URLs.Start,
 		Prev:    prevStr,
@@ -1213,7 +1219,11 @@ func (s *Server) genreBooksPageHandler(w http.ResponseWriter, r *http.Request) {
 	appRoot := s.CFG.Get("APPLICATION_ROOT")
 	genreName := GetGenreName(genIDValid)
 
-	self := s.URLs.Genre + genIDValid + "/" + strconv.Itoa(page)
+	// Self URL: omit page suffix for page 0
+	self := s.URLs.Genre + genIDValid
+	if page > 0 {
+		self = s.URLs.Genre + genIDValid + "/" + strconv.Itoa(page)
+	}
 	up := s.URLs.GenIdx
 
 	params := BookListParams{
