@@ -130,8 +130,9 @@ func (s *Server) interfaceJSHandler(w http.ResponseWriter, r *http.Request) {
 	// For appRoot="/" + start="/opds" = "//opds" → strip('/') → "opds"
 	opdsPrefix := strings.Trim(appRoot+start, "/")
 
-	// Build genre_prefix: strip "/opds/" from URL["genre"] (e.g. "/opds/genre/" → "genre")
-	genrePrefix := strings.TrimRight(s.URLs.Genre[5:], "/") // remove "/opds" prefix, then trim "/"
+	// Build genre_prefix: replicate Python URL["genre"].strip('/').replace('opds/', '')
+	// For "/opds/genre/" → strip('/') → "opds/genre" → replace → "genre"
+	genrePrefix := strings.ReplaceAll(strings.Trim(s.URLs.Genre, "/"), "opds/", "")
 
 	// Template uses {{index .Data "key"}} format from Jinja2 conversion
 	data := map[string]interface{}{
