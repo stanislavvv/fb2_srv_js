@@ -5,10 +5,12 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"fb2srv_go/config"
 	"fb2srv_go/db"
@@ -116,39 +118,60 @@ func decodeBase64Basic(encoded string) (string, error) {
 	return string(decoded), err
 }
 
-func (sc *statusCapture) WriteHeader(status int) {
-	sc.status = status
-	sc.w.WriteHeader(status)
-}
-
-// loggingMiddleware logs each request method, path and status.
+// loggingMiddleware logs each request in a single line, nginx combined log format:
+// IP - - [timestamp] "METHOD path HTTP/version" status bytes "-" "User-Agent" bd="-" ut=duration
 func (s *Server) loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := r.Context()
-		_ = start
-		log.Printf("START %s %s from %s", r.Method, r.RequestURI, r.RemoteAddr)
+		startTime := time.Now()
 
-		// Wrap ResponseWriter to capture status code
-		wr := &statusCapture{w: w, status: http.StatusOK}
+		// Wrap ResponseWriter to capture status code and bytes written
+		wr := &logResponseWriter{w: w, status: http.StatusOK}
 		next.ServeHTTP(wr, r)
 
-		log.Printf("FINISH %s %s => %d", r.Method, r.RequestURI, wr.status)
+		// Extract IP (strip port)
+		ip, _, err := net.SplitHostPort(r.RemoteAddr)
+		if err != nil {
+			ip = r.RemoteAddr
+		}
+
+		// Format timestamp: [27/Jun/2026:18:01:28 +0500]
+		ts := startTime.Format("02/Jan/2006:15:04:05 -0700")
+
+		// Duration in seconds (with decimals)
+		duration := time.Since(startTime).Seconds()
+
+		// User-Agent
+		userAgent := r.Header.Get("User-Agent")
+		if userAgent == "" {
+			userAgent = "-"
+		}
+
+		// Write directly to stderr to avoid log.Printf adding its own timestamp
+		fmt.Fprintf(os.Stderr, "%s - - [%s] \"%s %s HTTP/%s\" %d %d \"-\" \"%s\" bd=\"-\" ut=%.3f\n",
+			ip, ts, r.Method, r.RequestURI, r.Proto, wr.status, wr.bytes, userAgent, duration)
 	})
 }
 
-// statusCapture wraps http.ResponseWriter to capture status code.
-type statusCapture struct {
+// logResponseWriter wraps http.ResponseWriter to capture status code and bytes written.
+type logResponseWriter struct {
 	w      http.ResponseWriter
 	status int
+	bytes  int
 }
 
-func (sc *statusCapture) Header() http.Header { return sc.w.Header() }
-func (sc *statusCapture) Write(header []byte) (int, error) {
-	return sc.w.Write(header)
+func (lr *logResponseWriter) Header() http.Header { return lr.w.Header() }
+func (lr *logResponseWriter) Write(buf []byte) (int, error) {
+	n, err := lr.w.Write(buf)
+	lr.bytes += n
+	return n, err
 }
-func (sc *statusCapture) WriteStatus(status int) {
-	sc.status = status
-	sc.w.WriteHeader(status)
+func (lr *logResponseWriter) WriteHeader(status int) {
+	lr.status = status
+	lr.w.WriteHeader(status)
+}
+func (lr *logResponseWriter) WriteStatus(status int) {
+	lr.status = status
+	lr.w.WriteHeader(status)
 }
 
 // registerRoutes registers all OPDS and static routes.
