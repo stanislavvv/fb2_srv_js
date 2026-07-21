@@ -221,3 +221,39 @@ body.dark-mode .theme-toggle button {
 body.dark-mode .theme-toggle button img {
     filter: brightness(1.2);
 }
+
+/* Font size controls */
+.font-size-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0 8px;
+}
+.font-size-controls button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    font-size: 0.95em;
+    font-weight: bold;
+    color: var(--color, black);
+    line-height: 1;
+}
+.font-size-controls button:hover {
+    background-color: var(--bg-hover, #f0f0f0);
+    border-radius: 2px;
+}
+.font-size-controls #current-font-size {
+    font-size: 0.85em;
+    font-weight: normal;
+    min-width: 38px;
+    text-align: center;
+    user-select: none;
+}
+/* Dark mode font size controls */
+body.dark-mode .font-size-controls button {
+    color: #e0e0e0;
+}
+body.dark-mode .font-size-controls button:hover {
+    background-color: #424242;
+}

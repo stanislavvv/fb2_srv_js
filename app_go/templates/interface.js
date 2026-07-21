@@ -16,6 +16,12 @@ const lang_genres = '{{index .Data "lang_genres"}}';
 const lang_lang = '{{index .Data "lang_lang"}}';
 // end template data
 
+// Font size constants
+const FONT_SIZE_MIN = 50;
+const FONT_SIZE_MAX = 200;
+const FONT_SIZE_STEP = 10;
+const FONT_SIZE_STORAGE_KEY = 'fontSizePercent';
+
 function updateNavigationPath(path) {
     window.history.pushState(null, '', `#${path}`);
 }
@@ -755,3 +761,56 @@ if (searchInput) {
         }
     });
 }
+
+// Font size controls
+function getCurrentFontSize() {
+    const saved = localStorage.getItem(FONT_SIZE_STORAGE_KEY);
+    if (saved) {
+        const val = parseInt(saved, 10);
+        if (!isNaN(val) && val >= FONT_SIZE_MIN && val <= FONT_SIZE_MAX) {
+            return val;
+        }
+    }
+    return 100;
+}
+
+function applyFontSize(percent) {
+    const htmlEl = document.documentElement;
+    htmlEl.style.fontSize = (percent / 100) + 'em';
+    const sizeLabel = document.getElementById('current-font-size');
+    if (sizeLabel) {
+        sizeLabel.textContent = percent + '%';
+    }
+}
+
+function increaseFontSize() {
+    let current = getCurrentFontSize();
+    let newSize = Math.min(current + FONT_SIZE_STEP, FONT_SIZE_MAX);
+    localStorage.setItem(FONT_SIZE_STORAGE_KEY, newSize.toString());
+    applyFontSize(newSize);
+}
+
+function decreaseFontSize() {
+    let current = getCurrentFontSize();
+    let newSize = Math.max(current - FONT_SIZE_STEP, FONT_SIZE_MIN);
+    localStorage.setItem(FONT_SIZE_STORAGE_KEY, newSize.toString());
+    applyFontSize(newSize);
+}
+
+function initFontSize() {
+    const size = getCurrentFontSize();
+    applyFontSize(size);
+
+    const fontDecreaseBtn = document.getElementById('font-decrease');
+    if (fontDecreaseBtn) {
+        fontDecreaseBtn.addEventListener('click', decreaseFontSize);
+    }
+
+    const fontIncreaseBtn = document.getElementById('font-increase');
+    if (fontIncreaseBtn) {
+        fontIncreaseBtn.addEventListener('click', increaseFontSize);
+    }
+}
+
+// Initialize font size controls on load
+initFontSize();
