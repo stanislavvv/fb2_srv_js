@@ -16,6 +16,7 @@ Nothing global ToDo
     * [bug] make_id() duplicates uppercase conversion -- testing
     * [feature] per-zip/global author name replacement (mostly for joining nickname and real name)
   * opds:
-    * add golang variant for webapp -- python eat too much ram in idle. See ToDo_golang.md
+    * add golang variant for webapp -- python eat too much ram in idle. See ToDo_golang.md -- testing
+    * [feature] add "+" and "-" buttons for font size in web interface.
   * docs:
     * nginx example for covers (`@try_files` and default cover)

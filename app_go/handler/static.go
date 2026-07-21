@@ -218,6 +218,24 @@ func (s *Server) sunIconHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, filePath)
 }
 
+// styleCSSHandler handles GET /style.css
+func (s *Server) styleCSSHandler(w http.ResponseWriter, r *http.Request) {
+	staticDir := "app_go/static"
+	filePath := filepath.Join(staticDir, "style.css")
+
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		http.NotFound(w, r)
+		return
+	}
+
+	maxAge := 2592000
+	fmt.Sscanf(s.CFG.Get("CACHE_TIME_ST"), "%d", &maxAge)
+
+	w.Header().Set("Cache-Control", fmt.Sprintf("max-age=%d, must-revalidate", maxAge))
+	w.Header().Set("Content-Type", "text/css; charset=utf-8")
+	http.ServeFile(w, r, filePath)
+}
+
 // xslHandler handles GET /fb2.xsl → serves the XSL stylesheet file
 func (s *Server) xslHandler(w http.ResponseWriter, r *http.Request) {
 	xslFile := s.CFG.Get("FB2_XSLT")

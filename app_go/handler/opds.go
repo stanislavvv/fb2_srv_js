@@ -264,6 +264,7 @@ func (s *Server) registerRoutes() {
 	r.Get("/favicon.ico", s.faviconHandler)
 	r.Get("/moon.svg", s.moonIconHandler)
 	r.Get("/sun.svg", s.sunIconHandler)
+	r.Get("/style.css", s.styleCSSHandler)
 	r.Get(s.URLs.XslRead, s.xslHandler)
 
 	// === Static routes: Download ===

@@ -280,3 +280,8 @@ def moonicon():
 @static.route("/sun.svg")
 def sunicon():
     return current_app.send_static_file("sun.svg")
+
+
+@static.route("/style.css")
+def style_css():
+    return current_app.send_static_file("style.css")
