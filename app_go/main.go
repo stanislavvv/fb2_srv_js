@@ -83,8 +83,68 @@ func main() {
 	}()
 
 	fmt.Printf("OPDS server starting on http://%s\n", addr)
-	if root := cfg.Get("APPLICATION_ROOT"); root != "" {
-		fmt.Printf("Application root: %s\n", root)
+
+	// Debug output for configuration
+	if cfg.DEBUG == "yes" || cfg.DEBUG == "true" || cfg.DEBUG == "YES" {
+		fmt.Println("\n=== CONFIG DEBUG ===")
+		fmt.Printf("  DEBUG:                %s\n", cfg.DEBUG)
+		fmt.Printf("  APPLICATION_ROOT:     '%s'\n", cfg.Get("APPLICATION_ROOT"))
+		fmt.Printf("  LISTEN_HOST:          %s\n", cfg.LISTEN_HOST)
+		fmt.Printf("  LISTEN_PORT:          %s\n", cfg.LISTEN_PORT)
+		fmt.Printf("  PAGES:                '%s'\n", cfg.PAGES)
+		fmt.Printf("  ZIPS:                 '%s'\n", cfg.ZIPS)
+		fmt.Printf("  VECTOR_SEARCH:        %s\n", cfg.VECTOR_SEARCH)
+		fmt.Printf("  CACHE_TIME:           %s\n", cfg.CACHE_TIME)
+		fmt.Printf("  CACHE_TIME_RND:       %s\n", cfg.CACHE_TIME_RND)
+		fmt.Printf("  PAGE_SIZE:            %s\n", cfg.PAGE_SIZE)
+		fmt.Println("")
+
+		// Print all URLs
+		urls := config.GetURLs()
+		fmt.Println("  URLs:")
+		fmt.Printf("    Start:              '%s'\n", urls.Start)
+		fmt.Printf("    Author:             '%s'\n", urls.Author)
+		fmt.Printf("    AuthIdx:            '%s'\n", urls.AuthIdx)
+		fmt.Printf("    Seq:                '%s'\n", urls.Seq)
+		fmt.Printf("    SeqIdx:             '%s'\n", urls.SeqIdx)
+		fmt.Printf("    Genre:              '%s'\n", urls.Genre)
+		fmt.Printf("    GenIdx:             '%s'\n", urls.GenIdx)
+		fmt.Printf("    Search:             '%s'\n", urls.Search)
+		fmt.Printf("    SrchAuth:           '%s'\n", urls.SrchAuth)
+		fmt.Printf("    SrchSeq:            '%s'\n", urls.SrchSeq)
+		fmt.Printf("    SrchBook:           '%s'\n", urls.SrchBook)
+		fmt.Printf("    SrchBookAnno:       '%s'\n", urls.SrchBookAnno)
+		fmt.Printf("    SrchBookAnnoVector: '%s'\n", urls.SrchBookAnnoVector)
+		fmt.Printf("    RndBook:            '%s'\n", urls.RndBook)
+		fmt.Printf("    RndSeq:             '%s'\n", urls.RndSeq)
+		fmt.Printf("    RndGen:             '%s'\n", urls.RndGen)
+		fmt.Printf("    RndGenIdx:          '%s'\n", urls.RndGenIdx)
+		fmt.Printf("    Time:               '%s'\n", urls.Time)
+		fmt.Printf("    Read:               '%s'\n", urls.Read)
+		fmt.Printf("    Dl:                 '%s'\n", urls.Dl)
+		fmt.Printf("    Plain:              '%s'\n", urls.Plain)
+		fmt.Printf("    Cover:              '%s'\n", urls.Cover)
+		fmt.Printf("    XslRead:            '%s'\n", urls.XslRead)
+		fmt.Println("")
+
+		// URLs with APPLICATION_ROOT prefix
+		appRoot := cfg.APPLICATION_ROOT
+		if appRoot != "" {
+			fmt.Println("  URLs WITH APPLICATION_ROOT PREFIX:")
+			fmt.Printf("    Start:              '%s%s'\n", appRoot, urls.Start)
+			fmt.Printf("    Author:             '%s%s'\n", appRoot, urls.Author)
+			fmt.Printf("    AuthIdx:            '%s%s'\n", appRoot, urls.AuthIdx)
+			fmt.Printf("    Seq:                '%s%s'\n", appRoot, urls.Seq)
+			fmt.Printf("    SeqIdx:             '%s%s'\n", appRoot, urls.SeqIdx)
+			fmt.Printf("    Genre:              '%s%s'\n", appRoot, urls.Genre)
+			fmt.Printf("    GenIdx:             '%s%s'\n", appRoot, urls.GenIdx)
+			fmt.Printf("    Search:             '%s%s'\n", appRoot, urls.Search)
+			fmt.Printf("    Time:               '%s%s'\n", appRoot, urls.Time)
+			fmt.Printf("    Read:               '%s%s'\n", appRoot, urls.Read)
+			fmt.Printf("    Dl:                 '%s%s'\n", appRoot, urls.Dl)
+			fmt.Printf("    Cover:              '%s%s'\n", appRoot, urls.Cover)
+		}
+		fmt.Println("=== END CONFIG DEBUG ===\n")
 	}
 
 	if err := httpSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {

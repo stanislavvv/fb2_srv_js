@@ -176,17 +176,16 @@ func (lr *logResponseWriter) WriteStatus(status int) {
 
 // registerRoutes registers all OPDS and static routes.
 func (s *Server) registerRoutes() {
-	r := s.Router
 	appRoot := s.CFG.Get("APPLICATION_ROOT")
 
-	// Determine if we need a prefix strip middleware
-	if appRoot != "" {
-		// Strip APPLICATION_ROOT prefix from requests
-		oldRouter := r
-		r = chi.NewRouter()
-		r.Mount(appRoot, oldRouter)
-		s.Router = r
+	// Debug output for routes
+	if s.CFG.DEBUG == "yes" || s.CFG.DEBUG == "true" || s.CFG.DEBUG == "YES" {
+		fmt.Printf("[DEBUG] registerRoutes: appRoot = '%s'\n", appRoot)
+		fmt.Printf("[DEBUG] registerRoutes: s.Router before routes = %T\n", s.Router)
 	}
+
+	// === Register ALL routes on s.Router FIRST ===
+	r := s.Router
 
 	// === OPDS Routes (Phase 4.2: Root and navigation) ===
 
@@ -279,6 +278,25 @@ func (s *Server) registerRoutes() {
 	// === Static routes: Plain FB2 ===
 	plainBase := strings.TrimRight(s.URLs.Plain, "/")
 	r.Get(plainBase+"/{zip_file}/{filename}", s.plainHandler)
+
+	// === NOW apply APPLICATION_ROOT mount AFTER all routes are registered ===
+	if appRoot != "" {
+		if s.CFG.DEBUG == "yes" || s.CFG.DEBUG == "true" || s.CFG.DEBUG == "YES" {
+			fmt.Printf("[DEBUG] registerRoutes: creating parent router, mounting s.Router at '%s'\n", appRoot)
+		}
+		parentRouter := chi.NewRouter()
+		parentRouter.Mount(appRoot, s.Router)
+		s.Router = parentRouter
+
+		if s.CFG.DEBUG == "yes" || s.CFG.DEBUG == "true" || s.CFG.DEBUG == "YES" {
+			fmt.Printf("[DEBUG] registerRoutes: done. s.Router after mount = %T\n", s.Router)
+			fmt.Printf("[DEBUG] registerRoutes: all routes accessible at %s*\n", appRoot)
+		}
+	}
+
+	if s.CFG.DEBUG == "yes" || s.CFG.DEBUG == "true" || s.CFG.DEBUG == "YES" {
+		fmt.Printf("[DEBUG] registerRoutes: === FINAL Router type = %T ===\n", s.Router)
+	}
 }
 
 // --- Helper to get path params ---
