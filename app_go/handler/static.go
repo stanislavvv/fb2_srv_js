@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	tmplx "text/template"
 
 	"fb2srv_go/config"
 	"fb2srv_go/util"
@@ -122,6 +123,7 @@ func (s *Server) webrootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // interfaceJSHandler handles GET /interface.js → renders interface.js template
+// Uses text/template to avoid HTML escaping of < > characters in JavaScript code.
 func (s *Server) interfaceJSHandler(w http.ResponseWriter, r *http.Request) {
 	appRoot := s.CFG.Get("APPLICATION_ROOT")
 	start := s.URLs.Start
@@ -154,7 +156,10 @@ func (s *Server) interfaceJSHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Cache-Control", fmt.Sprintf("max-age=%d, must-revalidate", cacheSeconds))
 
-	tmpl, err := template.ParseFiles("app_go/templates/interface.js")
+	// Use text/template to avoid HTML escaping.
+	// html/template would escape < > " ' to < > " &#34; &#39;
+	// which breaks JavaScript code containing < > operators and symbols.
+	tmpl, err := tmplx.ParseFiles("app_go/templates/interface.js")
 	if err != nil {
 		log.Printf("ERROR: interfaceJSHandler template parse: %v", err)
 		http.Error(w, "Template error", http.StatusInternalServerError)
