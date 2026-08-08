@@ -262,6 +262,7 @@ def interface_js():
         "lang_links": LANG["js_links"],
         "lang_genres": LANG["js_genres"],
         "lang_lang": LANG["js_lang"],
+        "new_window": "true" if CONFIG["NEW_WINDOW"] else "false",
     }
     tpl = "interface.js"
     return create_http_response(data, tpl, cache_period=int(CONFIG['CACHE_TIME_ST']), mimetype='application/javascript')

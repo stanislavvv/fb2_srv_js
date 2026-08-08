@@ -38,6 +38,7 @@ VARS = {
     "app_ico": "APP_ICO",  # application .ico
     "vector_search": "VECTOR_SEARCH",  # true if use vector search
     "openai_url": "OPENAI_URL",  # url to embedded neural network openai api
+    "new_window": "NEW_WINDOW",  # true if book links open in new window
     "openai_model": "OPENAI_MODEL",  # by default 'text-embedding-3-small'
     "openai_key": "OPENAI_KEY",  # does not need for ollama
 }
@@ -61,6 +62,7 @@ CONFIG = {  # default values
     "APP_ICO": "/favicon.ico",  # ToDo: draw it
     "TITLE": "Home OPDS directory",
     "HIDE_DELETED": False,
+    "NEW_WINDOW": False,
     "VECTOR_SEARCH": False,
     "OPENAI_URL": "http://localhost:18000/v1",
     "OPENAI_MODEL": "text-embedding-3-small",

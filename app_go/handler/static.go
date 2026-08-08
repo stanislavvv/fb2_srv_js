@@ -132,12 +132,18 @@ func (s *Server) interfaceJSHandler(w http.ResponseWriter, r *http.Request) {
 	// For appRoot="/" + start="/opds" = "//opds" → strip('/') → "opds"
 	opdsPrefix := strings.Trim(appRoot+start, "/")
 
-	// Build genre_prefix: replicate Python URL["genre"].strip('/').replace('opds/', '')
-	// For "/opds/genre/" → strip('/') → "opds/genre" → replace → "genre"
-	genrePrefix := strings.ReplaceAll(strings.Trim(s.URLs.Genre, "/"), "opds/", "")
+		// Build genre_prefix: replicate Python URL["genre"].strip('/').replace('opds/', '')
+		// For "/opds/genre/" → strip('/') → "opds/genre" → replace → "genre"
+		genrePrefix := strings.ReplaceAll(strings.Trim(s.URLs.Genre, "/"), "opds/", "")
 
-	// Template uses {{index .Data "key"}} format from Jinja2 conversion
-	data := map[string]interface{}{
+		// Convert new_window config value ("yes"/"no") to JavaScript boolean ("true"/"false")
+		newWindow := "false"
+		if strings.EqualFold(s.CFG.Get("NEW_WINDOW"), "yes") {
+			newWindow = "true"
+		}
+
+		// Template uses {{index .Data "key"}} format from Jinja2 conversion
+		data := map[string]interface{}{
 		"Title": s.CFG.Get("TITLE"),
 		"Data": map[string]interface{}{
 			"approot":      appRoot,
@@ -148,6 +154,7 @@ func (s *Server) interfaceJSHandler(w http.ResponseWriter, r *http.Request) {
 			"lang_links":   s.LANG.JSLinks,
 			"lang_genres":  s.LANG.JSGenres,
 			"lang_lang":    s.LANG.JSLang,
+			"new_window":   newWindow,
 		},
 	}
 

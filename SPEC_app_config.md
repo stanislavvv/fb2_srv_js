@@ -96,6 +96,9 @@ search_result_limit = 50
 app_root = /books
 debug = no
 hide_deleted = yes
+
+; open links in new browser tab/window: yes|no
+new_window = no
 ```
 
 ## Users and passwords file
@@ -120,6 +123,7 @@ The following config variables are converted from string to appropriate types:
 | `debug` | boolean | `yes` → `True`, `no` → `False` |
 | `hide_deleted` | boolean | `yes` → `True`, `no` → `False` |
 | `vector_search` | boolean | `yes` → `True`, `no` → `False` |
+| `new_window` | boolean | `yes` → `True`, `no` → `False` |
 | `page_size` | integer | Numeric string |
 | `search_result_limit` | integer | Numeric string |
 | `pic_width` | integer | Numeric string |

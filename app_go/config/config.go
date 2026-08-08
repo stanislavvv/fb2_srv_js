@@ -37,6 +37,7 @@ var VARS = map[string]string{
 	"xslt_file":            "FB2_XSLT",
 	"app_ico":              "APP_ICO",
 	"vector_search":        "VECTOR_SEARCH",
+	"new_window":           "NEW_WINDOW",
 	"openai_url":           "OPENAI_URL",
 	"openai_model":         "OPENAI_MODEL",
 	"openai_key":           "OPENAI_KEY",
@@ -60,6 +61,7 @@ var defaults = map[string]string{
 	"APP_ICO":              "/favicon.ico",
 	"TITLE":                "Home OPDS directory",
 	"HIDE_DELETED":         "no",
+	"NEW_WINDOW":           "no",
 	"VECTOR_SEARCH":        "no",
 	"OPENAI_URL":           "http://localhost:18000/v1",
 	"OPENAI_MODEL":         "text-embedding-3-small",
@@ -94,6 +96,7 @@ type Config struct {
 	TITLE              string
 	APPLICATION_ROOT   string
 	HIDE_DELETED       string
+	NEW_WINDOW         string
 	VECTOR_SEARCH      string
 	OPENAI_URL         string
 	OPENAI_MODEL       string
@@ -145,6 +148,8 @@ func (c *Config) Get(key string) string {
 		return c.APPLICATION_ROOT
 	case "HIDE_DELETED":
 		return c.HIDE_DELETED
+	case "NEW_WINDOW":
+		return c.NEW_WINDOW
 	case "VECTOR_SEARCH":
 		return c.VECTOR_SEARCH
 	case "OPENAI_URL":
@@ -214,6 +219,8 @@ func (c *Config) Set(key, value string) {
 		c.APPLICATION_ROOT = value
 	case "HIDE_DELETED":
 		c.HIDE_DELETED = value
+	case "NEW_WINDOW":
+		c.NEW_WINDOW = value
 	case "VECTOR_SEARCH":
 		c.VECTOR_SEARCH = value
 	case "OPENAI_URL":
@@ -255,7 +262,7 @@ func (c *Config) Keys() []string {
 		"DEBUG", "PG_HOST", "PG_BASE", "PG_USER", "PG_PASS",
 		"PAGES", "ZIPS", "LISTEN_HOST", "LISTEN_PORT", "PIC_WIDTH",
 		"PAGE_SIZE", "MAX_SEARCH_RES", "TITLE", "APPLICATION_ROOT", "HIDE_DELETED",
-		"VECTOR_SEARCH", "OPENAI_URL", "OPENAI_MODEL", "OPENAI_KEY",
+		"NEW_WINDOW", "VECTOR_SEARCH", "OPENAI_URL", "OPENAI_MODEL", "OPENAI_KEY",
 		"MAX_PASS_LENGTH", "MAX_PASS_LENGTH_GEN", "PASS_SIZE_HINT",
 		"DEFAULT_COVER", "DEFAULT_COVER_SRC", "CACHE_TIME", "CACHE_TIME_ST",
 		"CACHE_TIME_RND", "FB2_XSLT", "APP_ICO", "INPX", "AUTHOR_PLACEHOLDER",

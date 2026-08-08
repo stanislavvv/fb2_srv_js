@@ -32,6 +32,7 @@ openai_url = http://127.0.0.1:11434/v1
 openai_model = text-embedding-3-small
 ; does not need for ollama
 ;openai_key = ...
+new_window = no
 
 [development]
 ;app_root = /books

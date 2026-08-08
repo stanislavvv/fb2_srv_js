@@ -14,6 +14,25 @@ const lang_authors = '{{ data["lang_authors"] }}';
 const lang_links = '{{ data["lang_links"] }}';
 const lang_genres = '{{ data["lang_genres"] }}';
 const lang_lang = '{{ data["lang_lang"] }}';
+const new_window = {{ data["new_window"] }};
+
+// Helper function to open links based on new_window setting
+// isBookLink: if true, always opens in new window (book reading links)
+// isBookLink: if false, depends on new_window constant
+function openLink(url, isBookLink) {
+    if (isBookLink) {
+        // Book reading links always open in new window
+        window.open(url, '_blank');
+    } else {
+        // Other links depend on new_window setting
+        if (new_window) {
+            window.open(url, '_blank');
+        } else {
+            window.location.href = url;
+        }
+    }
+}
+
 // end template data
 
 // Font size constants
@@ -104,7 +123,7 @@ function renderSimpleList(xmlDoc) {
         a.href = '#' + linkHref;
         a.textContent = title;
         // a.onclick = function () { navigateLink(linkHref); return false; };
-        a.onclick = function() { window.open('#' + linkHref, '_blank'); return false; };
+        a.onclick = function() { openLink('#' + linkHref, false); return false; };
         d.appendChild(a);
         contentSection.appendChild(d);
         let d2 = document.createElement("div");
@@ -146,7 +165,7 @@ function renderBook(entry) {
 
         a.onclick = function () {
             // navigateLink(auth_uri); return false;
-            window.open('#' + auth_uri, '_blank'); return false;
+            openLink('#' + auth_uri, false); return false;
         };
 
         if (auths.firstChild) {
@@ -169,7 +188,7 @@ function renderBook(entry) {
             a.textContent = title;
             a.onclick = function () {
                 // navigateLink(href); return false;
-                window.open('#' + href, '_blank'); return false;
+                openLink('#' + href, false); return false;
             };
             if (links.firstChild) {
                 links.appendChild(document.createTextNode(" "));
@@ -184,12 +203,12 @@ function renderBook(entry) {
             if (type == 'application/x-fb2+xml' || type == 'text/html') {
                 a.href = '#' + href;
                 a.onclick = function () {
-                    window.open('#' + href, '_blank'); return false;
+                    openLink('#' + href, true); return false;
                 };
             } else {
                 a.href = href;
                 a.onclick = function () {
-                    window.open(href, '_blank'); return false;
+                    openLink(href, true); return false;
                 };
             }
             if (links.firstChild) {
@@ -349,7 +368,7 @@ function renderHTMLBook(htmlUrl, bookTitle) {
                         // Case 2: External HTTP(S) link — open in new tab
                         if (href.startsWith('http://') || href.startsWith('https://')) {
                             e.preventDefault();
-                            window.open(href, '_blank');
+                            openLink(href, true);
                             return false;
                         }
                         // Case 3: Navigation links starting with #/ or absolute paths
@@ -420,7 +439,7 @@ function renderAuthorMain(xmlDoc, url) {
             a.href = '#' + linkHref;
             a.textContent = title;
             // a.onclick = function () { navigateLink(linkHref); return false; };
-            a.onclick = function() { window.open('#' + linkHref, '_blank'); return false; };
+            a.onclick = function() { openLink('#' + linkHref, false); return false; };
             d.appendChild(a);
             contentSection.appendChild(d);
         }
