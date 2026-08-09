@@ -378,7 +378,7 @@ def make_book_descr_db(books):
 def open_booklist(booklist):
     """return file object of booklist (.zip.list or .zip.list.gz)"""
     if booklist.find('gz') >= len(booklist) - 3:  # pylint: disable=R1705
-        return gzip.open(booklist)
+        return gzip.open(booklist, mode='rt', encoding='utf-8')
     else:
         return open(booklist, encoding="utf-8")
 

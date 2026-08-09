@@ -45,15 +45,18 @@ def opds_books_db(params):
     # Для layout="time" сначала вычисляем total_pages до вызова opds_header
     total_pages = 0
     if layout == "time":
+        session = None
         try:
             session = dbsession()
             total_count = session.query(Book).count()
             total_pages = int(total_count / pagelimit) if total_count > 0 else 0
             if total_count % pagelimit > 0:
                 total_pages = total_pages + 1
-            session.close()
         except Exception as ex:
             logging.error(f"Database error on count: {ex}")
+        finally:
+            if session is not None:
+                session.close()
 
     # Если запрашиваемая страница превышает последнюю, возвращаем пустой feed с rel="prev"
     if layout == "time" and page > total_pages:
@@ -78,6 +81,8 @@ def opds_books_db(params):
             params["prev"] = params["strong_baseref"] + f"/{page - 1}"
 
     ret = opds_header(params)
+    session = None
+    books = {}
     try:
         session = dbsession()
         if layout == "rnd_books":
@@ -193,11 +198,12 @@ def opds_books_db(params):
                     book_seqs.append(sequences[s])
             book["sequences"] = book_seqs
             books[book_id] = book
-        session.close()
     except Exception as ex:
         logging.error(f"Database error:{ex}")
-        session.close()
         return None
+    finally:
+        if session is not None:
+            session.close()
 
     data = []
     for book_id in books:
@@ -225,7 +231,8 @@ def opds_simple_list_db(params):
     layout = params["layout"]
 
     ret = opds_header(params)
-
+    session = None
+    data = []
     try:
         session = dbsession()
         list_data = []
@@ -267,10 +274,11 @@ def opds_simple_list_db(params):
                     "id": i.id
                 }
             )
-        session.close()
     except Exception as ex:
         logging.error(f"DB List error: {ex}")
-        session.close()
+    finally:
+        if session is not None:
+            session.close()
     for line in data:
         title = line["name"]
         k = line["id"]
