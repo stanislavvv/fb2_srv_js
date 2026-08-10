@@ -19,10 +19,6 @@ None
     - create `@validate_path_params(**validators)` decorator
     - remove duplicated `validate_id()` calls from 20+ route handlers
 
-  * [refactor] single session for batch DB operations (`app/data.py`):
-    - functions `get_exist_authors()`, `get_exist_seqs()`, `get_exist_genres()`, `get_exists_book()` each create a separate connection
-    - accept `session` as argument and reuse one session from calling code
-
   * [future] multi-term search conditions builder (`app/opds_db.py`):
     - function `build_multiterm_conditions()` to generate AND/OR ILIKE conditions
     - remove 4 identical search pattern copies in `opds_books_db()` and `opds_simple_list_db()`
@@ -32,11 +28,7 @@ None
   * common:
     * [bug][minor] date_time format in output: "YYYY-MM-DD HH:MM:SS_00:00" instead of ISO 8601
   * indexing:
-    * [bug] too aggressive quota marks removal ('"word" word' -> 'word" word'): some names stored wrong -- testing
-    * [bug] make_id() duplicates uppercase conversion -- testing
-    * [feature] per-zip/global author name replacement (mostly for joining nickname and real name) -- testing
-  * opds:
-    * add golang variant for webapp -- python eat too much ram in idle. See ToDo_golang.md -- testing
-    * [feature] add "+" and "-" buttons for font size in web interface.
+    * [feature] per-zip/global author name replacement (mostly for joining nickname and real name)
+  * opds: None
   * docs:
     * nginx example for covers (`@try_files` and default cover)
