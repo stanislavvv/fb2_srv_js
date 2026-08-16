@@ -132,6 +132,7 @@ def check_ids_vectors(session, book_ids, type):
 
 def process_books_vectors(session, lines, hide_deleted):
     book_ids = []
+    book_data = {}
     for line in lines:
         book = json.loads(line)
         if book is None:
@@ -140,8 +141,15 @@ def process_books_vectors(session, lines, hide_deleted):
             continue
         book_id = book["book_id"]
         book_ids.append(book_id)
+        book_data[book_id] = {
+            "book_title": book.get("book_title"),
+            "annotation": book.get("annotation"),
+            "genres": book.get("genres", [])
+        }
     ids = check_ids_vectors(session, book_ids, VectorType.BOOK_ANNO)
-    data, real_vect = make_anno_vectors(session, ids)
+    # filter book_data by ids
+    new_book_data = {bid: book_data[bid] for bid in ids if bid in book_data}
+    data, real_vect = make_anno_vectors(session, ids, book_data=new_book_data)
     dbwrite(data)
     logging.debug("  - processed: %s, in pass: %s", len(ids), len(book_ids))
 

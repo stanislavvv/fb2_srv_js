@@ -568,14 +568,27 @@ def get_count(session, obj):
     return session.query(obj).count()
 
 
-def make_anno_vectors(session, book_ids):
-    """return data for dbwrite for vector table with type == book annotation"""
+def make_anno_vectors(session, book_ids, book_data=None):
+    """return data for dbwrite for vector table with type == book annotation
+
+    If book_data is provided (from .list files), use it directly.
+    Otherwise, fetch from database as fallback.
+    """
     ret = []
-    descr = get_books_textinfo(session, book_ids)
+    if book_data is not None:
+        for book_id in book_data:
+            b = book_data[book_id]
+            if "genres" in b and isinstance(b["genres"], list):
+                gen_names = [get_genre_name(g) for g in b["genres"] if g]
+                b["genres"] = ", ".join(gen_names)
+        descr = book_data
+    else:
+        # Fallback: books data from DB
+        descr = get_books_textinfo(session, book_ids)
     # disable debug logs for openai internals
     logging.getLogger("openai").setLevel(logging.ERROR)
-    logging.getLogger("httpx").setLevel(logging.ERROR)
-    logging.getLogger("httpcore").setLevel(logging.ERROR)
+    logging.getLogger("httpx2").setLevel(logging.ERROR)
+    logging.getLogger("httpcore2").setLevel(logging.ERROR)
 
     vect_cnt = 0
     for book_id in descr:
