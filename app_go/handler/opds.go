@@ -573,8 +573,8 @@ func (s *Server) authorMainHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Python: auth_id = sub1 + sub2 + id (direct concatenation, NOT MakeID)
-	authID := sub1 + sub2 + id
+	// Python: auth_id = params["id"] (the id from URL is already the full 32-char hash)
+	authID := id
 
 	appRoot := s.CFG.Get("APPLICATION_ROOT")
 	authPath := util.ID2Path(authID)
@@ -627,7 +627,7 @@ func (s *Server) authorSeqsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authID := sub1 + sub2 + id
+	authID := id
 
 	appRoot := s.CFG.Get("APPLICATION_ROOT")
 	authPath := util.ID2Path(authID)
@@ -688,7 +688,7 @@ func (s *Server) authorNonSeqHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authID := sub1 + sub2 + id
+	authID := id
 
 	appRoot := s.CFG.Get("APPLICATION_ROOT")
 	authPath := util.ID2Path(authID)
@@ -743,7 +743,7 @@ func (s *Server) authorAlphabetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authID := sub1 + sub2 + id
+	authID := id
 
 	appRoot := s.CFG.Get("APPLICATION_ROOT")
 	authPath := util.ID2Path(authID)
@@ -794,7 +794,7 @@ func (s *Server) authorTimeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authID := sub1 + sub2 + id
+	authID := id
 
 	appRoot := s.CFG.Get("APPLICATION_ROOT")
 	authPath := util.ID2Path(authID)
@@ -846,7 +846,7 @@ func (s *Server) authorSeqBooksHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authID := sub1 + sub2 + id
+	authID := id
 
 	appRoot := s.CFG.Get("APPLICATION_ROOT")
 	authPath := util.ID2Path(authID)
