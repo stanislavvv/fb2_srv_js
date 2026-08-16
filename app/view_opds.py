@@ -134,7 +134,7 @@ def opds_author_main(sub1, sub2, id):
     sub2 = validate_id(sub2)
     id = validate_id(id)
     params = {
-        "index": URL["author"].replace("/opds/", "", 1) + f"{sub1}/{sub2}/{id}",
+        "index": URL["author"].replace("/opds/", "", 1) + id2path(id),
         "id": id,
         "sub1": sub1,
         "sub2": sub2,
@@ -157,8 +157,8 @@ def opds_author_seqs(sub1, sub2, id):
     sub2 = validate_id(sub2)
     id = validate_id(id)
     params = {
-        "index": URL["author"].replace("/opds/", "", 1) + f"{sub1}/{sub2}/{id}/sequences",
-        "nameindex": URL["author"].replace("/opds/", "", 1) + f"{sub1}/{sub2}/{id}",
+        "index": URL["author"].replace("/opds/", "", 1) + id2path(id) + "/sequences",
+        "nameindex": URL["author"].replace("/opds/", "", 1) + id2path(id),
         "id": id,
         "sub1": sub1,
         "sub2": sub2,
@@ -169,7 +169,7 @@ def opds_author_seqs(sub1, sub2, id):
         "layout": "name_id_list",
         "use_nums": True,
         "simple_baseref": URL["authidx"] + sub1 + "/" + sub2,
-        "strong_baseref": URL["author"] + f"{sub1}/{sub2}/{id}/",
+        "strong_baseref": URL["author"] + id2path(id) + "/",
         "self": URL["author"] + id2path(id) + "/sequences",
         "start": URL["start"],
         "up": URL["author"] + id2path(id)
@@ -185,7 +185,7 @@ def opds_author_seq(sub1, sub2, id, seq_id):
     id = validate_id(id)
     seq_id = validate_id(seq_id)
     params = {
-        "index": URL["author"].replace("/opds/", "", 1) + f"{sub1}/{sub2}/{id}/",
+        "index": URL["author"].replace("/opds/", "", 1) + id2path(id) + "/",
         "id": id,
         "sub1": sub1,
         "sub2": sub2,
@@ -211,7 +211,7 @@ def opds_author_nonseq(sub1, sub2, id):
     sub2 = validate_id(sub2)
     id = validate_id(id)
     params = {
-        "index": URL["author"].replace("/opds/", "", 1) + f"{sub1}/{sub2}/{id}/",
+        "index": URL["author"].replace("/opds/", "", 1) + id2path(id) + "/",
         "id": id,
         "sub1": sub1,
         "sub2": sub2,
@@ -236,7 +236,7 @@ def opds_author_alphabet(sub1, sub2, id):
     sub2 = validate_id(sub2)
     id = validate_id(id)
     params = {
-        "index": URL["author"].replace("/opds/", "", 1) + f"{sub1}/{sub2}/{id}/",
+        "index": URL["author"].replace("/opds/", "", 1) + id2path(id) + "/",
         "id": id,
         "sub1": sub1,
         "sub2": sub2,
@@ -261,7 +261,7 @@ def opds_author_time(sub1, sub2, id):
     sub2 = validate_id(sub2)
     id = validate_id(id)
     params = {
-        "index": URL["author"].replace("/opds/", "", 1) + f"{sub1}/{sub2}/{id}/",
+        "index": URL["author"].replace("/opds/", "", 1) + id2path(id) + "/",
         "id": id,
         "sub1": sub1,
         "sub2": sub2,
@@ -345,7 +345,7 @@ def opds_sequence(sub1, sub2, id):
     sub2 = validate_id(sub2)
     id = validate_id(id)
     params = {
-        "index": URL["seq"].replace("/opds/", "", 1) + f"{sub1}/{sub2}/{id}",
+        "index": URL["seq"].replace("/opds/", "", 1) + id2path(id),
         "id": id,
         "sub1": sub1,
         "sub2": sub2,
