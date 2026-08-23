@@ -29,6 +29,7 @@ None
     * [bug][minor] date_time format in output: "YYYY-MM-DD HH:MM:SS_00:00" instead of ISO 8601
   * indexing:
     * [feature] per-zip/global author name replacement (mostly for joining nickname and real name)
-  * opds: None
+  * opds:
+    * [bug] wrong sort in author's sequences list
   * docs:
     * nginx example for covers (`@try_files` and default cover)
