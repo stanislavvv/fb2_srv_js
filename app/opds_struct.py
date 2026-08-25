@@ -429,12 +429,15 @@ def opds_simple_list(params):
                 else:
                     idx_data[i_id] = name
             if use_nums:
-                for k, v in sorted(name_data.items(), key=lambda item: item[1]):  # pylint: disable=W0612
-                    data.append(k)
+                items = [{"id": k, "name": v} for k, v in name_data.items()]
+                items = sorted(items, key=cmp_to_key(custom_alphabet_name_cmp))
+                for item in items:
+                    data.append(item["id"])
             else:
-                for k, v in sorted(idx_data.items(), key=lambda item: item[1]):  # pylint: disable=W0612
-                    data.append(k)
-                data = sorted(data, key=cmp_to_key(custom_alphabet_name_cmp))
+                items = [{"id": k, "name": v} for k, v in idx_data.items()]
+                items = sorted(items, key=cmp_to_key(custom_alphabet_name_cmp))
+                for item in items:
+                    data.append(item["id"])
         if params["layout"] == "key_value":
             idx_data = {}
             for k, v in sorted(index.items(), key=lambda item: item[1]):  # pylint: disable=W0612
