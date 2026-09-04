@@ -31,5 +31,9 @@ None
     * [feature] per-zip/global author name replacement (mostly for joining nickname and real name)
   * opds:
     * [bug] `maxage` in some headers
+    * [bug] direct books data without auth
+    * [bug] possible xss in: a) html-rendered books, b) names, titles and annotations, c) author's description. Need check fb2 sanitizing. And may be in interface.js:
+      * don't decode html in text fields (use simply `descr.textContent = dcont` instead `descr.innerHTML = decodeHtml(dcont)` or may be only `s/innerHTML/textContent/` will be enough.
+      * use `contentSection.innerHTML = DOMPurify.sanitize(contentToInsert)` for rendered books.
   * docs:
     * nginx example for covers (`@try_files` and default cover)
