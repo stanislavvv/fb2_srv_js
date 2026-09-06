@@ -201,7 +201,7 @@ def fb2_plain(zip_file=None, filename=None):
         return redir_invalid(CONFIG['REDIR_FROM_ERR'])
     fb2data = fb2_out(zip_file, filename)
     if fb2data is not None:  # pylint: disable=R1705
-        cachectl = "maxage=%d, must-revalidate" % int(CONFIG['CACHE_TIME_ST'])
+        cachectl = "max-age=%d, must-revalidate" % int(CONFIG['CACHE_TIME_ST'])
         xsl_line = XSL_READ % URL["xsl_read"]
 
         fb2prepared = add_xsl_line(fb2data, xsl_line)
@@ -228,7 +228,7 @@ def fb2_read(zip_file=None, filename=None):
     if zip_file is None or filename is None:
         return redir_invalid(CONFIG['REDIR_FROM_ERR'])
     data = html_out(zip_file, filename)
-    cachectl = "maxage=%d, must-revalidate" % int(CONFIG['CACHE_TIME_ST'])
+    cachectl = "max-age=%d, must-revalidate" % int(CONFIG['CACHE_TIME_ST'])
 
     if data is not None:  # pylint: disable=R1705
         resp = Response(data, mimetype='text/html')
