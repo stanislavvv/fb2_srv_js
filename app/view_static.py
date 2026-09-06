@@ -129,6 +129,7 @@ def require_auth(f):
     return decorated_function
 
 
+@require_auth
 @static.route(URL["cover"] + "<sub1>/<sub2>/<book_id>.jpg")
 def fb2_cover(sub1=None, sub2=None, book_id=None):
     """return cover image for book"""
