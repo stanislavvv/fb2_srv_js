@@ -30,7 +30,8 @@ None
   * indexing:
     * [feature] per-zip/global author name replacement (mostly for joining nickname and real name)
   * opds:
-    * [bug] possible xss in: a) html-rendered books, b) names, titles and annotations, c) author's description. Need check fb2 sanitizing. And may be in interface.js:
+    * [bug] possible xss in: a) html-rendered books, b) names, titles and annotations, c) author's description. Need check fb2 sanitizing. -- backend fix testing
+      And may be in interface.js:
       * don't decode html in text fields (use simply `descr.textContent = dcont` instead `descr.innerHTML = decodeHtml(dcont)` or may be only `s/innerHTML/textContent/` will be enough.
       * use `contentSection.innerHTML = DOMPurify.sanitize(contentToInsert)` for rendered books.
   * docs:

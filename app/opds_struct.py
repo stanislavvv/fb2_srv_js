@@ -19,6 +19,7 @@ from .data import (
     sizeof_fmt
 )
 from .validate import safe_path
+from .sanitize import sanitize_html, escape_html
 from .strings import id2path, unicode_upper
 from .config import CONFIG, URL, LANG
 
@@ -166,6 +167,7 @@ def make_book_entry(book, ts, authref, seqref, seq_id=None):
     else:
         annotext = LANG["bookinfo"] % (annotation, sizeof_fmt(size))
     annotext = annotext + pubinfo
+    annotext = sanitize_html(annotext)
     ret = {
         "updated": date_time,
         "id": "tag:book:" + book_id,
@@ -541,7 +543,7 @@ def opds_author_page(params):
             ],
             "content": {
                 "@type": "text/html",
-                "#text": "<p><span style=\"font-weight:bold\">" + auth_name + "</span></p>"
+                "#text": "<p><span style=\"font-weight:bold\">" + escape_html(auth_name) + "</span></p>"
             }
         },
         {

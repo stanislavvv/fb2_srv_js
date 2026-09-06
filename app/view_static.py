@@ -29,6 +29,7 @@ from .validate import (
 )
 from .config import CONFIG, URL, LANG, XSL_READ
 from .data import is_auth
+from .sanitize import sanitize_html
 
 static = Blueprint("static", __name__)
 
@@ -70,7 +71,7 @@ def html_out(zip_file: str, filename: str):
                 doc = b_soap.prettify()
                 dom = et.fromstring(bytes(doc, encoding='utf8'))
                 html = transform(dom)
-                return str(html)
+                return sanitize_html(str(html))
     except Exception as ex:  # pylint: disable=W0703
         current_app.logger.error("Error in file: %s/%s: %s", zip_file, filename, ex)
         return None

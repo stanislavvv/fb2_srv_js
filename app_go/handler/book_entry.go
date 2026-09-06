@@ -235,6 +235,8 @@ func MakeBookEntry(book model.Book, ts string, appRoot string, urls *config.URL,
 	// Append publication info
 	pubinfo := pubinfoAnno(book.PubInfo, lang)
 	annotext = annotext + pubinfo
+	// XSS sanitize the composed HTML (annotation + pubinfo + sequence name)
+	annotext = util.SanitizeHTML(annotext)
 
 	return model.OPDSEntry{
 		Updated: dateTime,

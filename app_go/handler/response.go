@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"sort"
+	"strconv"
 
 	"fb2srv_go/config"
 	"fb2srv_go/db"
@@ -432,7 +433,7 @@ func buildNameIDListEntries(ts string, params SimpleListParams, indexList []map[
 		var title, text string
 		if useNums {
 			title = item.name
-			text = fmt.Sprintf(params.Subtitle, item.cnt)
+			text = fmt.Sprintf(params.Subtitle, strconv.Itoa(item.cnt))
 		} else {
 			title = item.name
 			text = item.name
@@ -605,7 +606,7 @@ func OpdsAuthorPage(params AuthorPageParams) (*model.OPDSFeed, error) {
 			},
 			Content: &model.OPDSContent{
 				Type:  "text/html",
-				Value: "<p><span style=\"font-weight:bold\">" + authName + "</span></p>",
+				Value: "<p><span style=\"font-weight:bold\">" + util.EscapeHTML(authName) + "</span></p>",
 			},
 		},
 		navEntry(ts, params.SubTag+":sequences", params.LANG.BooksSeq,

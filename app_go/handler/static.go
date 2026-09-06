@@ -419,6 +419,9 @@ func (s *Server) readHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// XSS sanitize the rendered book HTML (FB2 -> HTML)
+	htmlData = []byte(util.SanitizeHTML(string(htmlData)))
+
 	maxAge := 2592000
 	fmt.Sscanf(s.CFG.Get("CACHE_TIME_ST"), "%d", &maxAge)
 

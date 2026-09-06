@@ -11,4 +11,5 @@ require (
 require (
 	github.com/go-chi/chi v1.5.5 // indirect
 	github.com/wamuir/go-xslt v0.1.5 // indirect
+	golang.org/x/net v0.17.0 // indirect
 )
