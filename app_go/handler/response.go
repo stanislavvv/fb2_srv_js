@@ -438,9 +438,9 @@ func buildNameIDListEntries(ts string, params SimpleListParams, indexList []map[
 			title = item.name
 			text = item.name
 		}
-		// Python: url_str(item['id']) then ID2Path for the directory structure
-		idPath := util.ID2Path(item.key)
-		encKey := util.URLStr(idPath)
+		// Python: href = approot + baseref + urllib.parse.quote(k)
+		// k is the raw hex ID
+		encKey := util.URLStr(item.key)
 		href := params.AppRoot + params.StrongBaseRef + encKey
 		entries = append(entries, model.OPDSEntry{
 			Updated: ts,

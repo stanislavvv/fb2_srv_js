@@ -850,8 +850,7 @@ func (s *Server) authorSeqBooksHandler(w http.ResponseWriter, r *http.Request) {
 
 	appRoot := s.CFG.Get("APPLICATION_ROOT")
 	authPath := util.ID2Path(authID)
-	seqPath := util.ID2Path(seqID)
-	self := s.URLs.Author + authPath + "/" + seqPath
+	self := s.URLs.Author + authPath + "/" + seqID
 	up := s.URLs.Author + authPath + "/sequences"
 
 	idx := "author/" + sub1 + "/" + sub2 + "/" + id + "/"
