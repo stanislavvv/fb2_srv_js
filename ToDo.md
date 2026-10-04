@@ -31,5 +31,7 @@ None
     * [feature] per-zip/global author name replacement (mostly for joining nickname and real name)
   * opds:
     * [bug] opds_go in sequenceless author's page return books with non-null sequences
+  * interface:
+    * [bug] Ctrl-click MUST open link in new page
   * docs:
     * nginx example for covers (`@try_files` and default cover)
