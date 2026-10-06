@@ -16,16 +16,16 @@ const lang_genres = '{{ data["lang_genres"] }}';
 const lang_lang = '{{ data["lang_lang"] }}';
 const new_window = {{ data["new_window"] }};
 
-// Helper function to open links based on new_window setting
+// Helper function to open links
 // isBookLink: if true, always opens in new window (book reading links)
-// isBookLink: if false, depends on new_window constant
-function openLink(url, isBookLink) {
+// isBookLink: if false, opens in current window, unless Ctrl is held (then new window)
+function openLink(url, isBookLink, event) {
     if (isBookLink) {
         // Book reading links always open in new window
         window.open(url, '_blank');
     } else {
-        // Other links depend on new_window setting
-        if (new_window) {
+        // Other links: Ctrl+click opens in new window, regular click opens in current window
+        if (event && event.ctrlKey) {
             window.open(url, '_blank');
         } else {
             window.location.href = url;
@@ -122,8 +122,7 @@ function renderSimpleList(xmlDoc) {
         d.classList.add('col1')
         a.href = '#' + linkHref;
         a.textContent = title;
-        // a.onclick = function () { navigateLink(linkHref); return false; };
-        a.onclick = function() { openLink('#' + linkHref, false); return false; };
+        a.onclick = function(e) { openLink('#' + linkHref, false, e); return false; };
         d.appendChild(a);
         contentSection.appendChild(d);
         let d2 = document.createElement("div");
@@ -163,9 +162,8 @@ function renderBook(entry) {
         a.href = '#' + auth_uri;
         a.textContent = auth_name;
 
-        a.onclick = function () {
-            // navigateLink(auth_uri); return false;
-            openLink('#' + auth_uri, false); return false;
+        a.onclick = function (e) {
+            openLink('#' + auth_uri, false, e); return false;
         };
 
         if (auths.firstChild) {
@@ -186,9 +184,8 @@ function renderBook(entry) {
             let a = document.createElement("a");
             a.href = '#' + href;
             a.textContent = title;
-            a.onclick = function () {
-                // navigateLink(href); return false;
-                openLink('#' + href, false); return false;
+            a.onclick = function (e) {
+                openLink('#' + href, false, e); return false;
             };
             if (links.firstChild) {
                 links.appendChild(document.createTextNode(" "));
@@ -231,8 +228,13 @@ function renderBook(entry) {
         let href = `/${prefix}/${genre_prfx}/${genreid}`;
         a.href = '#' + href;
         a.textContent = label;
-        a.onclick = function () {
-            navigateLink(href); return false;
+        a.onclick = function (e) {
+            if (e.ctrlKey) {
+                window.open('#' + href, '_blank');
+            } else {
+                navigateLink(href);
+            }
+            return false;
         };
         if (categories.firstChild) {
             categories.appendChild(document.createTextNode(" "));
@@ -365,10 +367,14 @@ function renderHTMLBook(htmlUrl, bookTitle) {
                             }
                             return false;
                         }
-                        // Case 2: External HTTP(S) link — open in new tab
+                        // Case 2: External HTTP(S) link — Ctrl+click opens in new tab
                         if (href.startsWith('http://') || href.startsWith('https://')) {
                             e.preventDefault();
-                            openLink(href, true);
+                            if (e.ctrlKey) {
+                                window.open(href, '_blank');
+                            } else {
+                                window.location.href = href;
+                            }
                             return false;
                         }
                         // Case 3: Navigation links starting with #/ or absolute paths
@@ -438,8 +444,7 @@ function renderAuthorMain(xmlDoc, url) {
             let a = document.createElement("a");
             a.href = '#' + linkHref;
             a.textContent = title;
-            // a.onclick = function () { navigateLink(linkHref); return false; };
-            a.onclick = function() { openLink('#' + linkHref, false); return false; };
+            a.onclick = function(e) { openLink('#' + linkHref, false, e); return false; };
             d.appendChild(a);
             contentSection.appendChild(d);
         }
@@ -472,8 +477,14 @@ function parseAndRenderXML(xmlDoc, path) {
             a.textContent = linkTexts[relValue] || relValue || link.getAttribute('href');
 
             // Navigate using the new fetchOPDSData function with the hash path
-            a.onclick = function () {
-                navigateLink(link.getAttribute('href')); return false;
+            // Ctrl+click opens in new window
+            a.onclick = function (e) {
+                if (e.ctrlKey) {
+                    window.open('#' + link.getAttribute('href'), '_blank');
+                } else {
+                    navigateLink(link.getAttribute('href'));
+                }
+                return false;
             };
 
             if (navigationSection.firstChild) {

@@ -738,6 +738,11 @@ func OpdsBookList(params BookListParams) (*model.OPDSFeed, error) {
 		}
 	}
 
+	// Filter for author_nonseq: only books without sequences (same as Python)
+	if params.Layout == "author_nonseq" {
+		booksData = filterNonSeqBooks(booksData, pagesDir, params.Index)
+	}
+
 	sortedBooks := sortBooksByLayout(booksData, params.Layout, seqIDStr)
 
 	// Build feed
@@ -1013,3 +1018,35 @@ func OpdsSimpleListDB(database *db.DB, params SimpleListDBParams) (*model.OPDSFe
 }
 
 // NOTE: Chi route helpers (Param) will be added in Phase 4 when routes are implemented.
+
+// filterNonSeqBooks returns only books without sequences (matches Python opds_struct.py
+// layout "author_nonseq"). Primary source: sequenceless.json (list of book_id).
+// Fallback (on any error): books whose Sequences field is nil.
+func filterNonSeqBooks(books []model.Book, pagesDir, index string) []model.Book {
+	seqFile := pagesDir + "/" + index + "sequenceless.json"
+	data, err := os.ReadFile(seqFile)
+	if err == nil {
+		var ids []string
+		if json.Unmarshal(data, &ids) == nil {
+			set := make(map[string]struct{}, len(ids))
+			for _, id := range ids {
+				set[id] = struct{}{}
+			}
+			out := make([]model.Book, 0, len(books))
+			for _, b := range books {
+				if _, ok := set[b.BookID]; ok {
+					out = append(out, b)
+				}
+			}
+			return out
+		}
+	}
+	// Fallback: same as Python (book["sequences"] is None)
+	out := make([]model.Book, 0, len(books))
+	for _, b := range books {
+		if b.Sequences == nil {
+			out = append(out, b)
+		}
+	}
+	return out
+}

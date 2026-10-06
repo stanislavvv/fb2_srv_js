@@ -29,9 +29,5 @@ None
     * [bug][minor] date_time format in output: "YYYY-MM-DD HH:MM:SS_00:00" instead of ISO 8601
   * indexing:
     * [feature] per-zip/global author name replacement (mostly for joining nickname and real name)
-  * opds:
-    * [bug] opds_go in sequenceless author's page return books with non-null sequences
-  * interface:
-    * [bug] Ctrl-click MUST open link in new page
   * docs:
     * nginx example for covers (`@try_files` and default cover)
