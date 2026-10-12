@@ -31,3 +31,5 @@ None
     * [feature] per-zip/global author name replacement (mostly for joining nickname and real name)
   * docs:
     * nginx example for covers (`@try_files` and default cover)
+  * opds_go:
+    * [bug] wrong sort books in sequence (must be number/alphabet, not number-only)
