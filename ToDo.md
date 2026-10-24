@@ -31,5 +31,7 @@ None
     * [feature] per-zip/global author name replacement (mostly for joining nickname and real name)
   * docs:
     * nginx example for covers (`@try_files` and default cover)
+  * opds:
+    * [bug] 404 at author/0a/3e/0a3e3aefdc640f2ebb5b8097495ad719/sequences
   * opds_go:
     * [bug] wrong sort books in sequence (must be number/alphabet, not number-only)
