@@ -32,6 +32,6 @@ None
   * docs:
     * nginx example for covers (`@try_files` and default cover)
   * opds:
-    * [bug] 404 at author/0a/3e/0a3e3aefdc640f2ebb5b8097495ad719/sequences
+    * [bug] 404 at author's sequences page when no sequences. Must be standard author's sequences page output with empty sequences list.
   * opds_go:
     * [bug] wrong sort books in sequence (must be number/alphabet, not number-only)
