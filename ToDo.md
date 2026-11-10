@@ -28,10 +28,12 @@ None
   * common:
     * [bug][minor] date_time format in output: "YYYY-MM-DD HH:MM:SS_00:00" instead of ISO 8601
   * indexing:
+    * [bug] remove book cover before writing (some stacktrace after `rdfind -makehardlinks true`)
     * [feature] per-zip/global author name replacement (mostly for joining nickname and real name)
   * docs:
     * nginx example for covers (`@try_files` and default cover)
   * opds:
+    * [bug] incomplete auth (must be opds, not simple basic)
     * [bug] 404 at author's sequences page when no sequences. Must be standard author's sequences page output with empty sequences list.
   * opds_go:
     * [bug] wrong sort books in sequence (must be number/alphabet, not number-only)
