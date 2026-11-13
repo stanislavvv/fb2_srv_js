@@ -33,7 +33,8 @@ None
   * docs:
     * nginx example for covers (`@try_files` and default cover)
   * opds:
-    * [bug] incomplete auth (must be opds, not simple basic)
+    * [bug] incomplete auth (must be opds, not simple basic) -- not bug in service, only in fbreader
+    * [bug] wrong sort in author's books by alphabet page (by id, not by title)
     * [bug] 404 at author's sequences page when no sequences. Must be standard author's sequences page output with empty sequences list.
   * opds_go:
     * [bug] wrong sort books in sequence (must be number/alphabet, not number-only)
