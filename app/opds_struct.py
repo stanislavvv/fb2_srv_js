@@ -698,6 +698,8 @@ def opds_book_list(params):
                 if book["sequences"] is None:
                     data_nonseq.append(book)
         data = sorted(data_nonseq, key=cmp_to_key(custom_alphabet_book_title_cmp))
+    elif layout == "author_alpha":
+        data = sorted(data, key=cmp_to_key(custom_alphabet_book_title_cmp))
     elif layout == "author_time":
         data = sorted(data, key=lambda s: unicode_upper(s["date_time"]))
     elif layout == "sequence":
