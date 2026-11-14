@@ -645,21 +645,22 @@ func (s *Server) authorSeqsHandler(w http.ResponseWriter, r *http.Request) {
 	idx := "author/" + sub1 + "/" + sub2 + "/" + id + "/sequences"
 
 	params := SimpleListParams{
-		Index:         idx,
-		Self:          self,
-		SimpleBaseRef: s.URLs.AuthIdx + sub1 + "/" + sub2,
-		StrongBaseRef: s.URLs.Author + sub1 + "/" + sub2 + "/" + id + "/",
-		SubTag:        "tag:author:" + authID,
-		Subtitle:      s.LANG.BooksNum,
-		Layout:        "name_id_list",
-		UseNums:       boolPtr(true),
-		Title:         s.LANG.SeqsAuthor,
-		NameIndex:     nameIdxPtr,
-		Up:            &up,
-		AppRoot:       appRoot,
-		URLs:          s.URLs,
-		LANG:          s.LANG,
-		CFG:           s.CFG,
+		Index:          idx,
+		Self:           self,
+		SimpleBaseRef:  s.URLs.AuthIdx + sub1 + "/" + sub2,
+		StrongBaseRef:  s.URLs.Author + sub1 + "/" + sub2 + "/" + id + "/",
+		SubTag:         "tag:author:" + authID,
+		Subtitle:       s.LANG.BooksNum,
+		Layout:         "name_id_list",
+		UseNums:        boolPtr(true),
+		EmptyIfMissing: boolPtr(true),
+		Title:          s.LANG.SeqsAuthor,
+		NameIndex:      nameIdxPtr,
+		Up:             &up,
+		AppRoot:        appRoot,
+		URLs:           s.URLs,
+		LANG:           s.LANG,
+		CFG:            s.CFG,
 	}
 
 	feed, err := OpdsSimpleList(params)

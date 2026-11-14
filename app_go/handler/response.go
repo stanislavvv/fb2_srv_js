@@ -4,6 +4,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/url"
 	"os"
 	"sort"
@@ -34,22 +35,23 @@ type OpdsHeaderParams struct {
 
 // SimpleListParams holds parameters for opdsSimpleList.
 type SimpleListParams struct {
-	Index         string
-	Self          string
-	SimpleBaseRef string
-	StrongBaseRef string
-	SubTag        string
-	Subtitle      string
-	Title         string
-	NameIndex     *string // optional
-	UseNums       *bool   // optional
-	UseID2Path    *bool   // optional: if true, apply ID2Path to keys in SimpleBaseRef entries
-	Layout        string  // "name_id_list", "key_value", "subs", or "" for default
-	Up            *string // optional up link
-	AppRoot       string
-	URLs          *config.URL
-	LANG          *config.LANG
-	CFG           *config.Config
+	Index          string
+	Self           string
+	SimpleBaseRef  string
+	StrongBaseRef  string
+	SubTag         string
+	Subtitle       string
+	Title          string
+	NameIndex      *string // optional
+	UseNums        *bool   // optional
+	UseID2Path     *bool   // optional: if true, apply ID2Path to keys in SimpleBaseRef entries
+	Layout         string  // "name_id_list", "key_value", "subs", or "" for default
+	Up             *string // optional up link
+	EmptyIfMissing *bool   // optional: if true, return empty feed when index file not found
+	AppRoot        string
+	URLs           *config.URL
+	LANG           *config.LANG
+	CFG            *config.Config
 }
 
 // AuthorPageParams holds parameters for opdsAuthorPage.
@@ -291,6 +293,7 @@ func OpdsSimpleList(params SimpleListParams) (*model.OPDSFeed, error) {
 	ts := GetDTISO()
 
 	// Determine index file path
+	fileFound := false
 	indexFile := ""
 	simpleLinks := true
 
@@ -298,17 +301,17 @@ func OpdsSimpleList(params SimpleListParams) (*model.OPDSFeed, error) {
 	if _, err := os.Stat(path1); err == nil {
 		indexFile = path1
 		simpleLinks = true
+		fileFound = true
 	} else {
 		path2 := pagesDir + "/" + params.Index + ".json"
 		if _, err := os.Stat(path2); err == nil {
 			indexFile = path2
 			simpleLinks = false
-		} else {
-			return nil, fmt.Errorf("index file not found for %s", params.Index)
+			fileFound = true
 		}
 	}
 
-	// Load nameindex if provided
+	// Load nameindex if provided (before file check, to format title)
 	var nameData map[string]interface{}
 	if params.NameIndex != nil && *params.NameIndex != "" {
 		nameIndexFile := pagesDir + "/" + *params.NameIndex + "/index.json"
@@ -319,6 +322,37 @@ func OpdsSimpleList(params SimpleListParams) (*model.OPDSFeed, error) {
 		if err := json.Unmarshal(data, &nameData); err != nil {
 			return nil, fmt.Errorf("nameindex parse error: %v", err)
 		}
+	}
+
+	// If file not found and empty_if_missing is set, return empty feed
+	if !fileFound {
+		if params.EmptyIfMissing != nil && *params.EmptyIfMissing {
+			log.Printf("WARNING: File missing, returning empty list for %s", params.Index)
+			title := params.Title
+			if nameData != nil {
+				if name, ok := nameData["name"]; ok {
+					title = fmt.Sprintf(title, name)
+				}
+			}
+			up := params.Up
+			if up == nil {
+				val := params.Self
+				up = &val
+			}
+			feed := OpdsHeader(OpdsHeaderParams{
+				Title:   title,
+				Ts:      ts,
+				Start:   params.URLs.Start,
+				Self:    params.Self,
+				Tag:     params.SubTag,
+				Up:      up,
+				AppRoot: params.AppRoot,
+				AppICO:  params.CFG.Get("APP_ICO"),
+				URLs:    params.URLs,
+			})
+			return &feed, nil
+		}
+		return nil, fmt.Errorf("index file not found for %s", params.Index)
 	}
 
 	// Load index data
@@ -778,7 +812,7 @@ func OpdsBookList(params BookListParams) (*model.OPDSFeed, error) {
 func sortBooksByLayout(books []model.Book, layout string, seqID string) []model.Book {
 	switch layout {
 	case "author_seq":
-		// Presort by title, then filter by seq and sort by seq_num
+		// Presort by title, then filter by seq and sort by seq_num (title as secondary key)
 		sorted := make([]model.Book, 0, len(books))
 		for _, book := range books {
 			if book.Sequences != nil {
@@ -805,7 +839,10 @@ func sortBooksByLayout(books []model.Book, layout string, seqID string) []model.
 			if len(sorted[j].Sequences) > 0 && sorted[j].Sequences[0].Num != nil {
 				numJ = *sorted[j].Sequences[0].Num
 			}
-			return numI < numJ
+			if numI != numJ {
+				return numI < numJ
+			}
+			return util.BookTitleCmp(sorted[i].BookTitle, sorted[j].BookTitle) < 0
 		})
 		return sorted
 
@@ -831,7 +868,7 @@ func sortBooksByLayout(books []model.Book, layout string, seqID string) []model.
 		return books
 
 	case "sequence":
-		// Same logic as Python: presort by title, filter by seq_id, sort by seq_num
+		// Same logic as Python: presort by title, filter by seq_id, sort by seq_num (title as secondary key)
 		if seqID == "" {
 			return books
 		}
@@ -855,7 +892,7 @@ func sortBooksByLayout(books []model.Book, layout string, seqID string) []model.
 				}
 			}
 		}
-		// Sort by seq_num (numbered first, unnumbered after)
+		// Sort by seq_num (numbered first, unnumbered after), title as secondary key
 		sort.Slice(dataSeq, func(i, j int) bool {
 			numI := -1
 			numJ := -1
@@ -865,7 +902,10 @@ func sortBooksByLayout(books []model.Book, layout string, seqID string) []model.
 			if len(dataSeq[j].Sequences) > 0 && dataSeq[j].Sequences[0].Num != nil {
 				numJ = *dataSeq[j].Sequences[0].Num
 			}
-			return numI < numJ
+			if numI != numJ {
+				return numI < numJ
+			}
+			return util.BookTitleCmp(dataSeq[i].BookTitle, dataSeq[j].BookTitle) < 0
 		})
 		return dataSeq
 
@@ -1020,31 +1060,27 @@ func OpdsSimpleListDB(database *db.DB, params SimpleListDBParams) (*model.OPDSFe
 // NOTE: Chi route helpers (Param) will be added in Phase 4 when routes are implemented.
 
 // filterNonSeqBooks returns only books without sequences (matches Python opds_struct.py
-// layout "author_nonseq"). Primary source: sequenceless.json (list of book_id).
-// Fallback (on any error): books whose Sequences field is nil.
+// layout "author_nonseq"). Source: sequenceless.json (list of book_id).
+// If file is missing, returns empty list (treated as []).
 func filterNonSeqBooks(books []model.Book, pagesDir, index string) []model.Book {
 	seqFile := pagesDir + "/" + index + "sequenceless.json"
 	data, err := os.ReadFile(seqFile)
-	if err == nil {
-		var ids []string
-		if json.Unmarshal(data, &ids) == nil {
-			set := make(map[string]struct{}, len(ids))
-			for _, id := range ids {
-				set[id] = struct{}{}
-			}
-			out := make([]model.Book, 0, len(books))
-			for _, b := range books {
-				if _, ok := set[b.BookID]; ok {
-					out = append(out, b)
-				}
-			}
-			return out
-		}
+	if err != nil {
+		log.Printf("WARNING: File missing, returning empty list for %s/sequenceless.json", index)
+		return []model.Book{}
 	}
-	// Fallback: same as Python (book["sequences"] is None)
+	var ids []string
+	if json.Unmarshal(data, &ids) != nil {
+		log.Printf("WARNING: Sequenceless book ids parse error for %s/sequenceless.json", index)
+		return []model.Book{}
+	}
+	set := make(map[string]struct{}, len(ids))
+	for _, id := range ids {
+		set[id] = struct{}{}
+	}
 	out := make([]model.Book, 0, len(books))
 	for _, b := range books {
-		if b.Sequences == nil {
+		if _, ok := set[b.BookID]; ok {
 			out = append(out, b)
 		}
 	}

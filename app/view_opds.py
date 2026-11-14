@@ -168,6 +168,7 @@ def opds_author_seqs(sub1, sub2, id):
         "subtitle": LANG["books_num"],
         "layout": "name_id_list",
         "use_nums": True,
+        "empty_if_missing": True,
         "simple_baseref": URL["authidx"] + sub1 + "/" + sub2,
         "strong_baseref": URL["author"] + id2path(id) + "/",
         "self": URL["author"] + id2path(id) + "/sequences",

@@ -33,7 +33,7 @@ None
   * docs:
     * nginx example for covers (`@try_files` and default cover)
   * opds:
-    * [bug] wrong sort in author's books by alphabet page (by id, not by title)
-    * [bug] 404 at author's sequences page when no sequences. Must be standard author's sequences page output with empty sequences list.
+    * [bug] wrong sort in author's books by alphabet page (by id, not by title) -- testing
+    * [bug] 404 at author's sequences page when no sequences.json. Must be standard author's sequences page output with empty sequences list. -- minor bug, testing
   * opds_go:
-    * [bug] wrong sort books in sequence (must be number/alphabet, not number-only)
+    * [bug] wrong sort books in sequence (must be number/alphabet, not number-only) -- testing

@@ -378,14 +378,14 @@ def opds_simple_list(params):
     subtitle = params["subtitle"]  # for text part of links
 
     simple_links = False  # links not to simple lists
+    file_found = False
     if os.path.isfile(pagesdir + "/" + safe_path(index_info + "/index.json")):
         indexfile = pagesdir + "/" + safe_path(index_info + "/index.json")
         simple_links = True
+        file_found = True
     elif os.path.isfile(pagesdir + "/" + safe_path(index_info + ".json")):
         indexfile = pagesdir + "/" + safe_path(index_info + ".json")
-    else:
-        logging.error(f"Can't get indexfile for {index_info}")
-        return None
+        file_found = True
 
     if "nameindex" in params:
         nameindex = params["nameindex"]
@@ -400,6 +400,14 @@ def opds_simple_list(params):
             return None
         page_name = name_data["name"]
         params["title"] = params["title"] % page_name
+
+    if not file_found:
+        if params.get("empty_if_missing"):
+            logging.warning(f"File missing, returning empty list for {index_info}")
+            ret = opds_header(params)
+            return ret
+        logging.error(f"Can't get indexfile for {index_info}")
+        return None
 
     use_nums = None  # list without nums
     if "use_nums" in params:
@@ -684,19 +692,20 @@ def opds_book_list(params):
         data = sorted(data_seq, key=lambda s: s["seq_num"] or -1)
     elif layout == "author_nonseq":
         data_nonseq = []
-        try:
-            book_ids = []
-            with open(pagesdir + "/" + index + "sequenceless.json", encoding="utf-8") as f:
-                book_ids = json.load(f)
-            data_nonseq = []
-            for book in data:
-                if book["book_id"] in book_ids:
-                    data_nonseq.append(book)
-        except Exception as ex:
-            logging.error(f"Sequenceless book ids load error: {ex}")
-            for book in data:
-                if book["sequences"] is None:
-                    data_nonseq.append(book)
+        book_ids = []
+        seqless_file = pagesdir + "/" + index + "sequenceless.json"
+        if os.path.isfile(seqless_file):
+            try:
+                with open(seqless_file, encoding="utf-8") as f:
+                    book_ids = json.load(f)
+            except Exception as ex:
+                logging.warning(f"Sequenceless book ids load error: {ex}")
+                book_ids = []
+        else:
+            logging.warning(f"File missing, returning empty list for {index}/sequenceless.json")
+        for book in data:
+            if book["book_id"] in book_ids:
+                data_nonseq.append(book)
         data = sorted(data_nonseq, key=cmp_to_key(custom_alphabet_book_title_cmp))
     elif layout == "author_alpha":
         data = sorted(data, key=cmp_to_key(custom_alphabet_book_title_cmp))
